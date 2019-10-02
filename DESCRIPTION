@@ -1,0 +1,15 @@
+Package: corx
+Type: Package
+Title: Classy Correlation Matricies
+Version: 0.1.0
+Author: James Conigrave
+Maintainer: James Conigrave <james.conigrave@gmail.com>
+Description: 'corx' provides a functions, a class, and methods to make correlation matricies easy.
+  Partial correlation matricies are supported. 
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    ppcor,
+    crayon
+RoxygenNote: 6.1.1
