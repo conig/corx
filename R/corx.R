@@ -275,7 +275,8 @@ final_text = paste(c(
   bar,
   text,
   bar,
-  temp_note
+  temp_note,
+  ""
 ),
 collapse = "\n")
 cat(final_text)
