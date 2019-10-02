@@ -12,6 +12,7 @@
 #' @param triangle one of "lower", "upper" or NULL \(default\)
 #' @param caption table caption
 #' @param note table note
+#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each argument in the list. If TRUE is supplied, means and standard deviation is appended with na.rm = T
 #' @param ... additional arguments
 #' @export corx
 
@@ -39,9 +40,30 @@ corx <-
            triangle = NULL,
            caption = NULL,
            note = NULL,
+           describe = F,
            ...) {
 
     call = match.call()
+
+    #logical checks -------
+
+    if (!class(describe) %in% c("list", "logical")) {
+      stop(
+        "describe must be supplied a list of functions (with names), or a logical e.g. 'TRUE'",
+        call. = F
+      )
+    }
+
+
+    # set up describe -------------------------
+    if (identical(describe, T)) {
+      describe = list(
+        "M" = function(x)
+          mean(x, na.rm = TRUE),
+        "SD" = function(x)
+          sd(x, na.rm = TRUE)
+      )
+    }
 
     # allow object names ----------------------
     x = as.character(call$x)
@@ -96,12 +118,47 @@ corx <-
     r_matrix = par_matrix(results, x, y, "r") # extract matricies
     p_matrix = par_matrix(results, x, y, "p")
     n_matrix = par_matrix(results, x, y, "n")
-    pres_matrix = apa_matrix(r_matrix,
+    pres_matrix = data.frame(apa_matrix(r_matrix,
                                       p_matrix,
                                       stars,
                                       round,
                                       remove_lead,
-                                      triangle)
+                                      triangle))
+
+    # describe function ------------------------------
+
+    if (!identical(describe, F)) {
+      if (identical(describe, T)) {
+        describe = list(
+          "M" = function(x)
+            mean(x, na.rm = TRUE),
+          "SD" = function(x)
+            sd(x, na.rm = TRUE)
+        )
+      }
+
+      data = data.frame(data)
+      y = make.names(y)
+
+      for (i in seq_along(describe)) {
+        pres_matrix[[names(describe)[i]]] =
+          unlist(lapply(seq_along(y), function(var) {
+            val = describe[[i]](mtcars[, y[[var]]])
+            digits(val, round)
+          }))
+      }
+      pres_matrix = as.matrix(pres_matrix)
+    }
+
+    if(!is.null(triangle)){ # if triangle change names ----
+
+      nums = seq_along(rownames(pres_matrix))
+      rownames(pres_matrix) = paste0(nums,". ", rownames(pres_matrix))
+      colnames(pres_matrix)[1:length(nums)] = nums
+      pres_matrix = pres_matrix[,-length(nums)]
+    }
+
+    # add in note --------------------------------------------
 
     if(is.null(note)){
 
@@ -114,8 +171,15 @@ corx <-
     note = paste(note, collapse = "; ")
     }
 
-    c_matrix = list(call = call,apa = pres_matrix, r = r_matrix, p = p_matrix, n = n_matrix, caption = caption,
-                    note = note)
+    c_matrix = list(
+      call = call,
+      apa = pres_matrix,
+      r = r_matrix,
+      p = p_matrix,
+      n = n_matrix,
+      caption = caption,
+      note = note
+    )
     class(c_matrix) = "corx"
     return(c_matrix)
   }
@@ -252,15 +316,6 @@ apa_matrix = function(r_matrix, p_matrix, stars, round, remove_lead, triangle) {
 
   if(remove_lead) f_matrix[] <- gsub("0\\.",".",f_matrix) #remove leading zeros if requested
 
-if(!is.null(triangle)){
-
-  nums = seq_along(rownames(f_matrix))
-  rownames(f_matrix) = paste0(nums,". ", rownames(f_matrix))
-  colnames(f_matrix) = nums
-  f_matrix = f_matrix[,-length(nums)]
-}
-
-
   return(f_matrix)
 }
 
@@ -360,5 +415,4 @@ check_names = function (x, vars) {
   if (length(error_names) > 0) {
     stop(mess1, call. = F)
   }
-
 }

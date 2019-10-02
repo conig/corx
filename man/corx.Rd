@@ -7,7 +7,7 @@
 corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
   "kendall"), partial = NULL, stars = c(0.05), round = 2,
   remove_lead = T, triangle = NULL, caption = NULL, note = NULL,
-  ...)
+  describe = F, ...)
 }
 \arguments{
 \item{data}{A data.frame or matrix}
@@ -31,6 +31,8 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 \item{caption}{table caption}
 
 \item{note}{table note}
+
+\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each argument in the list. If TRUE is supplied, means and standard deviation is appended with na.rm = T}
 
 \item{...}{additional arguments}
 }
