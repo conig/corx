@@ -42,13 +42,18 @@ corx <-
            ...) {
 
     call = match.call()
+    x = as.character(call$x)[-1]
+    y = as.character(call$y)[-1]
 
-    if (is.null(x)) { #if no x
+    if (length(x)==0) { #if no x
       x = names(data) # x is the name of the dataset
+    }else{
     }
-    if (is.null(y)) { #if no y
+    if (length(y)==0) { #if no y
       y = names(data) #make y equal to x
+    }else{
     }
+
 
     if(!is.null(partial)){
       x = x[!x %in% partial]
@@ -208,7 +213,7 @@ apa_matrix = function(r_matrix, p_matrix, stars, round, remove_lead, triangle) {
       col2 = colnames(r_matrix)[c]
 
       if(col1 == col2){
-        f_matrix[r,c] = "-"
+        f_matrix[r,c] = " - "
       }else{
 
       temp_r = r_matrix[r,c]
@@ -260,11 +265,12 @@ apa = x$apa
 text = utils::capture.output(print(apa, quote = F, right = T))
 width = max(nchar(text))
 text = gsub("\\*",crayon::yellow("*"),text)
-
+text = gsub("\\ - ",crayon::silver(" - "),text)
 header = text[1]
 text = text[-1]
 bar = paste(rep(crayon::silver("-"), width),collapse = "")
 temp_note = paste("Note.",x$note)
+
 
 final_text = paste(c(
   crayon::blue(utils::capture.output(x$call)),
