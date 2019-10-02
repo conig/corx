@@ -1,11 +1,14 @@
 Package: corx
 Type: Package
 Title: Publication-ready correlation matricies for R
-Version: 0.9.0
-Author: James Conigrave
-Maintainer: James Conigrave <james.conigrave@gmail.com>
-Description: 'corx' provides a functions, a class, and methods to make correlation matricies easy.
-  Partial correlation matricies are supported. 
+Version: 0.9.1
+Authors@R: 
+    person(given = "James",
+           family = "Conigrave",
+           role = c("aut", "cre"),
+           email = "james.conigrave@gmail.com",
+           comment = c(ORCID = "0000-0002-8816-6229"))
+Description: An easy tool to create publication-ready correlation matricies.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -15,3 +18,5 @@ Imports:
     corrplot,
     glue
 RoxygenNote: 6.1.1
+Suggests: 
+    testthat

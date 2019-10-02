@@ -1,6 +1,6 @@
 #' corx
 #'
-#' Create a correlation matrix
+#' Creates an object of class "corx". This class of object is a list which contains an APA formatted table, and matricies of: correlation coefficients, p-values, and observations. Methods provided for functions 'plot' and 'coef'.
 #' @param data A data.frame or matrix
 #' @param x a vector of character names
 #' @param y a vector of character names
@@ -14,6 +14,15 @@
 #' @param note table note
 #' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each argument in the list. If TRUE is supplied, means and standard deviation is appended with na.rm = T
 #' @param ... additional arguments
+#' @examples
+#' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp),
+#'    y = c(wt,drat,disp,qsec), partial = wt,
+#'    round = 2, stars = c(0.05),
+#'    describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
+#' cor_mat
+#' coef(cor_mat)
+#' plot(cor_mat)
+#' @return A list of class 'corx'.
 #' @export corx
 
 # data = iris
@@ -27,6 +36,8 @@
 # triangle = NULL
 # caption = NULL
 # note = NULL
+# describe = T
+
 
 corx <-
   function(data,
@@ -82,7 +93,7 @@ corx <-
 
     check_names(data, c(x, y, partial))
 
-    if(!is.null(partial)){
+    if(!is.null(partial)){ #remove partialed out variable
       x = x[!x %in% partial]
       y = y[!y %in% partial]
     }
@@ -277,7 +288,7 @@ apa_matrix = function(r_matrix, p_matrix, stars, round, remove_lead, triangle) {
 
   for (r in seq_along(rownames(r_matrix))) {
     for (c in seq_along(colnames(r_matrix))) {
-#message(r);message(c)
+  #message("r = ",r,"; c = ",c)
       col1 = rownames(r_matrix)[r]
       col2 = colnames(r_matrix)[c]
 
@@ -288,7 +299,7 @@ apa_matrix = function(r_matrix, p_matrix, stars, round, remove_lead, triangle) {
       temp_r = r_matrix[r,c]
       temp_p = p_matrix[r,c]
 
-      n_stars = sum(temp_p < stars)
+      n_stars = sum(temp_p < stars, na.rm=T)
       add_stars = paste(rep("*", n_stars), collapse = "")
 
       f_matrix[r,c] = paste0(digits(temp_r,round),add_stars)

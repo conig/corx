@@ -36,6 +36,18 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 
 \item{...}{additional arguments}
 }
+\value{
+A list of class 'corx'.
+}
 \description{
-Create a correlation matrix
+Creates an object of class "corx". This class of object is a list which contains an APA formatted table, and matricies of: correlation coefficients, p-values, and observations. Methods provided for functions 'plot' and 'coef'.
+}
+\examples{
+cor_mat <- corx(mtcars, x = c(mpg,cyl,disp),
+   y = c(wt,drat,disp,qsec), partial = wt,
+   round = 2, stars = c(0.05),
+   describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
+cor_mat
+coef(cor_mat)
+plot(cor_mat)
 }
