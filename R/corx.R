@@ -115,6 +115,10 @@ corx <-
 #' @param partial control for anything?
 
 get_cor = function(data, x, y, method, partial) {
+
+  data = data.frame(data)
+  x = make.names(x)
+  y = make.names(y)
   if (length(partial) == 0) {
     data = stats::na.omit(data[,c(x,y)])
 
