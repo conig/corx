@@ -42,8 +42,17 @@ corx <-
            ...) {
 
     call = match.call()
-    x = as.character(call$x)[-1]
-    y = as.character(call$y)[-1]
+
+    # allow object names ----------------------
+    x = as.character(call$x)
+    if(length(x)>1) x <- x[-1]
+
+    y = as.character(call$y)
+    if(length(y)>1) y <- y[-1]
+
+    partial = as.character(call$partial)
+    if(length(partial) > 1) partial <- partial[-1]
+    if(length(partial) == 0) partial <- NULL
 
     if (length(x)==0) { #if no x
       x = names(data) # x is the name of the dataset
@@ -54,6 +63,7 @@ corx <-
     }else{
     }
 
+    check_names(data, c(x, y, partial))
 
     if(!is.null(partial)){
       x = x[!x %in% partial]
@@ -318,4 +328,37 @@ digits = function(x, n = 2) {
 
 plot.corx = function(x, y, ...){
   corrplot::corrplot(x$r, method = "square")
+}
+
+check_names = function (x, vars) {
+  vars = unique(vars)
+
+  name_data = names(data.frame(x))
+
+  error_names = vars[!vars %in% name_data]
+
+  find_name = function(n) {
+    prob_name = name_data[agrep(n, name_data)]
+
+    if (length(prob_name) == 1) {
+      return(glue::glue("'{n}' ['{prob_name}'?]"))
+    } else{
+      return(n)
+    }
+
+
+  }
+
+  error_names = unlist(lapply(error_names, find_name))
+
+  ifelse(length(error_names) > 1, stem <- "names", stem <- "name")
+
+  mess1 = glue::glue(
+    "{length(error_names)} {stem} could not be found: {paste(error_names, collapse = ', ')}."
+  )
+
+  if (length(error_names) > 0) {
+    stop(mess1, call. = F)
+  }
+
 }
