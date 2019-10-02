@@ -16,7 +16,7 @@
 #' @param ... additional arguments
 #' @export corx
 
-# data = mtcars
+# data = iris
 # x = NULL
 # y = NULL
 # method = c("pearson", "spearman", "kendall")
@@ -54,15 +54,10 @@ corx <-
       )
     }
 
-
-    # set up describe -------------------------
-    if (identical(describe, T)) {
-      describe = list(
-        "M" = function(x)
-          mean(x, na.rm = TRUE),
-        "SD" = function(x)
-          sd(x, na.rm = TRUE)
-      )
+    classes = unlist(lapply(data, class))
+    class_ok = classes %in% c("numeric","integer")
+    if(!all(class_ok)){
+      stop("All classes must be numeric: ",paste(names(data)[!class_ok], collapse = ", "))
     }
 
     # allow object names ----------------------
@@ -133,7 +128,7 @@ corx <-
           "M" = function(x)
             mean(x, na.rm = TRUE),
           "SD" = function(x)
-            sd(x, na.rm = TRUE)
+            stats::sd(x, na.rm = TRUE)
         )
       }
 
@@ -143,7 +138,7 @@ corx <-
       for (i in seq_along(describe)) {
         pres_matrix[[names(describe)[i]]] =
           unlist(lapply(seq_along(y), function(var) {
-            val = describe[[i]](mtcars[, y[[var]]])
+            val = describe[[i]](data[, y[[var]]])
             digits(val, round)
           }))
       }
