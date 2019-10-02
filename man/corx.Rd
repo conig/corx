@@ -31,6 +31,8 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 \item{caption}{table caption}
 
 \item{note}{table note}
+
+\item{...}{additional arguments}
 }
 \description{
 Create a correlation matrix

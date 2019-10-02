@@ -12,6 +12,7 @@
 #' @param triangle one of "lower", "upper" or NULL \(default\)
 #' @param caption table caption
 #' @param note table note
+#' @param ... additional arguments
 #' @export corx
 
 # data = mtcars
@@ -262,7 +263,7 @@ bar = paste(rep(crayon::silver("-"), width),collapse = "")
 temp_note = paste("Note.",x$note)
 
 final_text = paste(c(
-  crayon::blue(capture.output(x$call)),
+  crayon::blue(utils::capture.output(x$call)),
   "",
   x$caption,
   bar,
@@ -278,10 +279,6 @@ cat(final_text)
 
 #' @export
 coef.corx = function(object, ...) object$r
-
-#' @export
-nrow.corx = function(x, ...) x$r
-
 
 #' digits
 #'
