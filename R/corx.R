@@ -66,8 +66,13 @@ corx <-
 
     classes = unlist(lapply(data, class))
     class_ok = classes %in% c("numeric","integer")
+    bad_cols = names(data)[!class_ok]
+    bad_classes = classes[!class_ok]
+    script = paste(glue::glue("'{bad_cols}' [{bad_classes}]"),collapse = ", ")
+
+
     if(!all(class_ok)){
-      stop("All classes must be numeric: ",paste(names(data)[!class_ok], collapse = ", "))
+      stop("All classes must be numeric: ", script,".")
     }
 
     # allow object names ----------------------
