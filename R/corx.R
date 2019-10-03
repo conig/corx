@@ -25,19 +25,18 @@
 #' @return A list of class 'corx'.
 #' @export corx
 
-# data = iris
-# x = NULL
+# data = mtcars
+# x = "mpg"
 # y = NULL
-# method = c("pearson", "spearman", "kendall")
-# partial = NULL
-# stars = c(0.05)
-# round = 2
-# remove_lead = T
-# triangle = NULL
-# caption = NULL
-# note = NULL
-# describe = T
-
+#  method = c("pearson", "spearman", "kendall")
+#  partial = NULL
+#  stars = c(0.05)
+#  round = 2
+#  remove_lead = T
+#  triangle = NULL
+#  caption = NULL
+#  note = NULL
+#   describe = T
 
 corx <-
   function(data,
@@ -100,36 +99,32 @@ corx <-
 
     method = method[1] # take the first method if a vector
 
-    all_vars = unique(c(x,y))
+    if (is.null(partial)) { # get correlations
+      cors = psych::corr.test(data[, y], data[, x], method = method, adjust = "none")
+      cors$n = psych::pairwiseCount(data[,y], data[,x])
 
-    combos = t(utils::combn(all_vars,2)) # get all combos
-    duplis = cbind(all_vars, all_vars)
+      colnames(cors$r) = x ;colnames(cors$n) = x ;colnames(cors$p) = x
+      rownames(cors$r) = y ;rownames(cors$n) = y ;rownames(cors$p) = y
 
-    results = data.frame(rbind(combos, duplis), stringsAsFactors = F)
-    names(results) = c("Var1","Var2")
+      r_matrix = cors$r
+      p_matrix = cors$p
+      n_matrix = cors$n
 
-    cors = lapply(seq_along(results$Var1), function(r) { # calc results
-      #message(r)
-      get_cor(data,
-              results$Var1[r],
-              results$Var2[r],
-              method = method,
-              partial = partial)
-    })
+    } else{
+      cors = partial_matrix(data, x, y, method, partial)
 
-    cors = do.call(rbind, cors) #combine into data.frame
+      r_matrix = cors$r
+      p_matrix = cors$p
+      n_matrix = cors$n
 
-    results = data.frame(cbind(results, cors)) # add to table
+    }
 
-    r_matrix = par_matrix(results, x, y, "r") # extract matricies
-    p_matrix = par_matrix(results, x, y, "p")
-    n_matrix = par_matrix(results, x, y, "n")
-    pres_matrix = data.frame(apa_matrix(r_matrix,
+    pres_matrix = apa_matrix(r_matrix,
                                       p_matrix,
                                       stars,
                                       round,
                                       remove_lead,
-                                      triangle))
+                                      triangle)
 
     # describe function ------------------------------
 
@@ -146,6 +141,9 @@ corx <-
       data = data.frame(data)
       y = make.names(y)
 
+      orig_names = colnames(pres_matrix)
+      pres_matrix = data.frame(pres_matrix)
+
       for (i in seq_along(describe)) {
         pres_matrix[[names(describe)[i]]] =
           unlist(lapply(seq_along(y), function(var) {
@@ -154,6 +152,7 @@ corx <-
           }))
       }
       pres_matrix = as.matrix(pres_matrix)
+      colnames(pres_matrix)[seq_along(orig_names)] = orig_names
     }
 
     if(!is.null(triangle)){ # if triangle change names ----
@@ -190,87 +189,7 @@ corx <-
     return(c_matrix)
   }
 
-#' get_cor
-#'
-#' A flexible correlation function
-#' @param data data
-#' @param x variable 1
-#' @param y variable 2
-#' @param method correlation method
-#' @param partial control for anything?
 
-get_cor = function(data, x, y, method, partial) {
-
-  data = data.frame(data)
-  x = make.names(x)
-  y = make.names(y)
-  if (length(partial) == 0) {
-    data = stats::na.omit(data[,c(x,y)])
-
-    result = stats::cor.test(data[, x],
-                    data[, y],
-                      method = method)
-    r = result$estimate
-    if(x==y) r <- 1
-    p = result$p.value
-    n = nrow(data)
-
-  } else {
-    partial_data = stats::na.omit(data[, c(x, y, partial)])
-    n = nrow(partial_data)
-
-    if(x != y){
-    result = ppcor::pcor.test(partial_data[, x], partial_data[,
-                                                       y], partial_data[, partial], method = method)
-    r = result$estimate
-    p = result$p.value
-    }else{
-      r = 1
-      p = 0
-    }
-
-  }
-  return(data.frame(r = r,p = p, n = n))
-}
-
-#' par_matrix
-#'
-#' This function is used to construct final matricies
-#' @param results results dataset
-#' @param x one set of variables
-#' @param y another set of variables
-#' @param par the parameter to build with
-
-par_matrix = function(results, x, y, par){
-  m = matrix(nrow = length(y), ncol = length(x))
-  rownames(m) = y
-  colnames(m) = x
-
-  contains_var = function(r,c){
-    r_var = rownames(m)[r]
-    c_var = colnames(m)[c]
-
-    bool = unlist(lapply(seq_along(results$Var1),function(i){
-      Var1_in =  all(c(results$Var1[i], results$Var2[i]) %in% c(r_var,c_var) &
-                       c(r_var,c_var) %in% c(results$Var1[i], results$Var2[i]))
-    }))
-
-    return(bool)
-
-  }
-
-  for(r in seq_along(rownames(m))){
-    for(c in seq_along(colnames(m))){
- #message(r); message(c)
-      rows = contains_var(r,c)
-
-      m[r,c] = results[rows, par]
-
-    }
-  }
-
-  return(m)
-}
 
 #' apa matrix
 #'
@@ -282,45 +201,42 @@ par_matrix = function(results, x, y, par){
 #' @param remove_lead a bool. Should leading zeros be removed?
 #' @param triangle can select lower upper or NULL
 
-apa_matrix = function(r_matrix, p_matrix, stars, round, remove_lead, triangle) {
+apa_matrix = function(r_matrix,
+                      p_matrix,
+                      stars,
+                      round,
+                      remove_lead,
+                      triangle) {
   f_matrix = r_matrix
-  f_matrix[] = NA
+  f_matrix[] = digits(f_matrix , round)
+  diag(f_matrix) = " - "
 
-  for (r in seq_along(rownames(r_matrix))) {
-    for (c in seq_along(colnames(r_matrix))) {
-  #message("r = ",r,"; c = ",c)
-      col1 = rownames(r_matrix)[r]
-      col2 = colnames(r_matrix)[c]
-
-      if(col1 == col2){
-        f_matrix[r,c] = " - "
-      }else{
-
-      temp_r = r_matrix[r,c]
-      temp_p = p_matrix[r,c]
-
-      n_stars = sum(temp_p < stars, na.rm=T)
-      add_stars = paste(rep("*", n_stars), collapse = "")
-
-      f_matrix[r,c] = paste0(digits(temp_r,round),add_stars)
-
-      if(!is.null(triangle)) {
-        if (triangle == "lower" & c > r) {
-          f_matrix[r, c] = ""
-        }
-
-        if (triangle == "upper" & r > c) {
-          f_matrix[r, c] = ""
-        }
-      }
-
-
-      }
-
+  if (!is.null(triangle)) {
+    if (triangle == "lower") {
+      f_matrix[upper.tri(r_matrix)] = ""
+      p_matrix[upper.tri(p_matrix)] = 1
+    }
+    if (triangle == "upper") {
+      f_matrix[lower.tri(r_matrix)] = ""
+      p_matrix[lower.tri(p_matrix)] = 1
     }
   }
 
-  if(remove_lead) f_matrix[] <- gsub("0\\.",".",f_matrix) #remove leading zeros if requested
+  get_stars = function(p, stars) {
+    n_stars = sum(p < stars)
+    paste(rep("*", n_stars), collapse = "")
+  }
+
+  s_matrix = p_matrix
+  s_matrix[] =  sapply(p_matrix, function(p)
+    get_stars(p, stars))
+  diag(s_matrix) = ""
+
+  f_matrix[] = paste0(f_matrix, s_matrix)
+
+  if (remove_lead)
+    f_matrix[] <-
+    gsub("0\\.", ".", f_matrix) #remove leading zeros if requested
 
   return(f_matrix)
 }
@@ -388,13 +304,18 @@ digits = function(x, n = 2) {
 #' @export
 
 plot.corx = function(x, y, ...){
-  corrplot::corrplot(x$r, method = "square")
+  ggcorrplot::ggcorrplot(x$r,...)
 }
 
 check_names = function (x, vars) {
   vars = unique(vars)
 
-  name_data = names(data.frame(x))
+  if(!is.matrix(x)){
+  name_data = names(x)
+  }else{
+    name_data = colnames(x)
+  }
+
 
   error_names = vars[!vars %in% name_data]
 
