@@ -3,6 +3,7 @@
 S3method(coef,corx)
 S3method(plot,corx)
 S3method(print,corx)
+S3method(summary,corx)
 export(corx)
 exportClasses(corx)
 exportClasses(plot.corx)

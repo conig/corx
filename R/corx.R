@@ -26,17 +26,17 @@
 #' @export corx
 
 # data = mtcars
-# x = "mpg"
-# y = NULL
-#  method = c("pearson", "spearman", "kendall")
-#  partial = NULL
-#  stars = c(0.05)
-#  round = 2
-#  remove_lead = T
-#  triangle = NULL
-#  caption = NULL
-#  note = NULL
-#   describe = T
+# x = c("mpg","drat","gear")
+# y = c("cyl","hp")
+# method = c("pearson", "spearman", "kendall")
+# partial = NULL
+# stars = c(0.05)
+# round = 2
+# remove_lead = T
+# triangle = NULL
+# caption = NULL
+# note = NULL
+# describe = T
 
 corx <-
   function(data,
@@ -103,12 +103,12 @@ corx <-
       cors = psych::corr.test(data[, y], data[, x], method = method, adjust = "none")
       cors$n = psych::pairwiseCount(data[,y], data[,x])
 
-      colnames(cors$r) = x ;colnames(cors$n) = x ;colnames(cors$p) = x
-      rownames(cors$r) = y ;rownames(cors$n) = y ;rownames(cors$p) = y
+      r_matrix = as.matrix(cors$r)
+      p_matrix = as.matrix(cors$p)
+      n_matrix = as.matrix(cors$n)
 
-      r_matrix = cors$r
-      p_matrix = cors$p
-      n_matrix = cors$n
+      colnames(r_matrix) = x ;colnames(n_matrix) = x ;colnames(p_matrix) = x
+      rownames(r_matrix) = y ;rownames(n_matrix) = y ;rownames(p_matrix) = y
 
     } else{
       cors = partial_matrix(data, x, y, method, partial)
@@ -209,7 +209,12 @@ apa_matrix = function(r_matrix,
                       triangle) {
   f_matrix = r_matrix
   f_matrix[] = digits(f_matrix , round)
-  diag(f_matrix) = " - "
+  row_names = matrix(rownames(r_matrix), nrow(r_matrix), ncol = ncol(r_matrix))
+  col_names = matrix(colnames(r_matrix), nrow = nrow(r_matrix), ncol = ncol(r_matrix), byrow = T)
+
+  f_matrix[row_names == col_names] = " - "
+
+  #diag(f_matrix)
 
   if (!is.null(triangle)) {
     if (triangle == "lower") {
@@ -345,3 +350,9 @@ check_names = function (x, vars) {
     stop(mess1, call. = F)
   }
 }
+
+#' @export
+summary.corx = function(object,... , digits, quantile.type){
+  data.frame(object$apa)
+}
+
