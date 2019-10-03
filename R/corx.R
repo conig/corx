@@ -359,6 +359,16 @@ check_names = function (x, vars) {
 
 #' @export
 summary.corx = function(object,... , digits, quantile.type){
-  data.frame(object$apa)
+  name_mat = colnames(object$apa)
+  obj = data.frame(object$apa)
+  names(obj) = name_mat
+  return(obj)
 }
 
+#' @export
+as.data.frame.corx = function(x,...){
+  name_mat = colnames(x$apa)
+  obj = data.frame(x$apa)
+  names(obj) = name_mat
+  return(obj)
+}
