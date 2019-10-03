@@ -304,7 +304,9 @@ digits = function(x, n = 2) {
 #' @export
 
 plot.corx = function(x, y, ...){
-  ggcorrplot::ggcorrplot(x$r,...)
+  tri = x$call$triangle
+  if(is.null(tri)) tru = "full"
+  ggcorrplot::ggcorrplot(x$r, type = tri,...)
 }
 
 check_names = function (x, vars) {
