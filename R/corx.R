@@ -25,18 +25,18 @@
 #' @return A list of class 'corx'.
 #' @export corx
 
-# data = mtcars
-# x = c("mpg","drat","gear")
-# y = c("cyl","hp")
-# method = c("pearson", "spearman", "kendall")
-# partial = NULL
-# stars = c(0.05)
-# round = 2
-# remove_lead = T
-# triangle = NULL
-# caption = NULL
-# note = NULL
-# describe = T
+data = mtcars
+x = c("mpg")
+y = c("cyl")
+method = c("pearson", "spearman", "kendall")
+partial = NULL
+stars = c(0.05)
+round = 2
+remove_lead = T
+triangle = NULL
+caption = NULL
+note = NULL
+describe = T
 
 corx <-
   function(data,
@@ -235,7 +235,8 @@ apa_matrix = function(r_matrix,
   s_matrix = p_matrix
   s_matrix[] =  sapply(p_matrix, function(p)
     get_stars(p, stars))
-  diag(s_matrix) = ""
+
+  s_matrix[row_names == col_names] = ""
 
   f_matrix[] = paste0(f_matrix, s_matrix)
 
