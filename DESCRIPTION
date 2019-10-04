@@ -1,7 +1,7 @@
 Package: corx
 Type: Package
 Title: Publication-ready correlation matricies for R
-Version: 0.9.3
+Version: 1.0.0
 Authors@R: 
     person(given = "James",
            family = "Conigrave",
@@ -17,7 +17,8 @@ Imports:
     crayon,
     ggcorrplot,
     glue,
-    psych
+    psych,
+    clipr
 RoxygenNote: 6.1.1
 Suggests: 
     testthat

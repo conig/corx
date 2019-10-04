@@ -4,14 +4,12 @@
 \alias{plot.corx}
 \title{S3 class corx}
 \usage{
-\method{plot}{corx}(x, y, ...)
+\method{plot}{corx}(x, ...)
 }
 \arguments{
-\item{x}{a value}
+\item{x}{a corx object}
 
-\item{y}{a value}
-
-\item{...}{other arguments}
+\item{...}{other arguments to ggcorrplot::ggcorrplot}
 }
 \description{
 S3 class corx

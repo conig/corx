@@ -1,6 +1,6 @@
 #' corx
 #'
-#' Creates an object of class "corx". This class of object is a list which contains an APA formatted table, and matricies of: correlation coefficients, p-values, and observations. Methods provided for functions 'plot' and 'coef'.
+#' Creates an object of class "corx". This class of object is a list which contains an APA formatted matrix, and matricies of correlation coefficients, p-values, and observations. Methods provided for functions 'plot', summary, data.frame and 'coef'.
 #' @param data A data.frame or matrix
 #' @param x a vector of character names
 #' @param y a vector of character names
@@ -12,6 +12,7 @@
 #' @param triangle one of "lower", "upper" or NULL \(default\)
 #' @param caption table caption
 #' @param note table note
+#' @param grey_nonsig a bool. Should nonsig values be grey in output?
 #' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each argument in the list. If TRUE is supplied, means and standard deviation is appended with na.rm = T
 #' @param ... additional arguments
 #' @examples
@@ -51,6 +52,7 @@ corx <-
            caption = NULL,
            note = NULL,
            describe = F,
+           grey_nonsig = T,
            ...) {
 
     call = match.call()
@@ -64,16 +66,7 @@ corx <-
       )
     }
 
-    classes = unlist(lapply(data, class))
-    class_ok = classes %in% c("numeric","integer")
-    bad_cols = names(data)[!class_ok]
-    bad_classes = classes[!class_ok]
-    script = paste(glue::glue("'{bad_cols}' [{bad_classes}]"),collapse = ", ")
-
-
-    if(!all(class_ok)){
-      stop("All classes must be numeric: ", script,".")
-    }
+    check_classes(data, c("numeric","integer"), "All classes must be numeric.")
 
     # allow object names ----------------------
     x = as.character(call$x)
@@ -191,6 +184,8 @@ corx <-
       note = note
     )
     class(c_matrix) = "corx"
+    attr(c_matrix, "grey_nonsig") = grey_nonsig
+    attr(c_matrix, "stars") = stars
     return(c_matrix)
   }
 
@@ -260,14 +255,31 @@ apa_matrix = function(r_matrix,
 print.corx = function(x,...){
 
 apa = x$apa
+
 text = utils::capture.output(print(apa, quote = F, right = T))
 width = max(nchar(text))
+header = text[1]
+
+grey = attr(x, "grey_nonsig")
+star_call = attr(x, "stars")
+
+if(length(star_call) > 0 & grey){# make nonsig grey
+  gr = gregexpr("(-)?0?\\.[0-9]*(?![\\*0-9])",text, perl = T)
+  mat = regmatches(text,gr)
+  regmatches(text,gr) = lapply(mat, function(x) crayon::silver(x))
+}
+
 text = gsub("\\*",crayon::yellow("*"),text)
 text = gsub("\\ - ",crayon::silver(" - "),text)
-header = text[1]
+
+
+#text = gsub("\\_"," \033[90m",text)
+#text = gsub("\\|","\033[39m ",text)
+
 text = text[-1]
 bar = paste(rep(crayon::silver("-"), width),collapse = "")
 temp_note = paste("Note.",x$note)
+
 
 
 final_text = paste(c(
@@ -309,15 +321,27 @@ digits = function(x, n = 2) {
 #' @exportClass corx
 
 #' plot.corx
-#' @param x a value
-#' @param y a value
-#' @param ... other arguments
+#' @param x a corx object
+#' @param ... other arguments to ggcorrplot::ggcorrplot
 #' @export
 
-plot.corx = function(x, y, ...){
+plot.corx = function(x, ...){
+  call = match.call()
+  elip <- list(...)
+
   tri = x$call$triangle
-  if(is.null(tri)) tru = "full"
-  ggcorrplot::ggcorrplot(x$r, type = tri,...)
+  if(is.null(tri)) tri = "full"
+  if(!is.null(call$type)) tri = call$type
+
+  caption = x$call$caption
+  if(is.null(caption)) caption = ""
+  if(!is.null(call$title)) caption = call$title
+
+  elip[['title']] = caption
+  elip[['type']] = tri
+  elip[['corr']] = x$r
+
+  do.call(ggcorrplot::ggcorrplot, elip)
 }
 
 check_names = function (x, vars) {
@@ -329,7 +353,6 @@ check_names = function (x, vars) {
     name_data = colnames(x)
   }
 
-
   error_names = vars[!vars %in% name_data]
 
   find_name = function(n) {
@@ -340,8 +363,6 @@ check_names = function (x, vars) {
     } else{
       return(n)
     }
-
-
   }
 
   error_names = unlist(lapply(error_names, find_name))
@@ -372,3 +393,24 @@ as.data.frame.corx = function(x,...){
   names(obj) = name_mat
   return(obj)
 }
+
+#' check_classes
+#'
+#' check all classes are as expected
+#' @param data the data object
+#' @param ok_classes a vector of allowed classes
+#' @param stop_message a character string provided to users if error triggers.
+
+check_classes = function(data, ok_classes, stop_message) {
+  classes = unlist(lapply(data, class))
+  class_ok = classes %in% ok_classes
+  bad_cols = names(data)[!class_ok]
+  bad_index = which(names(data) %in% bad_cols)
+  bad_classes = abbreviate(classes[!class_ok],3)
+  script = paste(glue::glue("[{bad_index}] '{bad_cols}' <{bad_classes}>"), collapse = ", ")
+
+  if (!all(class_ok)) {
+    stop(stop_message," ", script, ".", call. = F)
+  }
+}
+

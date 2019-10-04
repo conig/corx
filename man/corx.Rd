@@ -7,7 +7,7 @@
 corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
   "kendall"), partial = NULL, stars = c(0.05), round = 2,
   remove_lead = T, triangle = NULL, caption = NULL, note = NULL,
-  describe = F, ...)
+  describe = F, grey_nonsig = T, ...)
 }
 \arguments{
 \item{data}{A data.frame or matrix}
@@ -34,13 +34,15 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 
 \item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each argument in the list. If TRUE is supplied, means and standard deviation is appended with na.rm = T}
 
+\item{grey_nonsig}{a bool. Should nonsig values be grey in output?}
+
 \item{...}{additional arguments}
 }
 \value{
 A list of class 'corx'.
 }
 \description{
-Creates an object of class "corx". This class of object is a list which contains an APA formatted table, and matricies of: correlation coefficients, p-values, and observations. Methods provided for functions 'plot' and 'coef'.
+Creates an object of class "corx". This class of object is a list which contains an APA formatted matrix, and matricies of correlation coefficients, p-values, and observations. Methods provided for functions 'plot', summary, data.frame and 'coef'.
 }
 \examples{
 cor_mat <- corx(mtcars, x = c(mpg,cyl,disp),
