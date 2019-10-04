@@ -25,10 +25,10 @@
 #' plot(cor_mat)
 #' @return A list of class 'corx'.
 #' @export corx
-
-# data = mtcars
-# x = c("mpg")
-# y = c("cyl")
+#
+#  data = ChickWeight
+# x = NULL
+# y = NULL
 # method = c("pearson", "spearman", "kendall")
 # partial = NULL
 # stars = c(0.05)
@@ -37,7 +37,7 @@
 # triangle = NULL
 # caption = NULL
 # note = NULL
-# describe = T
+# describe = F
 
 corx <-
   function(data,
@@ -56,6 +56,10 @@ corx <-
            ...) {
 
     call = match.call()
+
+    if(nrow(data) < 3){
+      stop("Can't calculate p-values with fewer than four rows of data.")
+    }
 
     #logical checks -------
 
@@ -186,6 +190,9 @@ corx <-
     class(c_matrix) = "corx"
     attr(c_matrix, "grey_nonsig") = grey_nonsig
     attr(c_matrix, "stars") = stars
+    attr(c_matrix, "round") = round
+    attr(c_matrix, "describe") = describe
+
     return(c_matrix)
   }
 
@@ -228,6 +235,7 @@ apa_matrix = function(r_matrix,
   }
 
   get_stars = function(p, stars) {
+    if(is.na(p)) p <- 1
     n_stars = sum(p < stars)
     paste(rep("*", n_stars), collapse = "")
   }
@@ -263,12 +271,20 @@ header = text[1]
 grey = attr(x, "grey_nonsig")
 star_call = attr(x, "stars")
 
-if(length(star_call) > 0 & grey){# make nonsig grey
-  gr = gregexpr("(-)?0?\\.[0-9]*(?![\\*0-9])",text, perl = T)
+if(length(star_call) > 0 & grey & identical(attr(x, "describe"), F)){# make nonsig grey
+
+  if(attr(x, "round") != 0 ){ # if no decimal places change regex
+    patt = "(-)?[0-9]?\\.[0-9]{1,}(?![\\*0-9])"
+  }else{
+    patt = "-?[0-1](?![\\*\\.0-9]{1,})"
+  }
+
+  gr = gregexpr(patt,text, perl = T)
   mat = regmatches(text,gr)
   regmatches(text,gr) = lapply(mat, function(x) crayon::silver(x))
 }
 
+text = gsub("\\bNA\\b",crayon::red("NA"), text) #make NA red
 text = gsub("\\*",crayon::yellow("*"),text)
 text = gsub("\\ - ",crayon::silver(" - "),text)
 
@@ -402,11 +418,11 @@ as.data.frame.corx = function(x,...){
 #' @param stop_message a character string provided to users if error triggers.
 
 check_classes = function(data, ok_classes, stop_message) {
-  classes = unlist(lapply(data, class))
+  classes = lapply(data, class)
   class_ok = classes %in% ok_classes
   bad_cols = names(data)[!class_ok]
   bad_index = which(names(data) %in% bad_cols)
-  bad_classes = abbreviate(classes[!class_ok],3)
+  bad_classes = lapply(classes[!class_ok], function(x) paste(abbreviate(x,3), collapse = ","))
   script = paste(glue::glue("[{bad_index}] '{bad_cols}' <{bad_classes}>"), collapse = ", ")
 
   if (!all(class_ok)) {
