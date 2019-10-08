@@ -61,6 +61,15 @@ test_that("partial cor OK?", {
 
   expect_equal(r1, r2)
   expect_equal(p1,p2)
+
+  # What about asym?
+
+  ob = corx(iris[-5], Sepal.Width, partial = "Petal.Width")
+  pob = ppcor::pcor.test(iris$Sepal.Length, iris$Sepal.Width, iris$Petal.Width)
+
+  expect_equal(ob$r[1,1], pob$estimate)
+  expect_equal(ob$p[1,1], pob$p.value)
+
 })
 
 test_that("partial cor OK? (spearman)", {
@@ -111,5 +120,37 @@ test_that("missing values ok", {
   testthat::expect_equal(x2$n[1,1], 32)
 
 })
+
+
+test_that("Assymetrical matricies are OK", {
+
+  corx_1 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt))
+  corx_2 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt), partial = "am")
+  testthat::expect_equal(cor(mtcars$cyl, mtcars$disp), corx_1$r[2,2])
+  testthat::expect_equal(rownames(corx_1$r), rownames(corx_2$r))
+  testthat::expect_equal(colnames(corx_1$r), colnames(corx_2$r))
+
+  cob_2 = ppcor::pcor.test(mtcars$disp, mtcars$cyl, mtcars$am)
+
+  testthat::expect_equal(corx_2$r[2,2], cob_2$estimate)
+  testthat::expect_equal(corx_2$p[2,2], cob_2$p.value)
+
+})
+
+
+test_that("Multiple partial variables", {
+
+  corx_1 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt), partial = c(am, drat))
+
+
+  cob_2 = ppcor::pcor.test(mtcars$mpg, mtcars$disp, mtcars[,c("am","drat")])
+
+  testthat::expect_equal(corx_1$r[1,2], cob_2$estimate)
+  testthat::expect_equal(corx_1$p[1,2], cob_2$p.value)
+
+})
+
+
+
 
 

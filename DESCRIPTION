@@ -1,14 +1,15 @@
 Package: corx
 Type: Package
-Title: Publication-ready correlation matricies for R
+Title: Formatted correlation matricies
 Version: 1.0.0
+Date: 2019-10-05
 Authors@R: 
     person(given = "James",
            family = "Conigrave",
            role = c("aut", "cre"),
            email = "james.conigrave@gmail.com",
            comment = c(ORCID = "0000-0002-8816-6229"))
-Description: An easy tool to create publication-ready correlation matricies.
+Description: A toolset to create publication-ready correlation matricies.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -12,29 +12,29 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 \arguments{
 \item{data}{A data.frame or matrix}
 
-\item{x}{a vector of character names}
+\item{x}{a vector of rownames. Defaults to all}
 
-\item{y}{a vector of character names}
+\item{y}{a vector of colnames. Defaults to all}
 
 \item{method}{One of "pearson", "spearman", or "kendall"}
 
-\item{partial}{a character vector of names. Used to perform partial correlation.}
+\item{partial}{a vector of colnames. Control variables to be used in partial correlations - defaults to NULL}
 
-\item{stars}{a numeric vector. Stars are added to summary if p-value is lower than each value.}
+\item{stars}{a numeric vector. This argument defines cut-offs for p-value stars. Multiple numbers can be given if you want multiple stars}
 
 \item{round}{Number of digits in printing}
 
-\item{remove_lead}{a bool. if true, leading zeros are removed in summaries}
+\item{remove_lead}{a bool. if TRUE \(the default\), leading zeros are removed in summaries}
 
-\item{triangle}{one of "lower", "upper" or NULL \(default\)}
+\item{triangle}{one of "lower", "upper" or NULL \(the default\)}
 
-\item{caption}{table caption}
+\item{caption}{table caption. Will be passed to plots}
 
 \item{note}{table note}
 
-\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each argument in the list. If TRUE is supplied, means and standard deviation is appended with na.rm = T}
+\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each item in the list. If TRUE is supplied, means and standard deviation is appended \(Missing values listwise deleted\)}
 
-\item{grey_nonsig}{a bool. Should nonsig values be grey in output?}
+\item{grey_nonsig}{a bool. Should nonsig values be grey in output? Nonsig values are identified by the lack of a star using regex}
 
 \item{...}{additional arguments}
 }
@@ -42,7 +42,7 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 A list of class 'corx'.
 }
 \description{
-Creates an object of class "corx". This class of object is a list which contains an APA formatted matrix, and matricies of correlation coefficients, p-values, and observations. Methods provided for functions 'plot', summary, data.frame and 'coef'.
+Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations can be calculated if the 'partial' argument is assigned. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
 }
 \examples{
 cor_mat <- corx(mtcars, x = c(mpg,cyl,disp),

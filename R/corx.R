@@ -1,19 +1,19 @@
 #' corx
 #'
-#' Creates an object of class "corx". This class of object is a list which contains an APA formatted matrix, and matricies of correlation coefficients, p-values, and observations. Methods provided for functions 'plot', summary, data.frame and 'coef'.
+#' Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations can be calculated if the 'partial' argument is assigned. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
 #' @param data A data.frame or matrix
-#' @param x a vector of character names
-#' @param y a vector of character names
+#' @param x a vector of rownames. Defaults to all
+#' @param y a vector of colnames. Defaults to all
 #' @param method One of "pearson", "spearman", or "kendall"
-#' @param partial a character vector of names. Used to perform partial correlation.
+#' @param partial a vector of colnames. Control variables to be used in partial correlations - defaults to NULL
 #' @param round Number of digits in printing
-#' @param stars a numeric vector. Stars are added to summary if p-value is lower than each value.
-#' @param remove_lead a bool. if true, leading zeros are removed in summaries
-#' @param triangle one of "lower", "upper" or NULL \(default\)
-#' @param caption table caption
+#' @param stars a numeric vector. This argument defines cut-offs for p-value stars. Multiple numbers can be given if you want multiple stars
+#' @param remove_lead a bool. if TRUE \(the default\), leading zeros are removed in summaries
+#' @param triangle one of "lower", "upper" or NULL \(the default\)
+#' @param caption table caption. Will be passed to plots
 #' @param note table note
-#' @param grey_nonsig a bool. Should nonsig values be grey in output?
-#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each argument in the list. If TRUE is supplied, means and standard deviation is appended with na.rm = T
+#' @param grey_nonsig a bool. Should nonsig values be grey in output? Nonsig values are identified by the lack of a star using regex
+#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each item in the list. If TRUE is supplied, means and standard deviation is appended \(Missing values listwise deleted\)
 #' @param ... additional arguments
 #' @examples
 #' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp),
@@ -25,19 +25,6 @@
 #' plot(cor_mat)
 #' @return A list of class 'corx'.
 #' @export corx
-#
-#  data = ChickWeight
-# x = NULL
-# y = NULL
-# method = c("pearson", "spearman", "kendall")
-# partial = NULL
-# stars = c(0.05)
-# round = 2
-# remove_lead = T
-# triangle = NULL
-# caption = NULL
-# note = NULL
-# describe = F
 
 corx <-
   function(data,
@@ -102,15 +89,15 @@ corx <-
     method = method[1] # take the first method if a vector
 
     if (is.null(partial)) { # get correlations
-      cors = psych::corr.test(data[, y], data[, x], method = method, adjust = "none")
-      cors$n = psych::pairwiseCount(data[,y], data[,x])
+      cors = psych::corr.test(data[, x], data[, y], method = method, adjust = "none")
+      cors$n = psych::pairwiseCount(data[,x], data[,y])
 
       r_matrix = as.matrix(cors$r)
       p_matrix = as.matrix(cors$p)
       n_matrix = as.matrix(cors$n)
 
-      colnames(r_matrix) = x ;colnames(n_matrix) = x ;colnames(p_matrix) = x
-      rownames(r_matrix) = y ;rownames(n_matrix) = y ;rownames(p_matrix) = y
+      colnames(r_matrix) = y ;colnames(n_matrix) = y ;colnames(p_matrix) = y
+      rownames(r_matrix) = x ;rownames(n_matrix) = x ;rownames(p_matrix) = x
 
     } else{
       cors = partial_matrix(data, x, y, method, partial)
@@ -429,4 +416,12 @@ check_classes = function(data, ok_classes, stop_message) {
     stop(stop_message," ", script, ".", call. = F)
   }
 }
+
+
+
+
+
+
+
+
 

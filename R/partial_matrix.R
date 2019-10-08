@@ -90,9 +90,9 @@ get_cor = function(data, x, y, method, partial) {
 #' @param par the parameter to build with
 
 par_matrix = function(results, x, y, par){
-  m = matrix(nrow = length(y), ncol = length(x))
-  rownames(m) = y
-  colnames(m) = x
+  m = matrix(nrow = length(x), ncol = length(y))
+  rownames(m) = x
+  colnames(m) = y
 
   contains_var = function(r,c){
     r_var = rownames(m)[r]
