@@ -271,9 +271,9 @@ if(length(star_call) > 0 & grey & identical(attr(x, "describe"), F)){# make nons
   regmatches(text,gr) = lapply(mat, function(x) crayon::silver(x))
 }
 
-text = gsub("\\bNA\\b",crayon::red("NA"), text) #make NA red
-text = gsub("\\*",crayon::yellow("*"),text)
-text = gsub("\\ - ",crayon::silver(" - "),text)
+text = gsub("\\bNA\\b", crayon::red("NA"), text) #make NA red
+text = gsub("\\*", crayon::yellow("*"),text)
+text = gsub("\\ - ", crayon::silver(" - "),text)
 
 
 #text = gsub("\\_"," \033[90m",text)
