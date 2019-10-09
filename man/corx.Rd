@@ -20,7 +20,7 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 
 \item{partial}{a vector of colnames. Control variables to be used in partial correlations - defaults to NULL}
 
-\item{stars}{a numeric vector. This argument defines cut-offs for p-value stars. Multiple numbers can be given if you want multiple stars}
+\item{stars}{a numeric vector. This argument defines cut-offs for p-value stars. This argument is vectorised}
 
 \item{round}{Number of digits in printing}
 
@@ -32,9 +32,9 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 
 \item{note}{table note}
 
-\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each item in the list. If TRUE is supplied, means and standard deviation is appended \(Missing values listwise deleted\)}
+\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the apa matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations \(Missing values deleted listwise \)}
 
-\item{grey_nonsig}{a bool. Should nonsig values be grey in output? Nonsig values are identified by the lack of a star using regex}
+\item{grey_nonsig}{a bool. Should non-sigificant values be grey in output? This argument does nothing if describe is not set to FALSE}
 
 \item{...}{additional arguments}
 }
@@ -42,13 +42,10 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 A list of class 'corx'.
 }
 \description{
-Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations can be calculated if the 'partial' argument is assigned. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
+Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations are calculated if the 'partial' argument is assigned values other than NULL. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
 }
 \examples{
-cor_mat <- corx(mtcars, x = c(mpg,cyl,disp),
-   y = c(wt,drat,disp,qsec), partial = wt,
-   round = 2, stars = c(0.05),
-   describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
+cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec), partial = wt, round = 2, stars = c(0.05), describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
 cor_mat
 coef(cor_mat)
 plot(cor_mat)

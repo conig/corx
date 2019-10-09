@@ -151,6 +151,27 @@ test_that("Multiple partial variables", {
 })
 
 
+test_that("Does describe work?", {
 
+  cx = corx(mtcars, describe = T)
+
+  cx_asem = corx(
+    data = mtcars,
+    x = c(mpg, cyl, disp),
+    y = c(wt, drat, disp,
+          qsec),
+    partial = wt,
+    stars = c(0.05),
+    round = 2,
+    describe = T
+  )
+
+  testthat::expect_equal(cx$apa[1,"M"], corx:::digits(mean(mtcars$mpg),2))
+  testthat::expect_equal(cx_asem$apa[1,"M"], corx:::digits(mean(mtcars$mpg),2))
+
+  testthat::expect_equal(cx$apa[1,"SD"], corx:::digits(sd(mtcars$mpg),2))
+  testthat::expect_equal(cx_asem$apa[1,"SD"], corx:::digits(sd(mtcars$mpg),2))
+
+})
 
 

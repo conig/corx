@@ -9,17 +9,17 @@
 #' @param partial variables to partial out
 
 partial_matrix <- function(data, x, y, method, partial){
-call = match.call()
-  all_vars = unique(c(x,y))
+call = match.call() # always nice to save the call
+  all_vars = unique(c(x,y)) # grab all unique vars
   combos = t(utils::combn(all_vars,2)) # get all combos
-  duplis = cbind(all_vars, all_vars)
+  duplis = cbind(all_vars, all_vars) # add in the duplicates
 
   results = data.frame(rbind(combos, duplis), stringsAsFactors = F)
   names(results) = c("Var1","Var2")
 
   cors = lapply(seq_along(results$Var1), function(r) { # calc results
     #message(r)
-    get_cor(data,
+    get_cor(data, # get partial correlation for each unique combination
             results$Var1[r],
             results$Var2[r],
             method = method,
@@ -30,9 +30,11 @@ call = match.call()
 
   results = data.frame(cbind(results, cors)) # add to table
 
-  r_matrix = par_matrix(results, x, y, "r") # extract matricies
-  p_matrix = par_matrix(results, x, y, "p")
-  n_matrix = par_matrix(results, x, y, "n")
+  all_results = par_matrix(results,x,y)
+
+  r_matrix = all_results$r # extract matricies
+  p_matrix = all_results$p
+  n_matrix = all_results$n
 
   return(list(call = call, r = r_matrix, p = p_matrix, n = n_matrix))
 
@@ -87,18 +89,21 @@ get_cor = function(data, x, y, method, partial) {
 #' @param results results dataset
 #' @param x one set of variables
 #' @param y another set of variables
-#' @param par the parameter to build with
 
-par_matrix = function(results, x, y, par){
-  m = matrix(nrow = length(x), ncol = length(y))
-  rownames(m) = x
-  colnames(m) = y
+par_matrix = function(results, x, y){
+  m = matrix(nrow = length(x), ncol = length(y)) # create resultant matrix[x,y]
+  rownames(m) = x # x is rows
+  colnames(m) = y # y is cols
 
-  contains_var = function(r,c){
-    r_var = rownames(m)[r]
-    c_var = colnames(m)[c]
+  r_mat = m # create empty matricies ready to recieve results
+  p_mat = m
+  n_mat = m
 
-    bool = unlist(lapply(seq_along(results$Var1),function(i){
+  contains_var = function(r,c){ # for a supplied index get the row which contains the relevant result
+    r_var = rownames(m)[r] # identify the x col
+    c_var = colnames(m)[c] # identify the y col
+
+    bool = unlist(lapply(seq_along(results$Var1),function(i){ # find the row which stores the relevant result
       Var1_in =  all(c(results$Var1[i], results$Var2[i]) %in% c(r_var,c_var) &
                        c(r_var,c_var) %in% c(results$Var1[i], results$Var2[i]))
     }))
@@ -107,15 +112,17 @@ par_matrix = function(results, x, y, par){
 
   }
 
-  for(r in seq_along(rownames(m))){
-    for(c in seq_along(colnames(m))){
+  for(r in seq_along(rownames(m))){ # for every rowname
+    for(c in seq_along(colnames(m))){ # and every colname
       #message(r); message(c)
-      rows = contains_var(r,c)
+      rows = contains_var(r,c) #find the row index which stores the relevant result
 
-      m[r,c] = results[rows, par]
+      r_mat[r,c] = results[rows, "r"] # extract the requested parameter.
+      p_mat[r,c] = results[rows, "p"]
+      n_mat[r,c] = results[rows, "n"]
 
     }
   }
 
-  return(m)
+  return(list(r = r_mat, p = p_mat, n = n_mat))
 }

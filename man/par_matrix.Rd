@@ -4,7 +4,7 @@
 \alias{par_matrix}
 \title{par_matrix}
 \usage{
-par_matrix(results, x, y, par)
+par_matrix(results, x, y)
 }
 \arguments{
 \item{results}{results dataset}
@@ -12,8 +12,6 @@ par_matrix(results, x, y, par)
 \item{x}{one set of variables}
 
 \item{y}{another set of variables}
-
-\item{par}{the parameter to build with}
 }
 \description{
 This function is used to construct final matricies

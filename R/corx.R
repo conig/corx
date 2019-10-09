@@ -1,25 +1,22 @@
 #' corx
 #'
-#' Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations can be calculated if the 'partial' argument is assigned. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
+#' Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations are calculated if the 'partial' argument is assigned values other than NULL. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
 #' @param data A data.frame or matrix
 #' @param x a vector of rownames. Defaults to all
 #' @param y a vector of colnames. Defaults to all
 #' @param method One of "pearson", "spearman", or "kendall"
 #' @param partial a vector of colnames. Control variables to be used in partial correlations - defaults to NULL
 #' @param round Number of digits in printing
-#' @param stars a numeric vector. This argument defines cut-offs for p-value stars. Multiple numbers can be given if you want multiple stars
+#' @param stars a numeric vector. This argument defines cut-offs for p-value stars. This argument is vectorised
 #' @param remove_lead a bool. if TRUE \(the default\), leading zeros are removed in summaries
 #' @param triangle one of "lower", "upper" or NULL \(the default\)
 #' @param caption table caption. Will be passed to plots
 #' @param note table note
-#' @param grey_nonsig a bool. Should nonsig values be grey in output? Nonsig values are identified by the lack of a star using regex
-#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be appended the apa matrix for each item in the list. If TRUE is supplied, means and standard deviation is appended \(Missing values listwise deleted\)
+#' @param grey_nonsig a bool. Should non-sigificant values be grey in output? This argument does nothing if describe is not set to FALSE
+#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the apa matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations \(Missing values deleted listwise \)
 #' @param ... additional arguments
 #' @examples
-#' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp),
-#'    y = c(wt,drat,disp,qsec), partial = wt,
-#'    round = 2, stars = c(0.05),
-#'    describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
+#' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec), partial = wt, round = 2, stars = c(0.05), describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
 #' cor_mat
 #' coef(cor_mat)
 #' plot(cor_mat)
@@ -70,38 +67,40 @@ corx <-
     if(length(partial) == 0) partial <- NULL
 
     if (length(x)==0) { #if no x
-      x = names(data) # x is the name of the dataset
+      x = names(data) # x is all dataset colnames
     }else{
     }
     if (length(y)==0) { #if no y
-      y = names(data) #make y equal to x
+      y = names(data) #make y equal to all dataset colnames
     }else{
     }
 
-    check_names(data, c(x, y, partial))
+    check_names(data, c(x, y, partial)) # check all names are present
 
-    if(!is.null(partial)){ #remove partialed out variable
+    if(!is.null(partial)){ #remove partialed out variable from x and y
       x = x[!x %in% partial]
       y = y[!y %in% partial]
     }
 
+    # check classes are appropriate
     check_classes(data[,unique(c(x,y,partial))], c("numeric","integer"), "All classes must be numeric.")
 
-    method = method[1] # take the first method if a vector
+    method = method[1] # take the first method in case more than one supplied
 
-    if (is.null(partial)) { # get correlations
-      cors = psych::corr.test(data[, x], data[, y], method = method, adjust = "none")
+    if (is.null(partial)) { # if no partial set
+      cors = psych::corr.test(data[, x], data[, y], method = method, adjust = "none") # standard cors
       cors$n = psych::pairwiseCount(data[,x], data[,y])
 
       r_matrix = as.matrix(cors$r)
       p_matrix = as.matrix(cors$p)
       n_matrix = as.matrix(cors$n)
 
-      colnames(r_matrix) = y ;colnames(n_matrix) = y ;colnames(p_matrix) = y
-      rownames(r_matrix) = x ;rownames(n_matrix) = x ;rownames(p_matrix) = x
+      colnames(r_matrix) = y ;colnames(n_matrix) = y ;colnames(p_matrix) = y # sometimes col/row names get stripped
+      rownames(r_matrix) = x ;rownames(n_matrix) = x ;rownames(p_matrix) = x # so I force them back on
 
     } else{
-      cors = partial_matrix(data, x, y, method, partial)
+
+      cors = partial_matrix(data, x, y, method, partial) # if partial not null use different method
 
       r_matrix = cors$r
       p_matrix = cors$p
@@ -109,7 +108,7 @@ corx <-
 
     }
 
-    pres_matrix = apa_matrix(r_matrix,
+    pres_matrix = apa_matrix(r_matrix, #get apa matrix
                                       p_matrix,
                                       stars,
                                       round,
@@ -118,9 +117,9 @@ corx <-
 
     # describe function ------------------------------
 
-    if (!identical(describe, F)) {
-      if (identical(describe, T)) {
-        describe = list(
+    if (!identical(describe, F)) { # if describe is selected
+      if (identical(describe, T)) { # if it is equal to true
+        describe = list( # define default describe functions
           "M" = function(x)
             mean(x, na.rm = TRUE),
           "SD" = function(x)
@@ -129,15 +128,15 @@ corx <-
       }
 
       data = data.frame(data)
-      y = make.names(y)
+      x = make.names(x)
 
       orig_names = colnames(pres_matrix)
       pres_matrix = data.frame(pres_matrix)
 
-      for (i in seq_along(describe)) {
+      for (i in seq_along(describe)) { # then apply describe function to data
         pres_matrix[[names(describe)[i]]] =
-          unlist(lapply(seq_along(y), function(var) {
-            val = describe[[i]](data[, y[[var]]])
+          unlist(lapply(seq_along(x), function(var) {
+            val = describe[[i]](data[, x[[var]]])
             digits(val, round)
           }))
       }
@@ -145,7 +144,7 @@ corx <-
       colnames(pres_matrix)[seq_along(orig_names)] = orig_names
     }
 
-    if(!is.null(triangle)){ # if triangle change names ----
+    if(!is.null(triangle)){ # if triangle change names -------
 
       nums = seq_along(rownames(pres_matrix))
       rownames(pres_matrix) = paste0(nums,". ", rownames(pres_matrix))
@@ -262,48 +261,44 @@ star_call = attr(x, "stars")
 if(length(star_call) > 0 & grey & identical(attr(x, "describe"), F)){# make nonsig grey
 
   if(attr(x, "round") != 0 ){ # if no decimal places change regex
-    patt = "(-)?[0-9]?\\.[0-9]{1,}(?![\\*0-9])"
-  }else{
-    patt = "-?[0-1](?![\\*\\.0-9]{1,})"
+    patt = "(-)?[0-9]?\\.[0-9]{1,}(?![\\*0-9])" # possible negative, then a possible 0-9 character, then a decimal
+  }else{                                        # then more 0-9 characters (at least one), but not followed by any number of stars!
+    patt = "-?[0-1](?![\\*\\.0-9]{1,})" # different pattern for round = 0 (even though no one will ever use that setting)
   }
 
-  gr = gregexpr(patt,text, perl = T)
+  gr = gregexpr(patt,text, perl = T) # get match locations
   mat = regmatches(text,gr)
-  regmatches(text,gr) = lapply(mat, function(x) crayon::silver(x))
+  regmatches(text,gr) = lapply(mat, function(x) crayon::silver(x)) # replace with silver text
 }
 
-text = gsub("\\bNA\\b", crayon::red("NA"), text) #make NA red
-text = gsub("\\*", crayon::yellow("*"),text)
-text = gsub("\\ - ", crayon::silver(" - "),text)
+text = gsub("\\bNA\\b", crayon::red("NA"), text) # make NAs red
+text = gsub("\\*", crayon::yellow("*"),text) # make stars yelloe
+text = gsub("\\ - ", crayon::silver(" - "),text) # make dashes silver
 
-
-#text = gsub("\\_"," \033[90m",text)
-#text = gsub("\\|","\033[39m ",text)
-
-text = text[-1]
-bar = paste(rep(crayon::silver("-"), width),collapse = "")
-temp_note = paste("Note.",x$note)
+text = text[-1] # remove header
+bar = paste(rep(crayon::silver("-"), width),collapse = "") # create a bar same length as table
+temp_note = paste("Note.",x$note) # get note ready
 
 
 
 final_text = paste(c(
-  crayon::blue(utils::capture.output(x$call)),
-  "",
-  x$caption,
-  bar,
-  header,
-  bar,
-  text,
-  bar,
-  temp_note,
+  crayon::blue(utils::capture.output(x$call)), # call
+  "", # then an empty line
+  x$caption, # table caption
+  bar, # a bar
+  header, # a header
+  bar, # a bar
+  text, # table contents
+  bar, # final bar
+  temp_note, # the note
   ""
 ),
-collapse = "\n")
+collapse = "\n") # all separated with line breaks
 cat(final_text)
 }
 
 #' @export
-coef.corx = function(object, ...) object$r
+coef.corx = function(object, ...) object$r # coef returns r matrix
 
 #' digits
 #'
