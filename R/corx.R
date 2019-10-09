@@ -57,7 +57,6 @@ corx <-
       )
     }
 
-    check_classes(data, c("numeric","integer"), "All classes must be numeric.")
 
     # allow object names ----------------------
     x = as.character(call$x)
@@ -85,6 +84,8 @@ corx <-
       x = x[!x %in% partial]
       y = y[!y %in% partial]
     }
+
+    check_classes(data[,unique(c(x,y,partial))], c("numeric","integer"), "All classes must be numeric.")
 
     method = method[1] # take the first method if a vector
 
