@@ -1,8 +1,8 @@
 Package: corx
 Type: Package
-Title: Formatted correlation matrices
-Version: 1.0.0
-Date: 2019-10-05
+Title: Formatted Correlation Matrices
+Version: 1.0.1
+Date: 2019-10-14
 Authors@R: 
     person(given = "James",
            family = "Conigrave",

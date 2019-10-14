@@ -7,7 +7,7 @@
 
 to_clipboard <- function(x, ...) {
 
-  if(class(x) == "corx"){
+  if("corx" %in% class(x)){
   clipr::write_clip(x$apa, ...)
   }else{
     clipr::write_clip(x, ...)
