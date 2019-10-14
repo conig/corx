@@ -51,7 +51,7 @@ test_that("Are diagonals OK?", {
 
 test_that("partial cor OK?", {
 
-  ob = corx(iris[-5], partial = "Sepal.Width")
+  ob = corx(iris[-5], z = "Sepal.Width")
   r1 = ob$r[2,1]
   p1 = ob$p[2,1]
 
@@ -64,7 +64,7 @@ test_that("partial cor OK?", {
 
   # What about asym?
 
-  ob = corx(iris[-5], Sepal.Width, partial = "Petal.Width")
+  ob = corx(iris[-5], Sepal.Width, z = "Petal.Width")
   pob = ppcor::pcor.test(iris$Sepal.Length, iris$Sepal.Width, iris$Petal.Width)
 
   expect_equal(ob$r[1,1], pob$estimate)
@@ -74,7 +74,7 @@ test_that("partial cor OK?", {
 
 test_that("partial cor OK? (spearman)", {
 
-  ob = corx(iris[-5], partial = "Sepal.Width", method = "spearman")
+  ob = corx(iris[-5], z = "Sepal.Width", method = "spearman")
   r1 = ob$r[2,1]
   p1 = ob$p[2,1]
 
@@ -88,7 +88,7 @@ test_that("partial cor OK? (spearman)", {
 
 test_that("partial cor OK? (kendall)", {
 
-  ob = corx(mtcars, partial = "cyl", method = "kendall")
+  ob = corx(mtcars, z = "cyl", method = "kendall")
   r1 = ob$r[2,1]
   p1 = ob$p[2,1]
 
@@ -112,7 +112,7 @@ test_that("missing values ok", {
   dat[1,3] = NA
 
   x = corx(dat)
-  x2 = corx(dat, partial = "carb")
+  x2 = corx(dat, z = "carb")
 
   testthat::expect_equal(x$n[1,3], 31)
   testthat::expect_equal(x$n[1,1], 32)
@@ -125,7 +125,7 @@ test_that("missing values ok", {
 test_that("Assymetrical matricies are OK", {
 
   corx_1 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt))
-  corx_2 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt), partial = "am")
+  corx_2 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt), z = "am")
   testthat::expect_equal(cor(mtcars$cyl, mtcars$disp), corx_1$r[2,2])
   testthat::expect_equal(rownames(corx_1$r), rownames(corx_2$r))
   testthat::expect_equal(colnames(corx_1$r), colnames(corx_2$r))
@@ -140,13 +140,16 @@ test_that("Assymetrical matricies are OK", {
 
 test_that("Multiple partial variables", {
 
-  corx_1 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt), partial = c(am, drat))
+  corx_1 = corx(mtcars, c(mpg, cyl), c(gear, disp, wt), z = c(am, drat))
 
 
   cob_2 = ppcor::pcor.test(mtcars$mpg, mtcars$disp, mtcars[,c("am","drat")])
+  cob_3 = ppcor::pcor.test(mtcars$cyl, mtcars$wt, mtcars[,c("am","drat")])
 
   testthat::expect_equal(corx_1$r[1,2], cob_2$estimate)
   testthat::expect_equal(corx_1$p[1,2], cob_2$p.value)
+  testthat::expect_equal(corx_1$r[2,3], cob_3$estimate)
+  testthat::expect_equal(corx_1$p[2,3], cob_3$p.value)
 
 })
 
@@ -160,18 +163,36 @@ test_that("Does describe work?", {
     x = c(mpg, cyl, disp),
     y = c(wt, drat, disp,
           qsec),
-    partial = wt,
+    z = wt,
     stars = c(0.05),
     round = 2,
     describe = T
   )
 
+  cx_asem2 = corx(
+    data = mtcars,
+    y = c(wt, drat, disp,
+          qsec),
+    z = wt,
+    stars = c(0.05),
+    round = 2,
+    describe = T
+  )
+
+  all_means = cx_asem2$apa[,"M"]
+  all_sds = cx_asem2$apa[,"SD"]
+  lapply_means = unlist(lapply(colnames(mtcars), function(x) corx:::digits(mean(mtcars[,x]),2)))
+  lapply_sds = unlist(lapply(colnames(mtcars), function(x) corx:::digits(sd(mtcars[,x]),2)))
+  names(lapply_means) = names(mtcars)
+  names(lapply_sds) = names(mtcars)
+
   testthat::expect_equal(cx$apa[1,"M"], corx:::digits(mean(mtcars$mpg),2))
   testthat::expect_equal(cx_asem$apa[1,"M"], corx:::digits(mean(mtcars$mpg),2))
-
   testthat::expect_equal(cx$apa[1,"SD"], corx:::digits(sd(mtcars$mpg),2))
   testthat::expect_equal(cx_asem$apa[1,"SD"], corx:::digits(sd(mtcars$mpg),2))
-
+  testthat::expect_equal(cx_asem$apa[3,"SD"], corx:::digits(sd(mtcars$disp),2))
+  testthat::expect_equal(all_means, lapply_means[names(lapply_means) != "wt"])
+  testthat::expect_equal(all_sds, lapply_sds[names(lapply_sds) != "wt"])
 })
 
 

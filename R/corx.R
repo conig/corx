@@ -1,34 +1,48 @@
 #' corx
 #'
-#' Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations are calculated if the 'partial' argument is assigned values other than NULL. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
+#' Creates an object of class "corx". This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
 #' @param data A data.frame or matrix
 #' @param x a vector of rownames. Defaults to all
 #' @param y a vector of colnames. Defaults to all
+#' @param z a vector of colnames. Control variables to be used in partial correlations - defaults to NULL
 #' @param method One of "pearson", "spearman", or "kendall"
-#' @param partial a vector of colnames. Control variables to be used in partial correlations - defaults to NULL
 #' @param round Number of digits in printing
-#' @param stars a numeric vector. This argument defines cut-offs for p-value stars. This argument is vectorised
-#' @param remove_lead a bool. if TRUE \(the default\), leading zeros are removed in summaries
-#' @param triangle one of "lower", "upper" or NULL \(the default\)
-#' @param caption table caption. Will be passed to plots
+#' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
+#' @param remove_lead a bool. if TRUE (the default), leading zeros are removed in summaries
+#' @param triangle one of "lower", "upper" or NULL (the default)
+#' @param caption table caption. Passed to plots
 #' @param note table note
-#' @param grey_nonsig a bool. Should non-sigificant values be grey in output? This argument does nothing if describe is not set to FALSE
-#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the apa matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations \(Missing values deleted listwise \)
+#' @param grey_nonsig a bool. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
+#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (Missing values deleted listwise )
 #' @param ... additional arguments
+#' @details corx constructs intercorrelation matrices using psych::corr.test. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using ppcor::ppcor.test. Asymmetrical correlation matrices can be constructed using the arguments x and y. The arguments 'x', 'y', and 'z' are powered by tidyselect.
 #' @examples
-#' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec), partial = wt, round = 2, stars = c(0.05), describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
+#' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
+#'            z = wt, round = 2, stars = c(0.05),
+#'            caption = "Controlling for weight" ,
+#'            describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
 #' cor_mat
 #' coef(cor_mat)
+#' cor_mat$p
 #' plot(cor_mat)
-#' @return A list of class 'corx'.
+#' @return A list of class 'corx' which includes:
+#' \itemize{
+#'  \item{"call"}{ The call}
+#'  \item{"apa"}{ An APA formatted correlation matrix with significance stars}
+#'  \item{"r"}{ Raw correlation coefficients}
+#'  \item{"p"}{ Raw p-values}
+#'  \item{"n"}{ Pairwise observations}
+#'  \item{"caption"}{ Object caption}
+#'  \item{"note"}{ Object note}
+#' }
 #' @export corx
 
 corx <-
   function(data,
            x = NULL,
            y = NULL,
+           z = NULL,
            method = c("pearson", "spearman", "kendall"),
-           partial = NULL,
            stars = c(0.05),
            round = 2,
            remove_lead = T,
@@ -40,6 +54,9 @@ corx <-
            ...) {
 
     call = match.call()
+    env = environment()
+    parent_env = sys.frame(sys.parent())
+    #return(list(call = call, env = env, parent_env = parent_env))
 
     if(nrow(data) < 3){
       stop("Can't calculate p-values with fewer than four rows of data.")
@@ -54,40 +71,85 @@ corx <-
       )
     }
 
+    # select vars and check names ----------------------
 
-    # allow object names ----------------------
-    x = as.character(call$x)
-    if(length(x)>1) x <- x[-1]
+    x = tidyselect::vars_select(colnames(data), {{x}}, .strict = F)
+    y = tidyselect::vars_select(colnames(data), {{y}}, .strict = F)
+    z = tidyselect::vars_select(colnames(data), {{z}}, .strict = F)
 
-    y = as.character(call$y)
-    if(length(y)>1) y <- y[-1]
+    check_for_vec = function(names, sym, env){
 
-    partial = as.character(call$partial)
-    if(length(partial) > 1) partial <- partial[-1]
-    if(length(partial) == 0) partial <- NULL
+      if(length(names) == 0 & !is.null(sym)){
 
-    if (length(x)==0) { #if no x
-      x = names(data) # x is all dataset colnames
-    }else{
+        if(as.character(sym) %in% ls(envir = env)){
+          #message("getting vec")
+          names = get(as.character(sym))
+        }
+
+      } else{
+        #message("names not length 0 or sym was null")
+      }
+
+      return(names)
     }
-    if (length(y)==0) { #if no y
-      y = names(data) #make y equal to all dataset colnames
-    }else{
+
+    x = check_for_vec(x, call$x, parent_env)
+    y = check_for_vec(y, call$y, parent_env)
+    z = check_for_vec(z, call$z, parent_env)
+
+    # message(length(x))
+
+    get_input = function(x){ # grab plain text input
+      x = as.character(x)
+      if(length(x)>1) x <- x[-1]
+      return(x)
+    }
+    x_orig = get_input(call$x)
+    y_orig = get_input(call$y)
+    z_orig = get_input(call$z)
+
+    to_check = c()
+
+    if(length(x) == 0 & length(x_orig) > 0){ # did the user try to get a var and failed
+      to_check = c(to_check, x_orig) # check what the deal is
+    }
+    if(length(y) == 0 & length(y_orig) > 0){
+      to_check = c(to_check, y_orig)
+    }
+    if(length(z) == 0 & length(z_orig) > 0){
+      to_check = c(to_check, z_orig)
     }
 
-    check_names(data, c(x, y, partial)) # check all names are present
+    check_names(data, unique(to_check))
 
-    if(!is.null(partial)){ #remove partialed out variable from x and y
-      x = x[!x %in% partial]
-      y = y[!y %in% partial]
+
+    #check_names(data, c(x, y, z)) # check all names are present
+
+    if(length(x) == 0){
+      x = names(data)
     }
+
+    if(length(y) == 0){
+      y = names(data)
+    }
+
+    if(length(z) == 0){
+      z = NULL
+    }
+
+    if(length(z) > 0){ #remove partialed out variable from x and y
+      x = x[!x %in% z]
+      y = y[!y %in% z]
+    }
+
+    if(length(x) == 0 | length(y) == 0) stop("Can't partial out the entirety of x or y")
 
     # check classes are appropriate
-    check_classes(data[,unique(c(x,y,partial))], c("numeric","integer"), "All classes must be numeric.")
+    check_classes(data[,unique(c(x,y,z))], c("numeric","integer"), "All classes must be numeric.")
 
     method = method[1] # take the first method in case more than one supplied
 
-    if (is.null(partial)) { # if no partial set
+    if (length(z) == 0) { # if no partial set
       cors = psych::corr.test(data[, x], data[, y], method = method, adjust = "none") # standard cors
       cors$n = psych::pairwiseCount(data[,x], data[,y])
 
@@ -100,7 +162,7 @@ corx <-
 
     } else{
 
-      cors = partial_matrix(data, x, y, method, partial) # if partial not null use different method
+      cors = partial_matrix(data, x, y, method, z) # if partial not null use different method
 
       r_matrix = cors$r
       p_matrix = cors$p

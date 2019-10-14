@@ -9,14 +9,14 @@ partial_matrix(data, x, y, method, partial)
 \arguments{
 \item{data}{the data object}
 
-\item{x}{horizontal variables}
+\item{x}{rownames}
 
-\item{y}{veritical variables}
+\item{y}{colnames}
 
-\item{method}{the methos}
+\item{method}{the method}
 
 \item{partial}{variables to partial out}
 }
 \description{
-Creates matricies of partial correlations including r, n, and p
+Creates matrices of partial correlations including r, n, and p
 }

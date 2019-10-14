@@ -14,5 +14,5 @@ par_matrix(results, x, y)
 \item{y}{another set of variables}
 }
 \description{
-This function is used to construct final matricies
+This function is used to construct final matrices
 }

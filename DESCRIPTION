@@ -1,6 +1,6 @@
 Package: corx
 Type: Package
-Title: Formatted correlation matricies
+Title: Formatted correlation matrices
 Version: 1.0.0
 Date: 2019-10-05
 Authors@R: 
@@ -9,7 +9,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "james.conigrave@gmail.com",
            comment = c(ORCID = "0000-0002-8816-6229"))
-Description: A toolset to create publication-ready correlation matricies.
+Description: A tool kit to create publication-ready correlation matrices.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -19,7 +19,8 @@ Imports:
     ggcorrplot,
     glue,
     psych,
-    clipr
+    clipr,
+    tidyselect
 RoxygenNote: 6.1.1
 Suggests: 
     testthat

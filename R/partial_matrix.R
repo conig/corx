@@ -1,11 +1,11 @@
 
 #' partial_matrix
 #'
-#' Creates matricies of partial correlations including r, n, and p
+#' Creates matrices of partial correlations including r, n, and p
 #' @param data the data object
-#' @param x horizontal variables
-#' @param y veritical variables
-#' @param method the methos
+#' @param x rownames
+#' @param y colnames
+#' @param method the method
 #' @param partial variables to partial out
 
 partial_matrix <- function(data, x, y, method, partial){
@@ -32,7 +32,7 @@ call = match.call() # always nice to save the call
 
   all_results = par_matrix(results,x,y)
 
-  r_matrix = all_results$r # extract matricies
+  r_matrix = all_results$r # extract matrices
   p_matrix = all_results$p
   n_matrix = all_results$n
 
@@ -50,42 +50,30 @@ call = match.call() # always nice to save the call
 #' @param partial control for anything?
 
 get_cor = function(data, x, y, method, partial) {
-
   data = data.frame(data)
   x = make.names(x)
   y = make.names(y)
-  if (length(partial) == 0) {
-    data = stats::na.omit(data[,c(x,y)])
 
-    result = stats::cor.test(data[, x],
-                             data[, y],
-                             method = method)
+  partial_data = stats::na.omit(data[, c(x, y, partial)])
+  n = nrow(partial_data)
+
+  if (x != y) {
+    result = ppcor::pcor.test(partial_data[, x], partial_data[,
+                                                              y], partial_data[, partial], method = method)
     r = result$estimate
-    if(x==y) r <- 1
     p = result$p.value
-    n = nrow(data)
-
-  } else {
-    partial_data = stats::na.omit(data[, c(x, y, partial)])
-    n = nrow(partial_data)
-
-    if(x != y){
-      result = ppcor::pcor.test(partial_data[, x], partial_data[,
-                                                                y], partial_data[, partial], method = method)
-      r = result$estimate
-      p = result$p.value
-    }else{
-      r = 1
-      p = 0
-    }
-
+  } else{
+    r = 1
+    p = 0
   }
-  return(data.frame(r = r,p = p, n = n))
+
+
+  return(data.frame(r = r, p = p, n = n))
 }
 
 #' par_matrix
 #'
-#' This function is used to construct final matricies
+#' This function is used to construct final matrices
 #' @param results results dataset
 #' @param x one set of variables
 #' @param y another set of variables
@@ -95,7 +83,7 @@ par_matrix = function(results, x, y){
   rownames(m) = x # x is rows
   colnames(m) = y # y is cols
 
-  r_mat = m # create empty matricies ready to recieve results
+  r_mat = m # create empty matrices ready to recieve results
   p_mat = m
   n_mat = m
 

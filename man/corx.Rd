@@ -4,8 +4,8 @@
 \alias{corx}
 \title{corx}
 \usage{
-corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
-  "kendall"), partial = NULL, stars = c(0.05), round = 2,
+corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
+  "spearman", "kendall"), stars = c(0.05), round = 2,
   remove_lead = T, triangle = NULL, caption = NULL, note = NULL,
   describe = F, grey_nonsig = T, ...)
 }
@@ -16,37 +16,53 @@ corx(data, x = NULL, y = NULL, method = c("pearson", "spearman",
 
 \item{y}{a vector of colnames. Defaults to all}
 
+\item{z}{a vector of colnames. Control variables to be used in partial correlations - defaults to NULL}
+
 \item{method}{One of "pearson", "spearman", or "kendall"}
 
-\item{partial}{a vector of colnames. Control variables to be used in partial correlations - defaults to NULL}
-
-\item{stars}{a numeric vector. This argument defines cut-offs for p-value stars. This argument is vectorised}
+\item{stars}{a numeric vector. This argument defines cut-offs for p-value stars.}
 
 \item{round}{Number of digits in printing}
 
-\item{remove_lead}{a bool. if TRUE \(the default\), leading zeros are removed in summaries}
+\item{remove_lead}{a bool. if TRUE (the default), leading zeros are removed in summaries}
 
-\item{triangle}{one of "lower", "upper" or NULL \(the default\)}
+\item{triangle}{one of "lower", "upper" or NULL (the default)}
 
-\item{caption}{table caption. Will be passed to plots}
+\item{caption}{table caption. Passed to plots}
 
 \item{note}{table note}
 
-\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the apa matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations \(Missing values deleted listwise \)}
+\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (Missing values deleted listwise )}
 
-\item{grey_nonsig}{a bool. Should non-sigificant values be grey in output? This argument does nothing if describe is not set to FALSE}
+\item{grey_nonsig}{a bool. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE}
 
 \item{...}{additional arguments}
 }
 \value{
-A list of class 'corx'.
+A list of class 'corx' which includes:
+\itemize{
+ \item{"call"}{ The call}
+ \item{"apa"}{ An APA formatted correlation matrix with significance stars}
+ \item{"r"}{ Raw correlation coefficients}
+ \item{"p"}{ Raw p-values}
+ \item{"n"}{ Pairwise observations}
+ \item{"caption"}{ Object caption}
+ \item{"note"}{ Object note}
+}
 }
 \description{
-Creates an object of class "corx". This function calculates correlation matricies. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. Partial correlations are calculated if the 'partial' argument is assigned values other than NULL. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
+Creates an object of class "corx". This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
+}
+\details{
+corx constructs intercorrelation matrices using psych::corr.test. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using ppcor::ppcor.test. Asymmetrical correlation matrices can be constructed using the arguments x and y. The arguments 'x', 'y', and 'z' are powered by tidyselect.
 }
 \examples{
-cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec), partial = wt, round = 2, stars = c(0.05), describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
+cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
+           z = wt, round = 2, stars = c(0.05),
+           caption = "Controlling for weight" ,
+           describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
 cor_mat
 coef(cor_mat)
+cor_mat$p
 plot(cor_mat)
 }

@@ -7,10 +7,10 @@
 to_clipboard(x, ...)
 }
 \arguments{
-\item{x}{the corx object}
+\item{x}{a corx object, matrix, or data.frame}
 
-\item{...}{aditional arguments passed to clipr::write_clip}
+\item{...}{additional arguments passed to clipr::write_clip}
 }
 \description{
-Provides a way to send correlation tables to the clipboard so they can be pasted into excel.
+Sends a formatted corx table to the clipboard so that it can be pasted into excel.
 }
