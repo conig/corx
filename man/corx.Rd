@@ -32,7 +32,7 @@ corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
 
 \item{note}{table note}
 
-\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (Missing values deleted listwise )}
+\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (missing values deleted pairwise)}
 
 \item{grey_nonsig}{a bool. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE}
 

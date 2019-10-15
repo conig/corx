@@ -13,7 +13,7 @@
 #' @param caption table caption. Passed to plots
 #' @param note table note
 #' @param grey_nonsig a bool. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
-#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (Missing values deleted listwise )
+#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (missing values deleted pairwise)
 #' @param ... additional arguments
 #' @details corx constructs intercorrelation matrices using psych::corr.test. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using ppcor::ppcor.test. Asymmetrical correlation matrices can be constructed using the arguments x and y. The arguments 'x', 'y', and 'z' are powered by tidyselect.
 #' @examples
