@@ -77,6 +77,25 @@ corx <-
     y = tidyselect::vars_select(colnames(data), {{y}}, .strict = F)
     z = tidyselect::vars_select(colnames(data), {{z}}, .strict = F)
 
+    # allow rename within select
+    rename_if_needed = function(data, x){
+      if(any(names(x) != x) & length(x) > 0){
+        rename_vars = x[ names(x) != x]
+        colnames(data)[colnames(data) %in% rename_vars] = names(rename_vars)
+      }
+      return(data)
+    }
+
+    data = rename_if_needed(data, x)
+    data = rename_if_needed(data, y)
+    data = rename_if_needed(data, z)
+
+    if(length(x) > 0) x <- names(x)
+    if(length(y) > 0) y <- names(y)
+    if(length(z) > 0) z <- names(z)
+
+    # --
+
     check_for_vec = function(names, sym, env){
 
       if(length(names) == 0 & !is.null(sym)){

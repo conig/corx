@@ -44,6 +44,13 @@ test_that("Weird names are working", {
   expect_equal(colnames(temp_corx$apa)[1], "mpee gee")
 })
 
+test_that("Rename working", {
+  temp_dat = mtcars
+  names(temp_dat)[1] = "mpee gee"
+  temp_corx = corx(temp_dat, c(mpg = "mpee gee"))
+  expect_equal(temp_corx$apa, corx(mtcars, mpg)$apa)
+})
+
 test_that("Are diagonals OK?", {
   temp_dat = as.character(corx(mtcars, mpg, cyl)$apa)
   expect_equal(temp_dat, "-.85*")
