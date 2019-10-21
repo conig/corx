@@ -20,8 +20,8 @@ call = match.call() # always nice to save the call
   cors = lapply(seq_along(results$Var1), function(r) { # calc results
     #message(r)
     get_cor(data, # get partial correlation for each unique combination
-            results$Var1[r],
-            results$Var2[r],
+            x = results$Var1[r],
+            y = results$Var2[r],
             method = method,
             partial = partial)
   })
@@ -49,6 +49,7 @@ call = match.call() # always nice to save the call
 #' @param method correlation method
 #' @param partial control for anything?
 
+
 get_cor = function(data, x, y, method, partial) {
   data = data.frame(data)
   x = make.names(x)
@@ -58,8 +59,9 @@ get_cor = function(data, x, y, method, partial) {
   n = nrow(partial_data)
 
   if (x != y) {
-    result = ppcor::pcor.test(partial_data[, x], partial_data[,
-                                                              y], partial_data[, partial], method = method)
+
+      result = ppcor::pcor.test(partial_data[, x], partial_data[,
+                                                                y], partial_data[, partial], method = method)
     r = result$estimate
     p = result$p.value
   } else{

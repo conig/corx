@@ -1,21 +1,21 @@
 #' corx
 #'
-#' Creates an object of class "corx". This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
+#' Creates an object of class 'corx'. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
 #' @param data A data.frame or matrix
 #' @param x a vector of rownames. Defaults to all
 #' @param y a vector of colnames. Defaults to all
 #' @param z a vector of colnames. Control variables to be used in partial correlations - defaults to NULL
-#' @param method One of "pearson", "spearman", or "kendall"
-#' @param round Number of digits in printing
+#' @param method a string. One of "pearson", "spearman", or "kendall"
+#' @param round a scalar. Number of digits in printing
 #' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
-#' @param remove_lead a bool. if TRUE (the default), leading zeros are removed in summaries
+#' @param remove_lead a logical. if TRUE (the default), leading zeros are removed in summaries
 #' @param triangle one of "lower", "upper" or NULL (the default)
 #' @param caption table caption. Passed to plots
 #' @param note table note
-#' @param grey_nonsig a bool. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
-#' @param describe a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (missing values deleted pairwise)
+#' @param describe a list of functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
+#' @param grey_nonsig a logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
 #' @param ... additional arguments
-#' @details corx constructs intercorrelation matrices using psych::corr.test. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using ppcor::ppcor.test. Asymmetrical correlation matrices can be constructed using the arguments x and y. The arguments 'x', 'y', and 'z' are powered by tidyselect.
+#' @details 'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
 #' @examples
 #' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
 #'            z = wt, round = 2, stars = c(0.05),
@@ -25,10 +25,13 @@
 #' coef(cor_mat)
 #' cor_mat$p
 #' plot(cor_mat)
+#' cor_2 <- corx(iris[,-5], describe = c(median, IQR = iqr, kurt = kurtosis),
+#'          note = "Using shortcuts to select describe functions", triangle = "lower")
+#' cor_2
 #' @return A list of class 'corx' which includes:
 #' \itemize{
 #'  \item{"call"}{ The call}
-#'  \item{"apa"}{ An APA formatted correlation matrix with significance stars}
+#'  \item{"apa"}{ An 'APA' formatted correlation matrix with significance stars}
 #'  \item{"r"}{ Raw correlation coefficients}
 #'  \item{"p"}{ Raw p-values}
 #'  \item{"n"}{ Pairwise observations}
@@ -45,12 +48,12 @@ corx <-
            method = c("pearson", "spearman", "kendall"),
            stars = c(0.05),
            round = 2,
-           remove_lead = T,
+           remove_lead = TRUE,
            triangle = NULL,
            caption = NULL,
            note = NULL,
-           describe = F,
-           grey_nonsig = T,
+           describe = FALSE,
+           grey_nonsig = TRUE,
            ...) {
 
     call = match.call()
@@ -64,12 +67,12 @@ corx <-
 
     #logical checks -------
 
-    if (!class(describe) %in% c("list", "logical")) {
-      stop(
-        "describe must be supplied a list of functions (with names), or a logical e.g. 'TRUE'",
-        call. = F
-      )
-    }
+    # if (!class(describe) %in% c("list", "logical")) {
+    #   stop(
+    #     "describe must be supplied a list of functions (with names), or a logical e.g. 'TRUE'",
+    #     call. = F
+    #   )
+    # }
 
     # select vars and check names ----------------------
 
@@ -181,7 +184,7 @@ corx <-
 
     } else{
 
-      cors = partial_matrix(data, x, y, method, z) # if partial not null use different method
+      cors = partial_matrix(data, x = x, y = y, method = method, partial = z) # if partial not null use different method
 
       r_matrix = cors$r
       p_matrix = cors$p
@@ -196,7 +199,32 @@ corx <-
                                       remove_lead,
                                       triangle)
 
-    # describe function ------------------------------
+    # describe function ----------------------------------------------------
+
+    # allow shortcuts
+
+    all_desc = list(mean = function(x) mean(x, na.rm=T),
+                    sd = function(x) stats::sd(x, na.rm=T),
+                    var = function(x) stats::var(x, na.rm = T),
+                    median = function(x) stats::median(x, na.rm = T),
+                    iqr = function(x) stats::IQR(x, na.rm = T),
+                    skewness = function(x) moments::skewness(x, na.rm = T),
+                    kurtosis = function(x) moments::kurtosis(x, na.rm =T)
+                    )
+
+    tryCatch({ # allow lists to be sent to tidyselect
+    describe_name = tidyselect::vars_select(names(all_desc), {{describe}}, .strict = F)
+    }, error = function(e) assign("describe_name", c(), envir = env)) # assign empty vec if error
+
+    if(length(describe_name) > 0){ # if vars were found
+
+      if(length(describe_name) != (length(call$describe) -1)){ # check if all vars were found
+      describe_name = tidyselect::vars_select(names(all_desc), {{describe}}, .strict = T)
+      }
+
+      describe = all_desc[describe_name] # set describe to all_desc
+      names(describe) = names(describe_name) # rename as needed
+    }
 
     if (!identical(describe, F)) { # if describe is selected
       if (identical(describe, T)) { # if it is equal to true
@@ -264,8 +292,6 @@ corx <-
     return(c_matrix)
   }
 
-
-
 #' apa matrix
 #'
 #' Creates an apa matrix
@@ -273,7 +299,7 @@ corx <-
 #' @param p_matrix p-value matrix
 #' @param stars a vector of pvalue stars
 #' @param round How many digits to round to?
-#' @param remove_lead a bool. Should leading zeros be removed?
+#' @param remove_lead a logical. Should leading zeros be removed?
 #' @param triangle can select lower upper or NULL
 
 apa_matrix = function(r_matrix,

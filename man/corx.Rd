@@ -6,8 +6,8 @@
 \usage{
 corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
   "spearman", "kendall"), stars = c(0.05), round = 2,
-  remove_lead = T, triangle = NULL, caption = NULL, note = NULL,
-  describe = F, grey_nonsig = T, ...)
+  remove_lead = TRUE, triangle = NULL, caption = NULL, note = NULL,
+  describe = FALSE, grey_nonsig = TRUE, ...)
 }
 \arguments{
 \item{data}{A data.frame or matrix}
@@ -18,13 +18,13 @@ corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
 
 \item{z}{a vector of colnames. Control variables to be used in partial correlations - defaults to NULL}
 
-\item{method}{One of "pearson", "spearman", or "kendall"}
+\item{method}{a string. One of "pearson", "spearman", or "kendall"}
 
 \item{stars}{a numeric vector. This argument defines cut-offs for p-value stars.}
 
-\item{round}{Number of digits in printing}
+\item{round}{a scalar. Number of digits in printing}
 
-\item{remove_lead}{a bool. if TRUE (the default), leading zeros are removed in summaries}
+\item{remove_lead}{a logical. if TRUE (the default), leading zeros are removed in summaries}
 
 \item{triangle}{one of "lower", "upper" or NULL (the default)}
 
@@ -32,9 +32,9 @@ corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
 
 \item{note}{table note}
 
-\item{describe}{a list of functions with names or a logical. If functions are supplied to describe, a new column will be bound to the APA matrix for each item in the list. If TRUE is supplied, describe calculates means and standard deviations (missing values deleted pairwise)}
+\item{describe}{a list of functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.}
 
-\item{grey_nonsig}{a bool. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE}
+\item{grey_nonsig}{a logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE}
 
 \item{...}{additional arguments}
 }
@@ -42,7 +42,7 @@ corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
 A list of class 'corx' which includes:
 \itemize{
  \item{"call"}{ The call}
- \item{"apa"}{ An APA formatted correlation matrix with significance stars}
+ \item{"apa"}{ An 'APA' formatted correlation matrix with significance stars}
  \item{"r"}{ Raw correlation coefficients}
  \item{"p"}{ Raw p-values}
  \item{"n"}{ Pairwise observations}
@@ -51,10 +51,10 @@ A list of class 'corx' which includes:
 }
 }
 \description{
-Creates an object of class "corx". This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', summary, data.frame and 'coef'.
+Creates an object of class 'corx'. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
 }
 \details{
-corx constructs intercorrelation matrices using psych::corr.test. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using ppcor::ppcor.test. Asymmetrical correlation matrices can be constructed using the arguments x and y. The arguments 'x', 'y', and 'z' are powered by tidyselect.
+'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
 }
 \examples{
 cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
@@ -65,4 +65,7 @@ cor_mat
 coef(cor_mat)
 cor_mat$p
 plot(cor_mat)
+cor_2 <- corx(iris[,-5], describe = c(median, IQR = iqr, kurt = kurtosis),
+         note = "Using shortcuts to select describe functions", triangle = "lower")
+cor_2
 }

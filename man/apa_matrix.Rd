@@ -15,7 +15,7 @@ apa_matrix(r_matrix, p_matrix, stars, round, remove_lead, triangle)
 
 \item{round}{How many digits to round to?}
 
-\item{remove_lead}{a bool. Should leading zeros be removed?}
+\item{remove_lead}{a logical. Should leading zeros be removed?}
 
 \item{triangle}{can select lower upper or NULL}
 }

@@ -79,6 +79,7 @@ test_that("partial cor OK?", {
 
 })
 
+
 test_that("partial cor OK? (spearman)", {
 
   ob = corx(iris[-5], z = "Sepal.Width", method = "spearman")
@@ -160,7 +161,6 @@ test_that("Multiple partial variables", {
 
 })
 
-
 test_that("Does describe work?", {
 
   cx = corx(mtcars, describe = T)
@@ -202,4 +202,136 @@ test_that("Does describe work?", {
   testthat::expect_equal(all_sds, lapply_sds[names(lapply_sds) != "wt"])
 })
 
+
+
+test_that("quick kurtosis working", {
+  cr = corx(mtcars, describe = kurtosis)
+
+  x = unname(unlist(cr$apa[,"kurtosis"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) moments::kurtosis(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick mean working", {
+  cr = corx(mtcars, describe = mean)
+
+  x = unname(unlist(cr$apa[,"mean"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) mean(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick sd working", {
+  cr = corx(mtcars, describe = sd)
+
+  x = unname(unlist(cr$apa[,"sd"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) stats::sd(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick var working", {
+  cr = corx(mtcars, describe = var)
+
+  x = unname(unlist(cr$apa[,"var"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) stats::var(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick median working", {
+  cr = corx(mtcars, describe = median)
+
+  x = unname(unlist(cr$apa[,"median"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) stats::median(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick iqr working", {
+  cr = corx(mtcars, describe = iqr)
+
+  x = unname(unlist(cr$apa[,"iqr"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) stats::IQR(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick skew working", {
+  cr = corx(mtcars, describe = skewness)
+
+  x = unname(unlist(cr$apa[,"skewness"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) moments::skewness(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick kurtosis working", {
+  cr = corx(mtcars, describe = kurtosis)
+
+  x = unname(unlist(cr$apa[,"kurtosis"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) moments::kurtosis(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+test_that("quick kurtosis working", {
+  cr = corx(mtcars, describe = kurtosis)
+
+  x = unname(unlist(cr$apa[,"kurtosis"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) moments::kurtosis(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+})
+
+
+
+test_that("multi-describe working", {
+  cr = corx(mtcars, describe = c(kurtosis, mean))
+
+  x = unname(unlist(cr$apa[,"kurtosis"]))
+  x2 = unname(unlist(cr$apa[,"mean"]))
+  y = digits(unlist(lapply(names(mtcars), function(x) moments::kurtosis(mtcars[,x], na.rm =T)),2))
+  y2 = digits(unlist(lapply(names(mtcars), function(x) mean(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(x, y)
+  testthat::expect_equal(x2, y2)
+})
+
+test_that("error when incorrect name supplied to describe", {
+testthat::expect_error(corx(mtcars, describe = c(mean, sd, krt)))
+
+})
+
+
+test_that("suppling list of functions to describe still works", {
+
+ cr =  corx(mtcars, describe = list(skew = function(x) moments::skewness(x, na.rm = T)))
+ y = digits(unlist(lapply(names(mtcars), function(x) moments::skewness(mtcars[,x], na.rm =T)),2))
+ testthat::expect_equal(unname(cr$apa[,"skew"]), y)
+
+})
+
+
+test_that("assymetical describe working OK", {
+  cr = corx(mtcars, c(mpg,cyl) , c(drat, gear, am), describe = c(k = kurtosis))
+  y = digits(unlist(lapply(c("mpg","cyl"), function(x) moments::kurtosis(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(unname(cr$apa[,"k"]), y)
+})
+
+test_that("assymetical describe inverted", {
+  cr = corx(mtcars,c(drat, gear, am), c(mpg,cyl) , describe = c(k = kurtosis))
+  y = digits(unlist(lapply(c("drat","gear", "am"), function(x) moments::kurtosis(mtcars[,x], na.rm =T)),2))
+
+  testthat::expect_equal(unname(cr$apa[,"k"]), y)
+})
+
+test_that("describe working on iris",{
+
+ cr = corx(iris[,-5], describe = c(test = median))
+ y = digits(unlist(lapply(names(iris)[-5], function(x) stats::median(iris[,x], na.rm =T)),2))
+ testthat::expect_equal(unname(cr$apa[,"test"]), y)
+})
 
