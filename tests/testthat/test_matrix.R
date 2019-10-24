@@ -335,3 +335,44 @@ test_that("describe working on iris",{
  testthat::expect_equal(unname(cr$apa[,"test"]), y)
 })
 
+
+test_that("triangle lower works",{
+
+  cr = corx(mtcars,  grey_nonsig = F, describe = c(test = median),
+            triangle = "lower", round = 8, remove_lead = F, stars = 0,
+            method = "kendall")$apa[10,6]
+
+  y = suppressWarnings(unname(digits(cor.test(mtcars$gear, mtcars$wt, method = "kendall")$estimate, 8)))
+  testthat::expect_equal(cr, y)
+})
+
+test_that("triangle upper works",{
+
+  cr = corx(mtcars,  grey_nonsig = F, describe = c(test = median),
+            triangle = "upper", round = 8, remove_lead = F, stars = 0,
+            method = "spearman")$apa[3,7]
+
+  y = suppressWarnings(unname(digits(cor.test(mtcars$disp, mtcars$qsec, method = "spearman")$estimate, 8)))
+  testthat::expect_equal(cr, y)
+})
+
+# test_that("clipboard no error",{
+#
+#   cr = as.matrix(corx(mtcars)$apa)
+#   diag(cr) = "-"
+#   to_clipboard(cr, allow_non_interactive = TRUE)
+#   from_clip = clipr::read_clip_tbl()
+#
+#   testthat::expect_equal(cr, as.matrix(from_clip))
+# })
+#
+# test_that("clipboard matrix ok",{
+#   cr = as.matrix(mtcars)
+#   to_clipboard(cr, allow_non_interactive = TRUE)
+#   from_clip = clipr::read_clip_tbl()
+#   testthat::expect_equal(cr, as.matrix(from_clip))
+# })
+
+
+
+
