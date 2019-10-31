@@ -1,0 +1,112 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# corx
+
+<!-- badges: start -->
+<img src='man/figures/logo.png' align="right" height="139" />
+<!-- badges: end -->
+
+'corx' aims to be a Swiss Army knife for correlation matrices. Formatting correlation matrices for academic tables can be challenging. 'corx' does all the heavy lifting for you. It runs the correlations, and stores all relevant results in a list. Extract underlying coefficient, pairwise observations and p-values. 'corx' will also calculate and format partial correlation matrices.
+
+## Installation
+
+You can install the released version of corx from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("corx")
+```
+
+## Example
+
+## Basic usage
+
+'corx' is built to be as flexible as possible. The simplest way to use 'corx' is to supply the first argument with a data.frame.
+
+```{r example}
+library(corx)
+x <- corx(mtcars)
+x
+```
+
+## Partial correlations
+
+To calculate correlations controlling for other variables, use the 'z' argument.
+
+```{r}
+x <- corx(mtcars, z = wt, caption = "Correlations controlling for weight")
+x
+```
+
+## Asymmetric correlation matrices
+
+Sometimes you only want the relationships for a subset of variables. Asymmetric matrices are useful in these instances. The arguments 'x' and 'y' can be used to achieve this. 'x' sets row variables, 'y' sets column variables.
+
+```{r}
+x <- corx(mtcars, x = c(mpg, wt))
+x
+```
+
+```{r}
+x <- corx(mtcars,
+          x = c(mpg, wt),
+          y = c(hp, gear, am))
+x
+```
+
+## Changing formatting
+
+Users can further customise the table for publication. For instance, the numbers of significance stars can be changed, the area above the diagonal omitted, and captions and notes added.
+
+```{r}
+x <- corx(mtcars[,1:5],
+          stars = c(0.05, 0.01, 0.001),
+          triangle = "lower",
+          caption = "An example correlation matrix")
+x
+```
+
+## Adding descriptive statistics
+
+We can also add in descriptive statistics easily.
+
+```{r}
+x <- corx(mtcars[,1:5],
+          stars = c(0.05, 0.01, 0.001),
+          triangle = "lower",
+          caption = "An example correlation matrix",
+          describe = c(M = mean, SD = sd, kurtosis))
+x          
+```
+
+To add descriptive columns describe can be set to any combination of the following values: c("mean","sd","median","iqr","var","skewness","kurtosis").
+
+Alternatively, you can pass a list of named functions:
+
+```{r}
+x <- corx(mtcars[,1:8], describe = list(Mean = function(x) mean(x),
+                                        SD = function(x) sd(x)))
+x
+```
+
+
+## Making plots
+
+There are many useful functions for plotting correlation matrices. 'corx' contains a plot function which uses the 'ggcorrplot' package.
+
+```{r, fig.width = 15}
+plot(x)
+```
+

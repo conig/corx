@@ -220,22 +220,25 @@
 <span id="cb7-21"><a href="#cb7-21"></a><span class="co">#&gt; Note. * p &lt; 0.05; ** p &lt; 0.01; *** p &lt; 0.001</span></span></code></pre></div>
 <p>To add descriptive columns describe can be set to any combination of the following values: c(“mean”,“sd”,“median”,“iqr”,“var”,“skewness”,“kurtosis”).</p>
 <p>Alternatively, you can pass a list of named functions:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>x &lt;-<span class="st"> </span><span class="kw"><a href="reference/corx.html">corx</a></span>(mtcars[,<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>], <span class="dt">describe =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">Mean =</span> <span class="cf">function</span>(x) <span class="kw"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(x),</span>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>x &lt;-<span class="st"> </span><span class="kw"><a href="reference/corx.html">corx</a></span>(mtcars[,<span class="dv">1</span><span class="op">:</span><span class="dv">8</span>], <span class="dt">describe =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">Mean =</span> <span class="cf">function</span>(x) <span class="kw"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(x),</span>
 <span id="cb8-2"><a href="#cb8-2"></a>                                        <span class="dt">SD =</span> <span class="cf">function</span>(x) <span class="kw"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span>(x)))</span>
 <span id="cb8-3"><a href="#cb8-3"></a>x</span>
-<span id="cb8-4"><a href="#cb8-4"></a><span class="co">#&gt; corx(data = mtcars[, 1:5], describe = list(Mean = function(x) mean(x), </span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co">#&gt; corx(data = mtcars[, 1:8], describe = list(Mean = function(x) mean(x), </span></span>
 <span id="cb8-5"><a href="#cb8-5"></a><span class="co">#&gt;     SD = function(x) sd(x)))</span></span>
 <span id="cb8-6"><a href="#cb8-6"></a><span class="co">#&gt; </span></span>
-<span id="cb8-7"><a href="#cb8-7"></a><span class="co">#&gt; ------------------------------------------------</span></span>
-<span id="cb8-8"><a href="#cb8-8"></a><span class="co">#&gt;        mpg   cyl  disp    hp  drat   Mean     SD</span></span>
-<span id="cb8-9"><a href="#cb8-9"></a><span class="co">#&gt; ------------------------------------------------</span></span>
-<span id="cb8-10"><a href="#cb8-10"></a><span class="co">#&gt; mpg     -  -.85* -.85* -.78*  .68*  20.09   6.03</span></span>
-<span id="cb8-11"><a href="#cb8-11"></a><span class="co">#&gt; cyl  -.85*    -   .90*  .83* -.70*   6.19   1.79</span></span>
-<span id="cb8-12"><a href="#cb8-12"></a><span class="co">#&gt; disp -.85*  .90*    -   .79* -.71* 230.72 123.94</span></span>
-<span id="cb8-13"><a href="#cb8-13"></a><span class="co">#&gt; hp   -.78*  .83*  .79*    -  -.45* 146.69  68.56</span></span>
-<span id="cb8-14"><a href="#cb8-14"></a><span class="co">#&gt; drat  .68* -.70* -.71* -.45*    -    3.60   0.53</span></span>
-<span id="cb8-15"><a href="#cb8-15"></a><span class="co">#&gt; ------------------------------------------------</span></span>
-<span id="cb8-16"><a href="#cb8-16"></a><span class="co">#&gt; Note. * p &lt; 0.05</span></span></code></pre></div>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co">#&gt; ------------------------------------------------------------------</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co">#&gt;        mpg   cyl  disp    hp  drat    wt  qsec    vs   Mean     SD</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="co">#&gt; ------------------------------------------------------------------</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co">#&gt; mpg     -  -.85* -.85* -.78*  .68* -.87*  .42*  .66*  20.09   6.03</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co">#&gt; cyl  -.85*    -   .90*  .83* -.70*  .78* -.59* -.81*   6.19   1.79</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co">#&gt; disp -.85*  .90*    -   .79* -.71*  .89* -.43* -.71* 230.72 123.94</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="co">#&gt; hp   -.78*  .83*  .79*    -  -.45*  .66* -.71* -.72* 146.69  68.56</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="co">#&gt; drat  .68* -.70* -.71* -.45*    -  -.71*   .09  .44*   3.60   0.53</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="co">#&gt; wt   -.87*  .78*  .89*  .66* -.71*    -   -.17 -.55*   3.22   0.98</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="co">#&gt; qsec  .42* -.59* -.43* -.71*   .09  -.17    -   .74*  17.85   1.79</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="co">#&gt; vs    .66* -.81* -.71* -.72*  .44* -.55*  .74*    -    0.44   0.50</span></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="co">#&gt; ------------------------------------------------------------------</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="co">#&gt; Note. * p &lt; 0.05</span></span></code></pre></div>
 </div>
 <div id="making-plots" class="section level2">
 <h2 class="hasAnchor">
