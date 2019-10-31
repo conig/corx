@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>print.corx — print.corx • corx</title>
+<title>plot_mds — plot_mds • corx</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,8 +42,8 @@
 
 
 
-<meta property="og:title" content="print.corx — print.corx" />
-<meta property="og:description" content="print.corx" />
+<meta property="og:title" content="plot_mds — plot_mds" />
+<meta property="og:description" content="plot the Classical multidimensional scaling of a corx object" />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -113,28 +113,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>print.corx</h1>
-    <small class="dont-index">Source: <a href='https://github.com/JConigrave/corx/blob/master/R/corx.R'><code>R/corx.R</code></a></small>
-    <div class="hidden name"><code>print.corx.Rd</code></div>
+    <h1>plot_mds</h1>
+    <small class="dont-index">Source: <a href='https://github.com/JConigrave/corx/blob/master/R/plot_mds.R'><code>R/plot_mds.R</code></a></small>
+    <div class="hidden name"><code>plot_mds.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>print.corx</p>
+    <p>plot the Classical multidimensional scaling of a corx object</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for corx</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>plot_mds</span>(<span class='no'>corx</span>, <span class='no'>k</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>object</p></td>
+      <th>corx</th>
+      <td><p>the corx object, or a matrix of correlation coefficicents</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>extra arguments</p></td>
+      <th>k</th>
+      <td><p>the number of clusters. If not provided, a prinipal components analysis is performed. k is set to the number of components which explain more than 5% of variance</p></td>
     </tr>
     </table>
 

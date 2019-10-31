@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">corx</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -140,10 +140,10 @@
 <span id="cb3-19"><a href="#cb3-19"></a><span class="co">#&gt; ---------------------------------------------------------------</span></span>
 <span id="cb3-20"><a href="#cb3-20"></a><span class="co">#&gt; Note. * p &lt; 0.05</span></span></code></pre></div>
 </div>
-<div id="assymetic-correlation-matricies" class="section level2">
+<div id="asymmetric-correlation-matrices" class="section level2">
 <h2 class="hasAnchor">
-<a href="#assymetic-correlation-matricies" class="anchor"></a>Assymetic correlation matricies</h2>
-<p>Sometimes you only want the relationships for a subset of variables. Assymetic matrices are useful in these instances. The arguments ‘x’ and ‘y’ can be used to achieve this. ‘x’ sets row variables, ‘y’ sets column variables.</p>
+<a href="#asymmetric-correlation-matrices" class="anchor"></a>Asymmetric correlation matrices</h2>
+<p>Sometimes you only want the relationships for a subset of variables. Asymmetric matrices are useful in these instances. The arguments ‘x’ and ‘y’ can be used to achieve this. ‘x’ sets row variables, ‘y’ sets column variables.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>x &lt;-<span class="st"> </span><span class="kw"><a href="reference/corx.html">corx</a></span>(mtcars, <span class="dt">x =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(mpg, wt))</span>
 <span id="cb4-2"><a href="#cb4-2"></a>x</span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="co">#&gt; corx(data = mtcars, x = c(mpg, wt))</span></span>
@@ -240,7 +240,7 @@
 <div id="making-plots" class="section level2">
 <h2 class="hasAnchor">
 <a href="#making-plots" class="anchor"></a>Making plots</h2>
-<p>There are many useful functions for plotting correlation matricies. ‘corx’ contains a plot function which uses the ‘ggcorrplot’ package.</p>
+<p>There are many useful functions for plotting correlation matrices. ‘corx’ contains a plot function which uses the ‘ggcorrplot’ package.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(x)</span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-8-1.png" width="100%"></p>
 </div>

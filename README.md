@@ -83,12 +83,12 @@ x
 #> Note. * p < 0.05
 ```
 
-## Assymetic correlation matricies
+## Asymmetric correlation matrices
 
 Sometimes you only want the relationships for a subset of variables.
-Assymetic matrices are useful in these instances. The arguments ‘x’ and
-‘y’ can be used to achieve this. ‘x’ sets row variables, ‘y’ sets
-column variables.
+Asymmetric matrices are useful in these instances. The arguments ‘x’ and
+‘y’ can be used to achieve this. ‘x’ sets row variables, ‘y’ sets column
+variables.
 
 ``` r
 x <- corx(mtcars, x = c(mpg, wt))
@@ -203,7 +203,7 @@ x
 
 ## Making plots
 
-There are many useful functions for plotting correlation matricies.
+There are many useful functions for plotting correlation matrices.
 ‘corx’ contains a plot function which uses the ‘ggcorrplot’ package.
 
 ``` r

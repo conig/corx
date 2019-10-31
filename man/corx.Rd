@@ -7,7 +7,7 @@
 corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
   "spearman", "kendall"), stars = c(0.05), round = 2,
   remove_lead = TRUE, triangle = NULL, caption = NULL, note = NULL,
-  describe = FALSE, grey_nonsig = TRUE, ...)
+  describe = FALSE, grey_nonsig = TRUE)
 }
 \arguments{
 \item{data}{A data.frame or matrix}
@@ -35,8 +35,6 @@ corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
 \item{describe}{a list of functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.}
 
 \item{grey_nonsig}{a logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE}
-
-\item{...}{additional arguments}
 }
 \value{
 A list of class 'corx' which includes:
