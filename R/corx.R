@@ -326,16 +326,7 @@ apa_matrix = function(r_matrix,
     }
   }
 
-  get_stars = function(p, stars) {
-    if(is.na(p)) p <- 1
-    n_stars = sum(p < stars)
-    paste(rep("*", n_stars), collapse = "")
-  }
-
-  s_matrix = p_matrix
-  s_matrix[] =  sapply(p_matrix, function(p)
-    get_stars(p, stars))
-
+  s_matrix = star_matrix(p_matrix, stars = stars)
   s_matrix[row_names == col_names] = ""
 
   f_matrix[] = paste0(f_matrix, s_matrix)
@@ -518,6 +509,25 @@ check_classes = function(data, ok_classes, stop_message) {
   }
 }
 
+#' star_matrix
+#'
+#' Replaces p-values with stars
+#' @param m matrix of p-values
+#' @param stars a vector of p-value thresholds to replace with stars
+
+star_matrix = function(m, stars) {
+  get_stars = function(p, stars) {
+    if (is.na(p))
+      p <- 1
+    n_stars = sum(p < stars)
+    paste(rep("*", n_stars), collapse = "")
+  }
+
+  s_matrix = m
+  s_matrix[] =  sapply(m, function(p)
+    get_stars(p, stars = stars))
+  return(s_matrix)
+}
 
 
 

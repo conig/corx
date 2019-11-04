@@ -356,6 +356,25 @@ test_that("triangle upper works",{
   testthat::expect_equal(cr, y)
 })
 
+test_that("star_matrix works",{
+
+  m = matrix(c(0.01,0.05,0.49,0.001, 0.0009, 0.5), ncol = 2)
+  s = corx:::star_matrix(m, stars = c(0.05,0.01,0.001))
+  s2 = corx:::star_matrix(m, stars = c(0.001))
+
+  m = matrix(c("*","","","**","***",""), ncol =2)
+  m2 = matrix(c("","","","","*",""), ncol =2)
+
+  testthat::expect_equal(s, m)
+  testthat::expect_equal(s2, m2)
+
+})
+
+
+
+
+
+
 # test_that("clipboard no error",{
 #
 #   cr = as.matrix(corx(mtcars)$apa)
