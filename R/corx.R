@@ -432,9 +432,10 @@ plot.corx = function(x, ...){
   if(is.null(caption)) caption = ""
   if(!is.null(call$title)) caption = call$title
 
-  elip[['title']] = caption
-  elip[['type']] = tri
-  elip[['corr']] = x$r
+  elip[['title']] = caption # elip is designed
+  elip[['type']] = tri      # To be a call
+  elip[['corr']] = x$r      # I'm setting arguments which will be used in do.call
+  elip[['p.mat']] = x$p     # We include the p.matrix for signifance rules in ggcorrplot
 
   do.call(ggcorrplot::ggcorrplot, elip)
 }

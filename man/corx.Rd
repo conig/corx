@@ -4,10 +4,21 @@
 \alias{corx}
 \title{corx}
 \usage{
-corx(data, x = NULL, y = NULL, z = NULL, method = c("pearson",
-  "spearman", "kendall"), stars = c(0.05), round = 2,
-  remove_lead = TRUE, triangle = NULL, caption = NULL, note = NULL,
-  describe = FALSE, grey_nonsig = TRUE)
+corx(
+  data,
+  x = NULL,
+  y = NULL,
+  z = NULL,
+  method = c("pearson", "spearman", "kendall"),
+  stars = c(0.05),
+  round = 2,
+  remove_lead = TRUE,
+  triangle = NULL,
+  caption = NULL,
+  note = NULL,
+  describe = FALSE,
+  grey_nonsig = TRUE
+)
 }
 \arguments{
 \item{data}{A data.frame or matrix}
