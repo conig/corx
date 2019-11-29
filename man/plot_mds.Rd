@@ -4,12 +4,14 @@
 \alias{plot_mds}
 \title{plot_mds}
 \usage{
-plot_mds(corx, k)
+plot_mds(corx, k = NULL, ...)
 }
 \arguments{
 \item{corx}{the corx object, or a matrix of correlation coefficicents}
 
-\item{k}{the number of clusters. If not provided, a prinipal components analysis is performed. k is set to the number of components which explain more than 5\% of variance}
+\item{k}{the number of clusters.}
+
+\item{...}{additional arguments passed to ggpubr::ggscatter}
 }
 \description{
 plot the Classical multidimensional scaling of a corx object

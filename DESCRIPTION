@@ -25,6 +25,6 @@ Imports:
     moments,
     ggpubr,
     ggplot2
-RoxygenNote: 7.0.0
+RoxygenNote: 7.0.1
 Suggests: 
     testthat
