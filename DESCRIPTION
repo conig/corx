@@ -13,7 +13,7 @@ Description: Create correlation (or partial correlation) matrices. Correlation m
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/JConigrave/corx https://jconigrave.github.io/corx/index.html
+URL: https://github.com/JConigrave/corx
 Imports: 
     ppcor,
     crayon,
@@ -25,6 +25,6 @@ Imports:
     moments,
     ggpubr,
     ggplot2
-RoxygenNote: 7.0.1
+RoxygenNote: 7.0.2
 Suggests: 
     testthat
