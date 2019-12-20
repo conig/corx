@@ -5,7 +5,8 @@
 
 <!-- badges: start -->
 
-<img src='man/figures/logo.png' align="right" height="139" />
+<img src='man/figures/logo.png' align="right" height="139" /> [![Build
+Status](https://travis-ci.com/JConigrave/corx.svg?branch=devel)](https://travis-ci.com/JConigrave/corx)
 <!-- badges: end -->
 
 ‘corx’ aims to be a Swiss Army knife for correlation matrices.
