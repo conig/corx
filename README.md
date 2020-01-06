@@ -248,7 +248,7 @@ First we create the corx object. We remove species as it’s not a numeric
 variable.
 
 ``` r
-cmat <- corx(iris, -Species)
+cmat <- corx(iris, -Species)# remove Species
 cmat
 #> corx(data = iris, x = -Species)
 #> 

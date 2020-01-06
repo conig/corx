@@ -25,7 +25,7 @@ corx(
 
 \item{x}{a vector of rownames. Defaults to all}
 
-\item{y}{a vector of colnames. Defaults to all}
+\item{y}{a vector of colnames. If not supplied, y is set to x.}
 
 \item{z}{a vector of colnames. Control variables to be used in partial correlations - defaults to NULL}
 

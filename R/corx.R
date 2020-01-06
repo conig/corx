@@ -3,7 +3,7 @@
 #' Creates an object of class 'corx'. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
 #' @param data A data.frame or matrix
 #' @param x a vector of rownames. Defaults to all
-#' @param y a vector of colnames. Defaults to all
+#' @param y a vector of colnames. If not supplied, y is set to x.
 #' @param z a vector of colnames. Control variables to be used in partial correlations - defaults to NULL
 #' @param method a string. One of "pearson", "spearman", or "kendall"
 #' @param round a scalar. Number of digits in printing
@@ -53,6 +53,7 @@ corx <-
            note = NULL,
            describe = FALSE,
            grey_nonsig = TRUE) {
+
 
     call = match.call()
     env = environment()

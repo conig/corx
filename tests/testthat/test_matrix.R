@@ -71,7 +71,7 @@ test_that("partial cor OK?", {
 
   # What about asym?
 
-  ob = corx(iris[-5], Sepal.Width, z = "Petal.Width")
+  ob = corx(iris[-5], Sepal.Width, tidyselect::everything(), z = "Petal.Width")
   pob = ppcor::pcor.test(iris$Sepal.Length, iris$Sepal.Width, iris$Petal.Width)
 
   expect_equal(ob$r[1,1], pob$estimate)
