@@ -96,12 +96,12 @@ x <- corx(mtcars, x = c(mpg, wt))
 x
 #> corx(data = mtcars, x = c(mpg, wt))
 #> 
-#> --------------------------------------------------------------------
-#>       mpg   cyl  disp    hp  drat    wt qsec    vs    am  gear  carb
-#> --------------------------------------------------------------------
-#> mpg    -  -.85* -.85* -.78*  .68* -.87* .42*  .66*  .60*  .48* -.55*
-#> wt  -.87*  .78*  .89*  .66* -.71*    -  -.17 -.55* -.69* -.58*  .43*
-#> --------------------------------------------------------------------
+#> ---------------
+#>       mpg    wt
+#> ---------------
+#> mpg    -  -.87*
+#> wt  -.87*    - 
+#> ---------------
 #> Note. * p < 0.05
 ```
 
@@ -244,25 +244,32 @@ displacing fuel and weight are closely related characteristics.
 
 Here’s another example, this time for the iris dataset:
 
+First we create the corx object. We remove species as it’s not a numeric
+variable.
+
 ``` r
-library(dplyr)
+cmat <- corx(iris, -Species)
+cmat
+#> corx(data = iris, x = -Species)
 #> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
+#> --------------------------------------------------------------
+#>              Sepal.Length Sepal.Width Petal.Length Petal.Width
+#> --------------------------------------------------------------
+#> Sepal.Length           -         -.12         .87*        .82*
+#> Sepal.Width          -.12          -         -.43*       -.37*
+#> Petal.Length         .87*       -.43*           -         .96*
+#> Petal.Width          .82*       -.37*         .96*          - 
+#> --------------------------------------------------------------
+#> Note. * p < 0.05
+```
 
-cmat = iris %>%
-  select(-Species) %>%
-  corx()
+Then we can perform and plot multidimentional scaling
 
+``` r
 plot_mds(cmat)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="50%" />
 
 We can see that Petal length and width are much more closely related
 than sepal width and length.

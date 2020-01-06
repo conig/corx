@@ -150,7 +150,7 @@ corx <-
     }
 
     if(length(y) == 0){
-      y = names(data)
+      y = x
     }
 
     if(length(z) == 0){

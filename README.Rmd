@@ -132,13 +132,16 @@ We can see that car's horsepower, number of cylinders, rates of displacing fuel 
 
 Here's another example, this time for the iris dataset:
 
+First we create the corx object. We remove species as it's not a numeric variable.
+
+```{r}
+cmat <- corx(iris, -Species)
+cmat
+```
+
+Then we can perform and plot multidimentional scaling
+
 ```{r out.width = "50%", fig.asp=1}
-library(dplyr)
-
-cmat = iris %>%
-  select(-Species) %>%
-  corx()
-
 plot_mds(cmat)
 ```
 
