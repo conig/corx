@@ -105,9 +105,41 @@ x
 
 ## Making plots
 
+### Correlation matrices
+
 There are many useful functions for plotting correlation matrices. 'corx' contains a plot function which uses the 'ggcorrplot' package.
 
 ```{r, fig.width = 15}
 plot(x)
 ```
 
+### Multidimensional scaling
+
+Multidimensional scaling enables similarities between variables to be converted to 2D distances. Users can thereby visualise how variables cluster together.
+
+```{r out.width = "50%", fig.asp=1}
+plot_mds(x)
+```
+
+We can see that variables cluster together in two separate arcs.
+If we want to highlight this we can request two clusters to be marked.
+
+```{r out.width = "50%", fig.asp=1}
+plot_mds(x, 2)
+```
+
+We can see that car's horsepower, number of cylinders, rates of displacing fuel and weight are closely related characteristics.
+
+Here's another example, this time for the iris dataset:
+
+```{r out.width = "50%", fig.asp=1}
+library(dplyr)
+
+cmat = iris %>%
+  select(-Species) %>%
+  corx()
+
+plot_mds(cmat)
+```
+
+We can see that Petal length and width are much more closely related than sepal width and length.

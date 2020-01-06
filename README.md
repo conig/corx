@@ -207,6 +207,8 @@ x
 
 ## Making plots
 
+### Correlation matrices
+
 There are many useful functions for plotting correlation matrices.
 ‘corx’ contains a plot function which uses the ‘ggcorrplot’ package.
 
@@ -215,3 +217,52 @@ plot(x)
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+
+### Multidimensional scaling
+
+Multidimensional scaling enables similarities between variables to be
+converted to 2D distances. Users can thereby visualise how variables
+cluster together.
+
+``` r
+plot_mds(x)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="50%" />
+
+We can see that variables cluster together in two separate arcs. If we
+want to highlight this we can request two clusters to be marked.
+
+``` r
+plot_mds(x, 2)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" />
+
+We can see that car’s horsepower, number of cylinders, rates of
+displacing fuel and weight are closely related characteristics.
+
+Here’s another example, this time for the iris dataset:
+
+``` r
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+
+cmat = iris %>%
+  select(-Species) %>%
+  corx()
+
+plot_mds(cmat)
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" />
+
+We can see that Petal length and width are much more closely related
+than sepal width and length.
