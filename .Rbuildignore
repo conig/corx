@@ -5,4 +5,5 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-.*travis\.yml$
+^travis\.yml$
+travis
