@@ -7,7 +7,7 @@
 
 <img src='man/figures/logo.png' align="right" height="139" /> [![Build
 Status](https://travis-ci.com/JConigrave/corx.svg?branch=devel)](https://travis-ci.com/JConigrave/corx)
-[![downloads](https://cranlogs.r-pkg.org/badges/corx)](https://cran.r-project.org/package=corx)
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/corx)](https://cran.r-project.org/package=corx)
 <!-- badges: end -->
 
 ‘corx’ aims to be a Swiss Army knife for correlation matrices.
