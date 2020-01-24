@@ -13,6 +13,10 @@ plot_mds = function(corx, k = NULL, ...) {
   dist = data.frame(stats::cmdscale(stats::dist(corx)))
   colnames(dist) = c("x", "y")
 
+  if(!numeric %in% class(k)){
+    stop("k must be a numeric",.call=F)
+  }
+
   if(!is.null(k)){
 
     if(k > nrow(dist)){

@@ -95,7 +95,6 @@ corx <-
     if(length(x) > 0) x <- names(x)
     if(length(y) > 0) y <- names(y)
     if(length(z) > 0) z <- names(z)
-
     # --
 
     check_for_vec = function(names, sym, env){
