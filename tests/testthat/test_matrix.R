@@ -370,7 +370,10 @@ test_that("star_matrix works",{
 
 })
 
-
+test_that("plot_mds can deal with no groups",{
+  out <- plot_mds(corx(mtcars))
+  testthat::expect_true("ggplot" %in% class(out))
+})
 
 
 

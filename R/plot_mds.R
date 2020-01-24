@@ -10,8 +10,6 @@ plot_mds = function(corx, k = NULL, ...) {
   call = match.call()
   if("corx" %in% class(corx)) corx <- stats::coef(corx)
 
-
-
   dist = data.frame(stats::cmdscale(stats::dist(corx)))
   colnames(dist) = c("x", "y")
 
@@ -19,6 +17,7 @@ plot_mds = function(corx, k = NULL, ...) {
   dist$group = factor(stats::kmeans(dist, k)$cluster)
   ellipse = TRUE
   }else{
+    dist$group = 1
     ellipse = FALSE
   }
 
