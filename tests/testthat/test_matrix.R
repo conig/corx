@@ -379,6 +379,13 @@ test_that("k cannot be larger than number of variables",{
   testthat::expect_error(plot_mds(corx(mtcars),100))
 })
 
+test_that(' k = "auto" works',{
+
+  out <- plot_mds(corx(mtcars), k = "auto")
+  testthat::expect_true("ggplot" %in% class(out))
+
+})
+
 
 # test_that("clipboard no error",{
 #

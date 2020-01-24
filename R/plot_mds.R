@@ -13,15 +13,23 @@ plot_mds = function(corx, k = NULL, ...) {
   dist = data.frame(stats::cmdscale(stats::dist(corx)))
   colnames(dist) = c("x", "y")
 
-  if(!numeric %in% class(k)){
-    stop("k must be a numeric",.call=F)
-  }
 
   if(!is.null(k)){
 
-    if(k > nrow(dist)){
+    if(k == "auto"){ # if k = auto, figure out a good value
+      pca = stats::princomp(corx)$sdev
+      cumprop = pca^2 / sum(pca^2)
+      k = as.numeric(length(cumprop[cumprop > .05]))
+    } # ---------------------------------------------------
+
+    if(! any(c("numeric","integer") %in% class(k))) { # check k is now a numeric
+      stop("k must be a numeric", .call = F)
+    } # ---------------------------------------------------
+
+    if(k > nrow(dist)){ # throw error if k is larger that var pool
       stop("k = ",k,". You cannot have more clusters than there are variables (",nrow(dist),").",call. =F)
-    }
+    } # -----------------------------------------------------------
+
 
   dist$group = factor(stats::kmeans(dist, k)$cluster)
   ellipse = TRUE
