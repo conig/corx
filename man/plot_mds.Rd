@@ -9,7 +9,7 @@ plot_mds(corx, k = NULL, ...)
 \arguments{
 \item{corx}{the corx object, or a matrix of correlation coefficicents}
 
-\item{k}{the number of clusters.}
+\item{k}{a numeric, the number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.}
 
 \item{...}{additional arguments passed to ggpubr::ggscatter}
 }
