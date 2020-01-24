@@ -375,7 +375,9 @@ test_that("plot_mds can deal with no groups",{
   testthat::expect_true("ggplot" %in% class(out))
 })
 
-
+test_that("k cannot be larger than number of variables",{
+  testthat::expect_error(plot_mds(corx(mtcars),100))
+})
 
 
 # test_that("clipboard no error",{

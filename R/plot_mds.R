@@ -14,6 +14,11 @@ plot_mds = function(corx, k = NULL, ...) {
   colnames(dist) = c("x", "y")
 
   if(!is.null(k)){
+
+    if(k > nrow(dist)){
+      stop("k = ",k,". You cannot have more clusters than there are variables (",nrow(dist),").",call. =F)
+    }
+
   dist$group = factor(stats::kmeans(dist, k)$cluster)
   ellipse = TRUE
   }else{
