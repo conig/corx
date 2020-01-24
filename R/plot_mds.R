@@ -2,7 +2,7 @@
 #'
 #' plot the Classical multidimensional scaling of a corx object
 #' @param corx the corx object, or a matrix of correlation coefficicents
-#' @param k the number of clusters.
+#' @param k  a numeric, the number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5% of total variance.
 #' @param ... additional arguments passed to ggpubr::ggscatter
 #' @export plot_mds
 
