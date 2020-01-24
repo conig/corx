@@ -23,7 +23,7 @@ plot_mds = function(corx, k = NULL, ...) {
     } # ---------------------------------------------------
 
     if(! any(c("numeric","integer") %in% class(k))) { # check k is now a numeric
-      stop("k must be a numeric", .call = F)
+      stop("k must be a numeric", call. = F)
     } # ---------------------------------------------------
 
     if(k > nrow(dist)){ # throw error if k is larger that var pool
