@@ -8,7 +8,11 @@
 
 plot_mds = function(corx, k = NULL, ...) {
   call = match.call()
-  if("corx" %in% class(corx)) corx <- stats::coef(corx)
+  if("corx" %in% class(corx)){
+    corx <- stats::abs(stats::coef(corx))
+  }else{
+    stop("Can only be used with corx objects")
+  }
 
   dist = data.frame(stats::cmdscale(stats::dist(corx)))
   colnames(dist) = c("x", "y")
