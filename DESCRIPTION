@@ -24,7 +24,8 @@ Imports:
     tidyselect,
     moments,
     ggpubr,
-    ggplot2
+    ggplot2,
+    magrittr
 RoxygenNote: 7.0.2
 Suggests: 
     testthat
