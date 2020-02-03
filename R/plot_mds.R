@@ -14,8 +14,12 @@ plot_mds = function(corx, k = NULL, ...) {
     stop("Can only be used with corx objects")
   }
 
-  dist = data.frame(stats::cmdscale(stats::dist(corx)))
+  cmd = stats::cmdscale(sqrt(1 - corx) * 2, eig = T)
+  dist = data.frame(cmd$points)
   colnames(dist) = c("x", "y")
+
+ # total_var =  sum(cmd$eig[1:2])/sum(cmd$eig) * 100
+#  if(total_var < 70) warning("Two dimentions explains only ", round(total_var,1),"% of variance. MDS might not be appropriate.")
 
   if(!is.null(k)){
 
