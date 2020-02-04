@@ -1,25 +1,37 @@
 #' plot_mds
 #'
 #' plot the Classical multidimensional scaling of a corx object
-#' @param corx the corx object, or a matrix of correlation coefficicents
+#' @param corx the corx object, or a matrix of correlation coefficients
 #' @param k  a numeric, the number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.
+#' @param abs if true (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.
 #' @param ... additional arguments passed to ggpubr::ggscatter
+#' @details plot_mds performs classic multidimensional scaling on a correlation matrix. The correlation matrix is first converted to a distance matrix using the following formulae:
+#' \deqn{dist = \sqrt(2*(1-r))}
+#' These distances are then passed to stats::cmdscale where k = 2. To compute \eqn{latex}{R^2}, distances are calculated from the MDS output and correlated with input distances. This correlation is squared.
+#'  If the value of \eqn{R^2} is less than 70%, a warning will inform users that two-dimensions may not be sufficient to represent item relationships.
+#' @references
+#' Carlson, D.L., 2017. Quantitative methods in archaeology using R. Cambridge University Press.
+#'
 #' @export plot_mds
 
-plot_mds = function(corx, k = NULL, ...) {
+plot_mds = function(corx, k = NULL, abs = T, ...) {
   call = match.call()
   if("corx" %in% class(corx)){
-    corx <- abs(stats::coef(corx))
+    corx <- stats::coef(corx)
   }else{
     stop("Can only be used with corx objects")
   }
 
-  cmd = stats::cmdscale(sqrt(1 - corx) * 2, eig = T)
+  if(abs) corx <- abs(corx)
+  distances =  sqrt(1 - corx) * 2
+  cmd = stats::cmdscale(distances, k = 2, eig = T)
+  r2 = cor(dist(cmd$points), as.dist(distances))^2 * 100
+
   dist = data.frame(cmd$points)
   colnames(dist) = c("x", "y")
 
  # total_var =  sum(cmd$eig[1:2])/sum(cmd$eig) * 100
-#  if(total_var < 70) warning("Two dimentions explains only ", round(total_var,1),"% of variance. MDS might not be appropriate.")
+  if(r2 < 70) warning("Two dimentions explains only ", round(r2,1),"% of variance. MDS might not be appropriate.")
 
   if(!is.null(k)){
 
