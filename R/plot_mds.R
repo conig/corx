@@ -25,7 +25,7 @@ plot_mds = function(corx, k = NULL, abs = T, ...) {
   if(abs) corx <- abs(corx)
   distances =  sqrt(1 - corx) * 2
   cmd = stats::cmdscale(distances, k = 2, eig = T)
-  r2 = cor(dist(cmd$points), as.dist(distances))^2 * 100
+  r2 = stats::cor(dist(cmd$points), stats::as.dist(distances))^2 * 100
 
   dist = data.frame(cmd$points)
   colnames(dist) = c("x", "y")
