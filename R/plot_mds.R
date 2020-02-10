@@ -31,7 +31,7 @@ plot_mds = function(corx, k = NULL, abs = T, ...) {
   colnames(dist) = c("x", "y")
 
  # total_var =  sum(cmd$eig[1:2])/sum(cmd$eig) * 100
-  if(r2 < 70) warning("Two dimentions explains only ", round(r2,1),"% of variance. MDS might not be appropriate.")
+  if(r2 < 70) warning("Two dimensions explains only ", round(r2,1),"% of variance. MDS might not be appropriate.")
 
   if(!is.null(k)){
 
