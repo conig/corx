@@ -1,7 +1,7 @@
 Package: corx
 Type: Package
 Title: Create and Format Correlation Matrices
-Version: 1.0.4
+Version: 1.0.5
 Date: 2020-02-04
 Authors@R: 
     person(given = "James",
@@ -27,6 +27,6 @@ Imports:
     ggplot2,
     magrittr,
     stats
-RoxygenNote: 7.0.2.9000
+RoxygenNote: 7.1.0
 Suggests: 
     testthat

@@ -4,7 +4,7 @@
 \alias{check_classes}
 \title{check_classes}
 \usage{
-check_classes(data, ok_classes, stop_message)
+check_classes(data, ok_classes, stop_message, stop = TRUE)
 }
 \arguments{
 \item{data}{the data object}
@@ -12,6 +12,8 @@ check_classes(data, ok_classes, stop_message)
 \item{ok_classes}{a vector of allowed classes}
 
 \item{stop_message}{a character string provided to users if error triggers.}
+
+\item{stop}{should the variable stop, or create a warning?}
 }
 \description{
 check all classes are as expected

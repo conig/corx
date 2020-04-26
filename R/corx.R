@@ -496,8 +496,9 @@ as.data.frame.corx = function(x,...){
 #' @param data the data object
 #' @param ok_classes a vector of allowed classes
 #' @param stop_message a character string provided to users if error triggers.
+#' @param stop should the variable stop, or create a warning?
 
-check_classes = function(data, ok_classes, stop_message) {
+check_classes = function(data, ok_classes, stop_message, stop = TRUE) {
   classes = lapply(data, class)
   class_ok = classes %in% ok_classes
   bad_cols = names(data)[!class_ok]
@@ -506,7 +507,11 @@ check_classes = function(data, ok_classes, stop_message) {
   script = paste(glue::glue("[{bad_index}] '{bad_cols}' <{bad_classes}>"), collapse = ", ")
 
   if (!all(class_ok)) {
+    if(stop){
     stop(stop_message," ", script, ".", call. = F)
+    }else{
+      warning(stop_message," ", script, ".", call. = F)
+    }
   }
 }
 
