@@ -222,8 +222,8 @@ plot(x)
 ### Multidimensional scaling
 
 Multidimensional scaling enables similarities between variables to be
-converted to 2D distances. Users can thereby visualise how variables
-cluster together.
+converted to 2D distances. This lets us visualise how variables cluster
+together.
 
 ``` r
 plot_mds(x)
@@ -231,8 +231,9 @@ plot_mds(x)
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="50%" />
 
-We can see that variables cluster together in two separate arcs. If we
-want to highlight this we can request two clusters to be marked.
+We can see that variables in mtcars cluster together in two separate
+groups. If we want to highlight this we can request two clusters to be
+marked.
 
 ``` r
 plot_mds(x, 2)
@@ -240,8 +241,17 @@ plot_mds(x, 2)
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" />
 
-We can see that car’s horsepower, number of cylinders, rates of
-displacing fuel and weight are closely related characteristics.
+You can see that miles per gallon, the number of cylinders, the
+displacement rate, and the weight of the car are all closely related.
+
+We could control for the number of cylinders and see how this affects
+relationships.
+
+``` r
+plot_mds(corx(mtcars, z = vs))
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" />
 
 Here’s another example, this time for the iris dataset:
 
@@ -264,13 +274,13 @@ cmat
 #> Note. * p < 0.05
 ```
 
-Then we can perform and plot multidimentional scaling
+Then we can perform multidimensional scaling and plot.
 
 ``` r
 plot_mds(cmat)
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="50%" />
 
 We can see that Petal length and width are much more closely related
 than sepal width and length.

@@ -116,20 +116,26 @@ plot(x)
 
 ### Multidimensional scaling
 
-Multidimensional scaling enables similarities between variables to be converted to 2D distances. Users can thereby visualise how variables cluster together.
+Multidimensional scaling enables similarities between variables to be converted to 2D distances. This lets us visualise how variables cluster together.
 
 ```{r out.width = "50%", fig.asp=1}
 plot_mds(x)
 ```
 
-We can see that variables cluster together in two separate arcs.
+We can see that variables in mtcars cluster together in two separate groups.
 If we want to highlight this we can request two clusters to be marked.
 
 ```{r out.width = "50%", fig.asp=1}
 plot_mds(x, 2)
 ```
 
-We can see that car's horsepower, number of cylinders, rates of displacing fuel and weight are closely related characteristics.
+You can see that miles per gallon, the number of cylinders, the displacement rate, and the weight of the car are all closely related.
+
+We could control for the number of cylinders and see how this affects relationships.
+
+```{r out.width = "50%", fig.asp=1}
+plot_mds(corx(mtcars, z = vs))
+```
 
 Here's another example, this time for the iris dataset:
 
@@ -140,7 +146,7 @@ cmat <- corx(iris, -Species)# remove Species
 cmat
 ```
 
-Then we can perform and plot multidimentional scaling
+Then we can perform multidimensional scaling and plot.
 
 ```{r out.width = "50%", fig.asp=1}
 plot_mds(cmat)

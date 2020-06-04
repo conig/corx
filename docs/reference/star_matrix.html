@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • corx</title>
+<title>star_matrix — star_matrix • corx</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,7 +46,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="star_matrix — star_matrix" />
+<meta property="og:description" content="Replaces p-values with stars" />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -66,7 +67,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -113,108 +114,34 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>star_matrix</h1>
+    <small class="dont-index">Source: <a href='https://github.com/JConigrave/corx/blob/master/R/corx.R'><code>R/corx.R</code></a></small>
+    <div class="hidden name"><code>star_matrix.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Replaces p-values with stars</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>star_matrix</span>(<span class='no'>m</span>, <span class='no'>stars</span>)</pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="apa_matrix.html">apa_matrix()</a></code> </p>
-        </td>
-        <td><p>apa matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="check_classes.html">check_classes()</a></code> </p>
-        </td>
-        <td><p>check_classes</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="corx.html">corx()</a></code> </p>
-        </td>
-        <td><p>corx</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="digits.html">digits()</a></code> </p>
-        </td>
-        <td><p>digits</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_cor.html">get_cor()</a></code> </p>
-        </td>
-        <td><p>get_cor</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="partial_matrix.html">partial_matrix()</a></code> </p>
-        </td>
-        <td><p>partial_matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="par_matrix.html">par_matrix()</a></code> </p>
-        </td>
-        <td><p>par_matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot.corx.html">plot(<i>&lt;corx&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>S3 class corx</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_mds.html">plot_mds()</a></code> </p>
-        </td>
-        <td><p>plot_mds</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="print.corx.html">print(<i>&lt;corx&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>print.corx</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="star_matrix.html">star_matrix()</a></code> </p>
-        </td>
-        <td><p>star_matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="to_clipboard.html">to_clipboard()</a></code> </p>
-        </td>
-        <td><p>to_clipboard</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>m</th>
+      <td><p>matrix of p-values</p></td>
+    </tr>
+    <tr>
+      <th>stars</th>
+      <td><p>a vector of p-value thresholds to replace with stars</p></td>
+    </tr>
     </table>
-  </div>
 
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

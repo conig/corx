@@ -4,7 +4,7 @@
 \alias{plot_mds}
 \title{plot_mds}
 \usage{
-plot_mds(corx, k = NULL, abs = T, ...)
+plot_mds(corx, k = NULL, abs = TRUE, ...)
 }
 \arguments{
 \item{corx}{the corx object, or a matrix of correlation coefficients}
@@ -19,10 +19,12 @@ plot_mds(corx, k = NULL, abs = T, ...)
 plot the Classical multidimensional scaling of a corx object
 }
 \details{
-plot_mds performs classic multidimensional scaling on a correlation matrix. The correlation matrix is first converted to a distance matrix using the following formulae:
+plot_mds performs classic multidimensional scaling on a correlation matrix. The correlation matrix is first converted to a distance matrix using psych::cor2dist.
+This function employs the following formula:
 \deqn{dist = \sqrt(2*(1-r))}
-These distances are then passed to stats::cmdscale where k = 2. To compute \eqn{latex}{R^2}, distances are calculated from the MDS output and correlated with input distances. This correlation is squared.
+These distances are then passed to stats::cmdscale where k = 2. To compute \eqn{latex}{R^2}, distances are predict from the cmdscale output and correlated with input distances. This correlation is squared.
  If the value of \eqn{R^2} is less than 70%, a warning will inform users that two-dimensions may not be sufficient to represent item relationships.
+ The position of variabiles is then plotted with ggplot2. Clusters of items are identified using stats::kmeans. The number of clusters is determined using principal component analysis unless specified.
 }
 \references{
 Carlson, D.L., 2017. Quantitative methods in archaeology using R. Cambridge University Press.
