@@ -3,7 +3,7 @@
 #' plot the Classical multidimensional scaling of a corx object
 #' @param corx the corx object, or a matrix of correlation coefficients
 #' @param k  a numeric, the number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.
-#' @param abs if true (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.
+#' @param abs if TRUE (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.
 #' @param ... additional arguments passed to ggpubr::ggscatter
 #' @details plot_mds performs classic multidimensional scaling on a correlation matrix. The correlation matrix is first converted to a distance matrix using psych::cor2dist.
 #' This function employs the following formula:
@@ -22,13 +22,25 @@ plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
   if("corx" %in% class(corx)){
     corx <- stats::coef(corx)
   }else{
-    stop("Can only be used with corx objects")
+    stop("plot_mds can only be used with corx objects")
   }
+
+  # check for misspecification ----
+
+  if(length(colnames(corx)) != length(rownames(corx))) stop("Different number of rows and columns: only symmetrical correlation matrices will work with plot_mds", call. = FALSE)
+
+  if(!all(colnames(corx) == rownames(corx))){
+    stop("Row names not equal to colnames: only symmetrical correlation matrices will work with plot_mds",call. =FALSE)
+  }
+
+  if(length(colnames(corx)) < 3) stop("At least three variables are needed to perform MDS", call. = FALSE)
+
+  # ----
+
 
   if(abs) corx <- abs(corx)
   distances =  psych::cor2dist(corx)
   cmd = stats::cmdscale(distances, k = 2, eig = TRUE)
-  # - test model appropriateness
 
   new_dists = dist(cmd$points, diag = TRUE, upper = TRUE)
   r2 = (stats::cor(new_dists, stats::as.dist(distances)) ^2) *100
@@ -69,7 +81,7 @@ plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
     ellipse = FALSE
   }
 
-  ggpubr::ggscatter(
+  p <- ggpubr::ggscatter(
     dist,
     x = "x",
     y = "y",
@@ -81,11 +93,10 @@ plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
     color = "black",
     fill = "group",
     show.legend.text = F,
-    font.family = "serif",
     ...
   ) + ggplot2::labs(x = "", y = "") +
-    ggplot2::theme(legend.position = "none",
-                   text = ggplot2::element_text(family = "serif"))
+    ggplot2::theme(legend.position = "none")
+  p
 }
 
 

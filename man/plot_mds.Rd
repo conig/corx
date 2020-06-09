@@ -11,7 +11,7 @@ plot_mds(corx, k = NULL, abs = TRUE, ...)
 
 \item{k}{a numeric, the number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.}
 
-\item{abs}{if true (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.}
+\item{abs}{if TRUE (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.}
 
 \item{...}{additional arguments passed to ggpubr::ggscatter}
 }

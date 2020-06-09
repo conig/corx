@@ -380,30 +380,12 @@ test_that("k cannot be larger than number of variables",{
 })
 
 test_that(' k = "auto" works',{
-
   out <- plot_mds(corx(mtcars), k = "auto")
   testthat::expect_true("ggplot" %in% class(out))
-
 })
 
-
-# test_that("clipboard no error",{
-#
-#   cr = as.matrix(corx(mtcars)$apa)
-#   diag(cr) = "-"
-#   to_clipboard(cr, allow_non_interactive = TRUE)
-#   from_clip = clipr::read_clip_tbl()
-#
-#   testthat::expect_equal(cr, as.matrix(from_clip))
-# })
-#
-# test_that("clipboard matrix ok",{
-#   cr = as.matrix(mtcars)
-#   to_clipboard(cr, allow_non_interactive = TRUE)
-#   from_clip = clipr::read_clip_tbl()
-#   testthat::expect_equal(cr, as.matrix(from_clip))
-# })
-
-
+test_that(' assymetry not allowed in plot_mds',{
+  testthat::expect_error(plot_mds(corx(mtcars, c(mpg), c(cyl,disp)), k = "auto"))
+})
 
 
