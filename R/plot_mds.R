@@ -37,7 +37,6 @@ plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
 
   # ----
 
-
   if(abs) corx <- abs(corx)
   distances =  psych::cor2dist(corx)
   cmd = stats::cmdscale(distances, k = 2, eig = TRUE)
