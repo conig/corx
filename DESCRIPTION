@@ -1,8 +1,8 @@
 Package: corx
 Type: Package
 Title: Create and Format Correlation Matrices
-Version: 1.0.3
-Date: 2019-10-28
+Version: 1.0.6
+Date: 2020-06-19
 Authors@R: 
     person(given = "James",
            family = "Conigrave",
@@ -24,7 +24,9 @@ Imports:
     tidyselect,
     moments,
     ggpubr,
-    ggplot2
-RoxygenNote: 7.0.2
+    ggplot2,
+    magrittr,
+    stats
+RoxygenNote: 7.1.0
 Suggests: 
     testthat

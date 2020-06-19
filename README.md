@@ -7,6 +7,7 @@
 
 <img src='man/figures/logo.png' align="right" height="139" /> [![Build
 Status](https://travis-ci.com/JConigrave/corx.svg?branch=devel)](https://travis-ci.com/JConigrave/corx)
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/corx)](https://cran.r-project.org/package=corx)
 <!-- badges: end -->
 
 ‘corx’ aims to be a Swiss Army knife for correlation matrices.
@@ -96,12 +97,12 @@ x <- corx(mtcars, x = c(mpg, wt))
 x
 #> corx(data = mtcars, x = c(mpg, wt))
 #> 
-#> --------------------------------------------------------------------
-#>       mpg   cyl  disp    hp  drat    wt qsec    vs    am  gear  carb
-#> --------------------------------------------------------------------
-#> mpg    -  -.85* -.85* -.78*  .68* -.87* .42*  .66*  .60*  .48* -.55*
-#> wt  -.87*  .78*  .89*  .66* -.71*    -  -.17 -.55* -.69* -.58*  .43*
-#> --------------------------------------------------------------------
+#> ---------------
+#>       mpg    wt
+#> ---------------
+#> mpg    -  -.87*
+#> wt  -.87*    - 
+#> ---------------
 #> Note. * p < 0.05
 ```
 
@@ -207,6 +208,8 @@ x
 
 ## Making plots
 
+### Correlation matrices
+
 There are many useful functions for plotting correlation matrices.
 ‘corx’ contains a plot function which uses the ‘ggcorrplot’ package.
 
@@ -215,3 +218,69 @@ plot(x)
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+
+### Multidimensional scaling
+
+Multidimensional scaling enables similarities between variables to be
+converted to 2D distances. This lets us visualise how variables cluster
+together.
+
+``` r
+plot_mds(x)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="50%" />
+
+We can see that variables in mtcars cluster together in two separate
+groups. If we want to highlight this we can request two clusters to be
+marked.
+
+``` r
+plot_mds(x, 2)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" />
+
+You can see that miles per gallon, the number of cylinders, the
+displacement rate, and the weight of the car are all closely related.
+
+We could control for the number of cylinders and see how this affects
+relationships.
+
+``` r
+plot_mds(corx(mtcars, z = vs))
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" />
+
+Here’s another example, this time for the iris dataset:
+
+First we create the corx object. We remove species as it’s not a numeric
+variable.
+
+``` r
+cmat <- corx(iris, -Species)# remove Species
+cmat
+#> corx(data = iris, x = -Species)
+#> 
+#> --------------------------------------------------------------
+#>              Sepal.Length Sepal.Width Petal.Length Petal.Width
+#> --------------------------------------------------------------
+#> Sepal.Length           -         -.12         .87*        .82*
+#> Sepal.Width          -.12          -         -.43*       -.37*
+#> Petal.Length         .87*       -.43*           -         .96*
+#> Petal.Width          .82*       -.37*         .96*          - 
+#> --------------------------------------------------------------
+#> Note. * p < 0.05
+```
+
+Then we can perform multidimensional scaling and plot.
+
+``` r
+plot_mds(cmat)
+```
+
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="50%" />
+
+We can see that Petal length and width are much more closely related
+than sepal width and length.

@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <img src='man/figures/logo.png' align="right" height="139" />
 [![Build Status](https://travis-ci.com/JConigrave/corx.svg?branch=devel)](https://travis-ci.com/JConigrave/corx)
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/corx)](https://cran.r-project.org/package=corx)
 <!-- badges: end -->
 
 'corx' aims to be a Swiss Army knife for correlation matrices. Formatting correlation matrices for academic tables can be challenging. 'corx' does all the heavy lifting for you. It runs the correlations, and stores all relevant results in a list. Extract underlying coefficient, pairwise observations and p-values. 'corx' will also calculate and format partial correlation matrices.
@@ -105,9 +106,50 @@ x
 
 ## Making plots
 
+### Correlation matrices
+
 There are many useful functions for plotting correlation matrices. 'corx' contains a plot function which uses the 'ggcorrplot' package.
 
 ```{r, fig.width = 15}
 plot(x)
 ```
 
+### Multidimensional scaling
+
+Multidimensional scaling enables similarities between variables to be converted to 2D distances. This lets us visualise how variables cluster together.
+
+```{r out.width = "50%", fig.asp=1}
+plot_mds(x)
+```
+
+We can see that variables in mtcars cluster together in two separate groups.
+If we want to highlight this we can request two clusters to be marked.
+
+```{r out.width = "50%", fig.asp=1}
+plot_mds(x, 2)
+```
+
+You can see that miles per gallon, the number of cylinders, the displacement rate, and the weight of the car are all closely related.
+
+We could control for the number of cylinders and see how this affects relationships.
+
+```{r out.width = "50%", fig.asp=1}
+plot_mds(corx(mtcars, z = vs))
+```
+
+Here's another example, this time for the iris dataset:
+
+First we create the corx object. We remove species as it's not a numeric variable.
+
+```{r}
+cmat <- corx(iris, -Species)# remove Species
+cmat
+```
+
+Then we can perform multidimensional scaling and plot.
+
+```{r out.width = "50%", fig.asp=1}
+plot_mds(cmat)
+```
+
+We can see that Petal length and width are much more closely related than sepal width and length.

@@ -71,7 +71,7 @@ test_that("partial cor OK?", {
 
   # What about asym?
 
-  ob = corx(iris[-5], Sepal.Width, z = "Petal.Width")
+  ob = corx(iris[-5], Sepal.Width, tidyselect::everything(), z = "Petal.Width")
   pob = ppcor::pcor.test(iris$Sepal.Length, iris$Sepal.Width, iris$Petal.Width)
 
   expect_equal(ob$r[1,1], pob$estimate)
@@ -370,28 +370,22 @@ test_that("star_matrix works",{
 
 })
 
+test_that("plot_mds can deal with no groups",{
+  out <- plot_mds(corx(mtcars))
+  testthat::expect_true("ggplot" %in% class(out))
+})
 
+test_that("k cannot be larger than number of variables",{
+  testthat::expect_error(plot_mds(corx(mtcars),100))
+})
 
+test_that(' k = "auto" works',{
+  out <- plot_mds(corx(mtcars), k = "auto")
+  testthat::expect_true("ggplot" %in% class(out))
+})
 
-
-
-# test_that("clipboard no error",{
-#
-#   cr = as.matrix(corx(mtcars)$apa)
-#   diag(cr) = "-"
-#   to_clipboard(cr, allow_non_interactive = TRUE)
-#   from_clip = clipr::read_clip_tbl()
-#
-#   testthat::expect_equal(cr, as.matrix(from_clip))
-# })
-#
-# test_that("clipboard matrix ok",{
-#   cr = as.matrix(mtcars)
-#   to_clipboard(cr, allow_non_interactive = TRUE)
-#   from_clip = clipr::read_clip_tbl()
-#   testthat::expect_equal(cr, as.matrix(from_clip))
-# })
-
-
+test_that(' assymetry not allowed in plot_mds',{
+  testthat::expect_error(plot_mds(corx(mtcars, c(mpg), c(cyl,disp)), k = "auto"))
+})
 
 
