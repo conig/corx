@@ -1,7 +1,7 @@
 Package: corx
 Type: Package
 Title: Create and Format Correlation Matrices
-Version: 1.0.6
+Version: 1.0.6.1
 Date: 2020-06-19
 Authors@R: 
     person(given = "James",
@@ -13,7 +13,7 @@ Description: Create correlation (or partial correlation) matrices. Correlation m
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/JConigrave/corx
+URL: https://github.com/conig/corx
 Imports: 
     ppcor,
     crayon,
@@ -27,6 +27,6 @@ Imports:
     ggplot2,
     magrittr,
     stats
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     testthat

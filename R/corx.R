@@ -14,6 +14,7 @@
 #' @param note table note
 #' @param describe a list of functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
 #' @param grey_nonsig a logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
+#' @param call_only For debugging, if TRUE only the call is returned
 #' @details 'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
 #' @examples
 #' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
@@ -52,13 +53,14 @@ corx <-
            caption = NULL,
            note = NULL,
            describe = FALSE,
-           grey_nonsig = TRUE) {
+           grey_nonsig = TRUE,
+           call_only = FALSE) {
 
 
     call = match.call()
     env = environment()
     parent_env = sys.frame(sys.parent())
-    #return(list(call = call, env = env, parent_env = parent_env))
+    if(call_only) return(list(call = call, env = env, parent_env = parent_env))
 
     if(nrow(data) < 3){
       stop("Can't calculate p-values with fewer than four rows of data.")
@@ -80,12 +82,15 @@ corx <-
     z = tidyselect::vars_select(colnames(data), {{z}}, .strict = F)
 
     # allow rename within select
-    rename_if_needed = function(data, x){
-      if(any(names(x) != x) & length(x) > 0){
-        rename_vars = x[ names(x) != x]
-        colnames(data)[colnames(data) %in% rename_vars] = names(rename_vars)
+    rename_if_needed = function(data, x) {
+      rename_vars = x[names(x) != x]
+      for (i in seq_along(rename_vars)) {
+        if (names(x)[i] != x[i]) {
+          colnames(data)[colnames(data) == x[i]] = names(rename_vars[rename_vars == x[i]])
+        }
       }
-      return(data)
+
+      data
     }
 
     data = rename_if_needed(data, x)
@@ -96,6 +101,7 @@ corx <-
     if(length(y) > 0) y <- names(y)
     if(length(z) > 0) z <- names(z)
     # --
+
 
     check_for_vec = function(names, sym, env){
 
@@ -128,6 +134,8 @@ corx <-
     y_orig = get_input(call$y)
     z_orig = get_input(call$z)
 
+
+
     to_check = c()
 
     if(length(x) == 0 & length(x_orig) > 0){ # did the user try to get a var and failed
@@ -141,7 +149,6 @@ corx <-
     }
 
     check_names(data, unique(to_check))
-
 
     #check_names(data, c(x, y, z)) # check all names are present
 
@@ -157,17 +164,21 @@ corx <-
       z = NULL
     }
 
-    if(length(z) > 0){ #remove partialed out variable from x and y
+    if(length(z) > 0){ #remove partialled out variable from x and y
       x = x[!x %in% z]
       y = y[!y %in% z]
     }
+
+
 
     if(length(x) == 0 | length(y) == 0) stop("Can't partial out the entirety of x or y")
 
     # check classes are appropriate
     check_classes(data[,unique(c(x,y,z))], c("numeric","integer"), "All classes must be numeric.")
 
+
     method = method[1] # take the first method in case more than one supplied
+
 
     if (length(z) == 0) { # if no partial set
       cors = psych::corr.test(data[, x], data[, y], method = method, adjust = "none") # standard cors
