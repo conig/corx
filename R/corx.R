@@ -511,7 +511,7 @@ as.data.frame.corx = function(x,...){
 
 check_classes = function(data, ok_classes, stop_message, stop = TRUE) {
   classes = lapply(data, class)
-  class_ok = classes %in% ok_classes
+  class_ok = sapply(classes, function(x) any(ok_classes %in% x))
   bad_cols = names(data)[!class_ok]
   bad_index = which(names(data) %in% bad_cols)
   bad_classes = lapply(classes[!class_ok], function(x) paste(abbreviate(x,3), collapse = ","))
