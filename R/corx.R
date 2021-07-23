@@ -38,7 +38,7 @@
 #'  \item{"caption"}{ Object caption}
 #'  \item{"note"}{ Object note}
 #' }
-#' @export corx
+#' @export
 
 corx <-
   function(data,
@@ -66,6 +66,8 @@ corx <-
       stop("Can't calculate p-values with fewer than four rows of data.")
     }
 
+    if(is(data, "matrix")) data <- data.frame(data, check.names = FALSE)
+1
     #logical checks -------
 
     # if (!class(describe) %in% c("list", "logical")) {
