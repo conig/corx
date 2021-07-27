@@ -1,6 +1,6 @@
 #' corx
 #'
-#' Creates an object of class 'corx'. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
+#' Creates a 'corx' object. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
 #' @param data A data.frame or matrix
 #' @param x a vector of rownames. Defaults to all
 #' @param y a vector of colnames. If not supplied, y is set to x.
@@ -8,6 +8,7 @@
 #' @param method a string. One of "pearson", "spearman", or "kendall"
 #' @param round a scalar. Number of digits in printing
 #' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
+#' @param adjust_p What adjustment for multiple tests should be used? One of "none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr". Argument passed to psych::corr.test.
 #' @param remove_lead a logical. if TRUE (the default), leading zeros are removed in summaries
 #' @param triangle one of "lower", "upper" or NULL (the default)
 #' @param caption table caption. Passed to plots
@@ -15,7 +16,7 @@
 #' @param describe a list of functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
 #' @param grey_nonsig a logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
 #' @param call_only For debugging, if TRUE only the call is returned
-#' @details 'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
+#' @details 'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are can be adjusted for multiple comparisons by using the 'adjust_p' argument. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
 #' @examples
 #' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
 #'            z = wt, round = 2, stars = c(0.05),
@@ -46,7 +47,8 @@ corx <-
            y = NULL,
            z = NULL,
            method = c("pearson", "spearman", "kendall"),
-           stars = c(0.05),
+           stars = c(0.05,0.01,0.001),
+           adjust_p = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
            round = 2,
            remove_lead = TRUE,
            triangle = NULL,
@@ -59,6 +61,7 @@ corx <-
 
     call = match.call()
     env = environment()
+
     parent_env = sys.frame(sys.parent())
     if(call_only) return(list(call = call, env = env, parent_env = parent_env))
 
@@ -66,18 +69,7 @@ corx <-
       stop("Can't calculate p-values with fewer than four rows of data.")
     }
 
-    if(is(data, "matrix")) data <- data.frame(data, check.names = FALSE)
-1
-    #logical checks -------
-
-    # if (!class(describe) %in% c("list", "logical")) {
-    #   stop(
-    #     "describe must be supplied a list of functions (with names), or a logical e.g. 'TRUE'",
-    #     call. = F
-    #   )
-    # }
-
-    # select vars and check names ----------------------
+    if(methods::is(data, "matrix")) data <- data.frame(data, check.names = FALSE)
 
     x = tidyselect::vars_select(colnames(data), {{x}}, .strict = F)
     y = tidyselect::vars_select(colnames(data), {{y}}, .strict = F)
@@ -103,7 +95,6 @@ corx <-
     if(length(y) > 0) y <- names(y)
     if(length(z) > 0) z <- names(z)
     # --
-
 
     check_for_vec = function(names, sym, env){
 
@@ -179,36 +170,33 @@ corx <-
     check_classes(data[,unique(c(x,y,z))], c("numeric","integer"), "All classes must be numeric.")
 
 
-    method = method[1] # take the first method in case more than one supplied
+    method   = method[1] # take the first method in case more than one supplied
+    adjust_p = adjust_p[1]
 
-
+      cors = list()
     if (length(z) == 0) { # if no partial set
-      cors = psych::corr.test(data[, x], data[, y], method = method, adjust = "none") # standard cors
-      cors$n = psych::pairwiseCount(data[,x], data[,y])
-
-      r_matrix = as.matrix(cors$r)
-      p_matrix = as.matrix(cors$p)
-      n_matrix = as.matrix(cors$n)
-
-      colnames(r_matrix) = y ;colnames(n_matrix) = y ;colnames(p_matrix) = y # sometimes col/row names get stripped
-      rownames(r_matrix) = x ;rownames(n_matrix) = x ;rownames(p_matrix) = x # so I force them back on
-
-    } else{
-
-      cors = partial_matrix(data, x = x, y = y, method = method, partial = z) # if partial not null use different method
-
-      r_matrix = cors$r
-      p_matrix = cors$p
-      n_matrix = cors$n
-
+      cor_vals = psych::corr.test(data[, x], data[, y], method = method, adjust = adjust_p)
+      cors$r <- as.matrix(cor_vals$r)
+      cors$n <- as.matrix(psych::pairwiseCount(data[,x], data[,y]))
+      cors$p <- as.matrix(cor_vals$p.adj)
+    }else{
+      cor_vals <- psych::partial.r(data, x = unique(c(x, y)),  y = z, method = method)
+      cors$r <- matrix(cor_vals[x, y], nrow = length(x), ncol = length(y))
+      rownames(cors$r) <- x; colnames(cors$r) <- y
+      cors$n <- partial_n_matrix(data, x, y, z)
+      cors$p <- as.matrix(psych::corr.p(cors$r, n = (cors$n - length(z)), adjust = adjust_p)$p)
+  # corr.p can be used for partial correlations when n = n - no of variables partialled out
     }
 
-    pres_matrix = apa_matrix(r_matrix, #get apa matrix
-                                      p_matrix,
-                                      stars,
-                                      round,
-                                      remove_lead,
-                                      triangle)
+      colnames(cors$r) = y ;colnames(cors$n) = y ;colnames(cors$p) = y # sometimes col/row names get stripped
+      rownames(cors$r) = x ;rownames(cors$n) = x ;rownames(cors$p) = x
+
+    pres_matrix = apa_matrix(cors$r, #get apa matrix
+                             cors$p,
+                             stars,
+                             round,
+                             remove_lead,
+                             triangle)
 
     # describe function ----------------------------------------------------
 
@@ -221,16 +209,16 @@ corx <-
                     iqr = function(x) stats::IQR(x, na.rm = T),
                     skewness = function(x) moments::skewness(x, na.rm = T),
                     kurtosis = function(x) moments::kurtosis(x, na.rm =T)
-                    )
+    )
 
     tryCatch({ # allow lists to be sent to tidyselect
-    describe_name = tidyselect::vars_select(names(all_desc), {{describe}}, .strict = F)
+      describe_name = tidyselect::vars_select(names(all_desc), {{describe}}, .strict = F)
     }, error = function(e) assign("describe_name", c(), envir = env)) # assign empty vec if error
 
     if(length(describe_name) > 0){ # if vars were found
 
       if(length(describe_name) != (length(call$describe) -1)){ # check if all vars were found
-      describe_name = tidyselect::vars_select(names(all_desc), {{describe}}, .strict = T)
+        describe_name = tidyselect::vars_select(names(all_desc), {{describe}}, .strict = T)
       }
 
       describe = all_desc[describe_name] # set describe to all_desc
@@ -276,32 +264,55 @@ corx <-
 
     if(is.null(note)){
 
-    note = lapply(seq_along(stars), function(s){
+      note = lapply(seq_along(stars), function(s){
 
-      temp_stars = paste(rep("*",s), collapse = "")
-      paste0(temp_stars, " p < ", stars[s])
-    })
+        temp_stars = paste(rep("*",s), collapse = "")
+        paste0(temp_stars, " p < ", stars[s])
+      })
 
-    note = paste(note, collapse = "; ")
+      note = paste(note, collapse = "; ")
     }
 
     c_matrix = list(
       call = call,
       apa = pres_matrix,
-      r = r_matrix,
-      p = p_matrix,
-      n = n_matrix,
+      r = cors$r,
+      p = cors$p,
+      n = cors$n,
       caption = caption,
       note = note
     )
-    class(c_matrix) = "corx"
-    attr(c_matrix, "grey_nonsig") = grey_nonsig
-    attr(c_matrix, "stars") = stars
-    attr(c_matrix, "round") = round
-    attr(c_matrix, "describe") = describe
+    class(c_matrix) <- "corx"
+    attr(c_matrix, "grey_nonsig") <- grey_nonsig
+    attr(c_matrix, "stars") <- stars
+    attr(c_matrix, "round") <- round
+    attr(c_matrix, "describe") <- describe
 
     return(c_matrix)
   }
+
+#' partial_n_matrix
+#'
+#' Calculate complete observations for a crosstab + a third variable
+#' @param data data.frame or matrix
+#' @param x rownames
+#' @param y colnames
+#' @param z partial variable vector
+
+partial_n_matrix <- function(data, x, y, z){
+
+  mx <- matrix(nrow = length(x), ncol = length(y))
+  rownames(mx) <- x
+  colnames(mx) <- y
+
+  for(row in rownames(mx)){
+    for(col in colnames(mx)){
+      mx[row,col] <- sum(stats::complete.cases(data[,c(row, col, z)]))
+    }
+  }
+
+  as.matrix(mx)
+}
 
 #' apa matrix
 #'
@@ -358,52 +369,52 @@ apa_matrix = function(r_matrix,
 #' @export
 print.corx = function(x,...){
 
-apa = x$apa
+  apa = x$apa
 
-text = utils::capture.output(print(apa, quote = F, right = T))
-width = max(nchar(text))
-header = text[1]
+  text = utils::capture.output(print(apa, quote = F, right = T))
+  width = max(nchar(text))
+  header = text[1]
 
-grey = attr(x, "grey_nonsig")
-star_call = attr(x, "stars")
+  grey = attr(x, "grey_nonsig")
+  star_call = attr(x, "stars")
 
-if(length(star_call) > 0 & grey & identical(attr(x, "describe"), F)){# make nonsig grey
+  if(length(star_call) > 0 & grey & identical(attr(x, "describe"), F)){# make nonsig grey
 
-  if(attr(x, "round") != 0 ){ # if no decimal places change regex
-    patt = "(-)?[0-9]?\\.[0-9]{1,}(?![\\*0-9])" # possible negative, then a possible 0-9 character, then a decimal
-  }else{                                        # then more 0-9 characters (at least one), but not followed by any number of stars!
-    patt = "-?[0-1](?![\\*\\.0-9]{1,})" # different pattern for round = 0 (even though no one will ever use that setting)
+    if(attr(x, "round") != 0 ){ # if no decimal places change regex
+      patt = "(-)?[0-9]?\\.[0-9]{1,}(?![\\*0-9])" # possible negative, then a possible 0-9 character, then a decimal
+    }else{                                        # then more 0-9 characters (at least one), but not followed by any number of stars!
+      patt = "-?[0-1](?![\\*\\.0-9]{1,})" # different pattern for round = 0 (even though no one will ever use that setting)
+    }
+
+    gr = gregexpr(patt,text, perl = T) # get match locations
+    mat = regmatches(text,gr)
+    regmatches(text,gr) = lapply(mat, function(x) crayon::silver(x)) # replace with silver text
   }
 
-  gr = gregexpr(patt,text, perl = T) # get match locations
-  mat = regmatches(text,gr)
-  regmatches(text,gr) = lapply(mat, function(x) crayon::silver(x)) # replace with silver text
-}
+  text = gsub("\\bNA\\b", crayon::red("NA"), text) # make NAs red
+  text = gsub("\\*", crayon::yellow("*"),text) # make stars yelloe
+  text = gsub("\\ - ", crayon::silver(" - "),text) # make dashes silver
 
-text = gsub("\\bNA\\b", crayon::red("NA"), text) # make NAs red
-text = gsub("\\*", crayon::yellow("*"),text) # make stars yelloe
-text = gsub("\\ - ", crayon::silver(" - "),text) # make dashes silver
-
-text = text[-1] # remove header
-bar = paste(rep(crayon::silver("-"), width),collapse = "") # create a bar same length as table
-temp_note = paste("Note.",x$note) # get note ready
+  text = text[-1] # remove header
+  bar = paste(rep(crayon::silver("-"), width),collapse = "") # create a bar same length as table
+  temp_note = paste("Note.",x$note) # get note ready
 
 
 
-final_text = paste(c(
-  crayon::blue(utils::capture.output(x$call)), # call
-  "", # then an empty line
-  x$caption, # table caption
-  bar, # a bar
-  header, # a header
-  bar, # a bar
-  text, # table contents
-  bar, # final bar
-  temp_note, # the note
-  ""
-),
-collapse = "\n") # all separated with line breaks
-cat(final_text)
+  final_text = paste(c(
+    crayon::blue(utils::capture.output(x$call)), # call
+    "", # then an empty line
+    x$caption, # table caption
+    bar, # a bar
+    header, # a header
+    bar, # a bar
+    text, # table contents
+    bar, # final bar
+    temp_note, # the note
+    ""
+  ),
+  collapse = "\n") # all separated with line breaks
+  cat(final_text)
 }
 
 #' @export
@@ -457,7 +468,7 @@ check_names = function (x, vars) {
   vars = unique(vars)
 
   if(!is.matrix(x)){
-  name_data = names(x)
+    name_data = names(x)
   }else{
     name_data = colnames(x)
   }
@@ -521,7 +532,7 @@ check_classes = function(data, ok_classes, stop_message, stop = TRUE) {
 
   if (!all(class_ok)) {
     if(stop){
-    stop(stop_message," ", script, ".", call. = F)
+      stop(stop_message," ", script, ".", call. = F)
     }else{
       warning(stop_message," ", script, ".", call. = F)
     }
@@ -547,11 +558,6 @@ star_matrix = function(m, stars) {
     get_stars(p, stars = stars))
   return(s_matrix)
 }
-
-
-
-
-
 
 
 

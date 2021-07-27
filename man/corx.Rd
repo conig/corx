@@ -10,7 +10,8 @@ corx(
   y = NULL,
   z = NULL,
   method = c("pearson", "spearman", "kendall"),
-  stars = c(0.05),
+  stars = c(0.05, 0.01, 0.001),
+  adjust_p = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
   round = 2,
   remove_lead = TRUE,
   triangle = NULL,
@@ -33,6 +34,8 @@ corx(
 \item{method}{a string. One of "pearson", "spearman", or "kendall"}
 
 \item{stars}{a numeric vector. This argument defines cut-offs for p-value stars.}
+
+\item{adjust_p}{What adjustment for multiple tests should be used? One of "none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr". Argument passed to psych::corr.test.}
 
 \item{round}{a scalar. Number of digits in printing}
 
@@ -63,10 +66,10 @@ A list of class 'corx' which includes:
 }
 }
 \description{
-Creates an object of class 'corx'. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
+Creates a 'corx' object. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
 }
 \details{
-'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
+'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are can be adjusted for multiple comparisons by using the 'adjust' argument. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
 }
 \examples{
 cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),

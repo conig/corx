@@ -26,7 +26,8 @@ Imports:
     ggpubr,
     ggplot2,
     magrittr,
-    stats
+    stats,
+    methods
 RoxygenNote: 7.1.1
 Suggests: 
     papaja,
