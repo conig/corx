@@ -208,7 +208,8 @@ corx <-
                     median = function(x) stats::median(x, na.rm = T),
                     iqr = function(x) stats::IQR(x, na.rm = T),
                     skewness = function(x) moments::skewness(x, na.rm = T),
-                    kurtosis = function(x) moments::kurtosis(x, na.rm =T)
+                    kurtosis = function(x) moments::kurtosis(x, na.rm =T),
+                    n = function(x) digits(length(na.omit(x)),0)
     )
 
     tryCatch({ # allow lists to be sent to tidyselect
@@ -242,10 +243,17 @@ corx <-
       pres_matrix = data.frame(pres_matrix)
 
       for (i in seq_along(describe)) { # then apply describe function to data
+        safe_round <- function(x, round){
+          if(is(x, "numeric")){
+            return(digits(x, round))
+          }
+          x
+        }
+
         pres_matrix[[names(describe)[i]]] =
           unlist(lapply(seq_along(x), function(var) {
             val = describe[[i]](data[, x[[var]]])
-            digits(val, round)
+            safe_round(val, round)
           }))
       }
       pres_matrix = as.matrix(pres_matrix)
