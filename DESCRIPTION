@@ -1,8 +1,8 @@
 Package: corx
 Type: Package
 Title: Create and Format Correlation Matrices
-Version: 1.0.6.5
-Date: 2021-05-07
+Version: 1.0.6.6
+Date: 2022-03-29
 Authors@R: 
     person(given = "James",
            family = "Conigrave",
@@ -15,7 +15,6 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/conig/corx
 Imports: 
-    ppcor,
     crayon,
     ggcorrplot,
     glue,
@@ -27,8 +26,9 @@ Imports:
     ggplot2,
     magrittr,
     stats,
-    methods
-RoxygenNote: 7.1.1
+    methods,
+    ppcor
+RoxygenNote: 7.1.2
 Suggests: 
     papaja,
     testthat

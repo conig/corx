@@ -209,7 +209,7 @@ corx <-
                     iqr = function(x) stats::IQR(x, na.rm = T),
                     skewness = function(x) moments::skewness(x, na.rm = T),
                     kurtosis = function(x) moments::kurtosis(x, na.rm =T),
-                    n = function(x) digits(length(na.omit(x)),0)
+                    n = function(x) digits(length(stats::na.omit(x)),0)
     )
 
     tryCatch({ # allow lists to be sent to tidyselect
@@ -244,7 +244,7 @@ corx <-
 
       for (i in seq_along(describe)) { # then apply describe function to data
         safe_round <- function(x, round){
-          if(is(x, "numeric")){
+          if(methods::is(x, "numeric")){
             return(digits(x, round))
           }
           x

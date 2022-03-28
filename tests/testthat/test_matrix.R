@@ -1,4 +1,4 @@
-
+library(corx)
 corx_ob = corx(mtcars)
 corx_ob.sp = corx(mtcars, method = "spearman")
 corx_ob.kn = corx(mtcars, method = "kendall")
@@ -22,10 +22,9 @@ test_that("R matrix identical (spearman)", {
   expect_equal(corx_ob.sp$r, cor_ob.sp)
 })
 
-# disabled as this minor discrepancy is due to psych::corr.test and is being fixed
-# test_that("R matrix identical (kendall)", {
-#   expect_equal(corx_ob.kn$r, cor_ob.kn)
-# })
+test_that("R matrix identical (kendall)", {
+  expect_equal(corx_ob.kn$r, cor_ob.kn)
+})
 
 test_that("p-values identical (pearson", {
   expect_equal(corx_mpg_cyl.p, cortest_mpg_cyl.p)
@@ -36,6 +35,13 @@ test_that("p-values identical (spearman", {
   obs_p = suppressWarnings(cor.test(mtcars$mpg, mtcars$cyl, method = "spearman")$p.value)
   expect_equal(corx_p, obs_p)
 })
+
+# test_that("p-values identical (kendall)", {
+#   corx_p = corx_ob.kn$p[1,2]
+#   obs_p = suppressWarnings(cor.test(mtcars$mpg, mtcars$cyl, method = "kendall")$p.value)
+#   expect_equal(corx_p, obs_p)
+# })
+
 
 test_that("Weird names are working", {
   temp_dat = mtcars

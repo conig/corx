@@ -69,7 +69,7 @@ A list of class 'corx' which includes:
 Creates a 'corx' object. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
 }
 \details{
-'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are can be adjusted for multiple comparisons by using the 'adjust' argument. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
+'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are can be adjusted for multiple comparisons by using the 'adjust_p' argument. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
 }
 \examples{
 cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
