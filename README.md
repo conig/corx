@@ -9,6 +9,7 @@
 
 [![downloads](https://cranlogs.r-pkg.org/badges/grand-total/corx)](https://cran.r-project.org/package=corx)
 [![R-CMD-check](https://github.com/conig/corx/workflows/R-CMD-check/badge.svg)](https://github.com/conig/corx/actions)
+[![R-CMD-check](https://github.com/conig/corx/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/conig/corx/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 ‘corx’ aims to be a Swiss Army knife for correlation matrices.
