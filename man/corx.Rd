@@ -10,7 +10,8 @@ corx(
   y = NULL,
   z = NULL,
   method = c("pearson", "spearman", "kendall"),
-  stars = c(0.05),
+  stars = c(0.05, 0.01, 0.001),
+  p_adjust = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
   round = 2,
   remove_lead = TRUE,
   triangle = NULL,
@@ -28,11 +29,13 @@ corx(
 
 \item{y}{a vector of colnames. If not supplied, y is set to x.}
 
-\item{z}{a vector of colnames. Control variables to be used in partial correlations - defaults to NULL}
+\item{z}{a vector of variable names. Control variables to be used in partial correlations - defaults to NULL}
 
 \item{method}{a string. One of "pearson", "spearman", or "kendall"}
 
 \item{stars}{a numeric vector. This argument defines cut-offs for p-value stars.}
+
+\item{p_adjust}{What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"}
 
 \item{round}{a scalar. Number of digits in printing}
 
@@ -53,21 +56,39 @@ corx(
 \value{
 A list of class 'corx' which includes:
 \itemize{
- \item{"call"}{ The call}
+ \item{"call"}{ The call which if evaluated reproduces the object}
  \item{"apa"}{ An 'APA' formatted correlation matrix with significance stars}
  \item{"r"}{ Raw correlation coefficients}
- \item{"p"}{ Raw p-values}
+ \item{"p"}{ p-values}
  \item{"n"}{ Pairwise observations}
  \item{"caption"}{ Object caption}
  \item{"note"}{ Object note}
 }
 }
 \description{
-Creates an object of class 'corx'. This function calculates correlation matrices. It stores effect sizes, p-values, the number of pairwise observations, and a formatted correlation matrix in a list. The argument 'z' allows for control variables to be assigned. If z does not equal NULL, partial correlations are performed. Methods are exported for the generic functions 'print', 'plot', 'summary', 'data.frame' and, 'coef'.
+Calculates correlations matrices. Relevant values are stored in a list with methods for easy retrieval and formatting in publication ready tables.
 }
 \details{
-'corx' constructs intercorrelation matrices using 'psych::corr.test'. P-values attained are not adjusted for multiple comparisons. The argument z can be used to specify control variables. If control variables are specified, partial correlations are calculated using 'ppcor::ppcor.test'. Asymmetrical correlation matrices can be constructed using the arguments 'x' and 'y'. The arguments 'x', 'y', and 'z' are powered by 'tidyselect::vars_select'.
+Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
 }
+\section{Partial correlations}{
+
+
+Supplying the argument z will call ppcor::pcor.test the correlation pair are supplied to arguments x and y. The vector of z given to corx is passed to to argument z in pcor.test.
+}
+
+\section{Missing data}{
+
+
+Observations containing missing data required to complete a correlation or partial correlation are automatically removed.
+}
+
+\section{P-adjust}{
+
+
+P-values attained can be adjusted for multiple comparisons by using the 'adjust_p' argument. This calls the function stats::p.adjust. When a matrix is symmetrical, p-values are only adjusted for unique comparisons. When a correlation matrix is not symmetrical, all comparisons are assumed to be unique.
+}
+
 \examples{
 cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
            z = wt, round = 2, stars = c(0.05),
