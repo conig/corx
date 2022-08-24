@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 [![R-CMD-check](https://github.com/conig/corx/workflows/R-CMD-check/badge.svg)](https://github.com/conig/corx/actions)
 <!-- badges: end -->
 
-'corx' aims to be a Swiss Army knife for correlation matrices. Formatting correlation matrices for academic tables can be challenging. 'corx' does all the heavy lifting for you. It runs the correlations, and stores all relevant results in a list. Extract underlying coefficient, pairwise observations and p-values. 'corx' will also calculate and format partial correlation matrices.
+'corx' aims to be a Swiss Army knife for correlation matrices. Formatting correlation matrices for academic tables can be challenging. 'corx' does all the heavy lifting for you. It runs the correlations, and stores all relevant results in a list. Results can be formatted into data.frames which can then easily be rendered into tables in a variety of formats.
 
 ## Installation
 
@@ -32,11 +32,19 @@ You can install the released version of corx from [CRAN](https://CRAN.R-project.
 install.packages("corx")
 ```
 
+To try features in development, you can install corx from github
+
+```r
+remotes::install_github("conig/corx@devel")
+```
+
+
+
 ## Example
 
 ## Basic usage
 
-'corx' is built to be as flexible as possible. The simplest way to use 'corx' is to supply the first argument with a data.frame.
+The simplest way to use corx is to supply it with a data.frame, which houses numeric variables.
 
 ```{r example}
 library(corx)
@@ -75,7 +83,7 @@ Users can further customise the table for publication. For instance, the numbers
 
 ```{r}
 x <- corx(mtcars[,1:5],
-          stars = c(0.05, 0.01, 0.001),
+          stars = c(0.05),
           triangle = "lower",
           caption = "An example correlation matrix")
 x
@@ -104,6 +112,14 @@ x <- corx(mtcars[,1:8], describe = list(Mean = function(x) mean(x),
 x
 ```
 
+## Making tables
+
+Corx objects can be passed directly to papaja::apa_table(), or knitr::kable().
+
+```{r}
+corx(mtcars[, 1:5], triangle = "lower", describe = c(mean, sd)) |>
+  knitr::kable(caption = "My correlation matrix")
+```
 
 ## Making plots
 
@@ -131,26 +147,3 @@ plot_mds(x, 2)
 ```
 
 You can see that miles per gallon, the number of cylinders, the displacement rate, and the weight of the car are all closely related.
-
-We could control for the number of cylinders and see how this affects relationships.
-
-```{r out.width = "50%", fig.asp=1}
-plot_mds(corx(mtcars, z = vs))
-```
-
-Here's another example, this time for the iris dataset:
-
-First we create the corx object. We remove species as it's not a numeric variable.
-
-```{r}
-cmat <- corx(iris, -Species)# remove Species
-cmat
-```
-
-Then we can perform multidimensional scaling and plot.
-
-```{r out.width = "50%", fig.asp=1}
-plot_mds(cmat)
-```
-
-We can see that Petal length and width are much more closely related than sepal width and length.

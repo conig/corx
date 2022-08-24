@@ -1,8 +1,8 @@
 Package: corx
 Type: Package
 Title: Create and Format Correlation Matrices
-Version: 1.0.6.6
-Date: 2022-03-29
+Version: 1.0.7.0
+Date: 2022-08-16
 Authors@R: 
     person(given = "James",
            family = "Conigrave",
@@ -18,17 +18,16 @@ Imports:
     crayon,
     ggcorrplot,
     glue,
-    psych,
     clipr,
     tidyselect,
     moments,
     ggpubr,
     ggplot2,
-    magrittr,
     stats,
     methods,
     ppcor
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Suggests: 
     papaja,
+    psych,
     testthat

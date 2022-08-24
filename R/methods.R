@@ -6,7 +6,12 @@
 
 apa_table.corx <- function(corx, ...){
 
-  papaja::apa_table(corx$apa, ...)
+  args <- list(...)
+  args$x <- corx$apa
+  if(is.null(args$caption)) args$caption <- corx$caption
+  if(is.null(args$note)) args$note <- corx$note
+
+  do.call(papaja::apa_table, args)
 
 }
 

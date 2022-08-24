@@ -14,9 +14,9 @@
 ‘corx’ aims to be a Swiss Army knife for correlation matrices.
 Formatting correlation matrices for academic tables can be challenging.
 ‘corx’ does all the heavy lifting for you. It runs the correlations, and
-stores all relevant results in a list. Extract underlying coefficient,
-pairwise observations and p-values. ‘corx’ will also calculate and
-format partial correlation matrices.
+stores all relevant results in a list. Results can be formatted into
+data.frames which can then easily be rendered into tables in a variety
+of formats.
 
 ## Installation
 
@@ -27,12 +27,18 @@ You can install the released version of corx from
 install.packages("corx")
 ```
 
+To try features in development, you can install corx from github
+
+``` r
+remotes::install_github("conig/corx@devel")
+```
+
 ## Example
 
 ## Basic usage
 
-‘corx’ is built to be as flexible as possible. The simplest way to use
-‘corx’ is to supply the first argument with a data.frame.
+The simplest way to use corx is to supply it with a data.frame, which
+houses numeric variables.
 
 ``` r
 library(corx)
@@ -143,24 +149,24 @@ diagonal omitted, and captions and notes added.
 
 ``` r
 x <- corx(mtcars[,1:5],
-          stars = c(0.05, 0.01, 0.001),
+          stars = c(0.05),
           triangle = "lower",
           caption = "An example correlation matrix")
 x
-#> corx(data = mtcars[, 1:5], stars = c(0.05, 0.01, 0.001), triangle = "lower", 
+#> corx(data = mtcars[, 1:5], stars = c(0.05), triangle = "lower", 
 #>     caption = "An example correlation matrix")
 #> 
 #> An example correlation matrix
-#> --------------------------------------
-#>               1       2       3      4
-#> --------------------------------------
-#> 1. mpg       -                        
-#> 2. cyl  -.85***      -                
-#> 3. disp -.85***  .90***      -        
-#> 4. hp   -.78***  .83***  .79***     - 
-#> 5. drat  .68*** -.70*** -.71*** -.45**
-#> --------------------------------------
-#> Note. * p < 0.05; ** p < 0.01; *** p < 0.001
+#> -------------------------------
+#>             1     2     3     4
+#> -------------------------------
+#> 1. mpg     -                   
+#> 2. cyl  -.85*    -             
+#> 3. disp -.85*  .90*    -       
+#> 4. hp   -.78*  .83*  .79*    - 
+#> 5. drat  .68* -.70* -.71* -.45*
+#> -------------------------------
+#> Note. * p < 0.05
 ```
 
 ## Adding descriptive statistics
@@ -228,6 +234,26 @@ x
 #> Note. * p < 0.05; ** p < 0.01; *** p < 0.001
 ```
 
+## Making tables
+
+Corx objects can be passed directly to papaja::apa_table(), or
+knitr::kable().
+
+``` r
+corx(mtcars[, 1:5], triangle = "lower", describe = c(mean, sd)) |>
+  knitr::kable(caption = "My correlation matrix")
+```
+
+|          | 1          | 2          | 3          | 4        | mean   | sd     |
+|:---------|:-----------|:-----------|:-----------|:---------|:-------|:-------|
+| 1\. mpg  | \-         |            |            |          | 20.09  | 6.03   |
+| 2\. cyl  | -.85\*\*\* | \-         |            |          | 6.19   | 1.79   |
+| 3\. disp | -.85\*\*\* | .90\*\*\*  | \-         |          | 230.72 | 123.94 |
+| 4\. hp   | -.78\*\*\* | .83\*\*\*  | .79\*\*\*  | \-       | 146.69 | 68.56  |
+| 5\. drat | .68\*\*\*  | -.70\*\*\* | -.71\*\*\* | -.45\*\* | 3.60   | 0.53   |
+
+My correlation matrix
+
 ## Making plots
 
 ### Correlation matrices
@@ -239,7 +265,7 @@ There are many useful functions for plotting correlation matrices.
 plot(x)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
 ### Multidimensional scaling
 
@@ -251,7 +277,7 @@ together.
 plot_mds(x)
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" />
 
 We can see that variables in mtcars cluster together in two separate
 groups. If we want to highlight this we can request two clusters to be
@@ -261,48 +287,7 @@ marked.
 plot_mds(x, 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" />
 
 You can see that miles per gallon, the number of cylinders, the
 displacement rate, and the weight of the car are all closely related.
-
-We could control for the number of cylinders and see how this affects
-relationships.
-
-``` r
-plot_mds(corx(mtcars, z = vs))
-```
-
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="50%" />
-
-Here’s another example, this time for the iris dataset:
-
-First we create the corx object. We remove species as it’s not a numeric
-variable.
-
-``` r
-cmat <- corx(iris, -Species)# remove Species
-cmat
-#> corx(data = iris, x = -Species)
-#> 
-#> --------------------------------------------------------------
-#>              Sepal.Length Sepal.Width Petal.Length Petal.Width
-#> --------------------------------------------------------------
-#> Sepal.Length           -         -.12       .87***      .82***
-#> Sepal.Width          -.12          -       -.43***     -.37***
-#> Petal.Length       .87***     -.43***           -       .96***
-#> Petal.Width        .82***     -.37***       .96***          - 
-#> --------------------------------------------------------------
-#> Note. * p < 0.05; ** p < 0.01; *** p < 0.001
-```
-
-Then we can perform multidimensional scaling and plot.
-
-``` r
-plot_mds(cmat)
-```
-
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="50%" />
-
-We can see that Petal length and width are much more closely related
-than sepal width and length.

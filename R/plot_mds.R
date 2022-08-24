@@ -19,7 +19,7 @@
 
 plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
   call = match.call()
-  if("corx" %in% class(corx)){
+  if(methods::is(corx, "corx")){
     corx <- stats::coef(corx)
   }else{
     stop("plot_mds can only be used with corx objects")

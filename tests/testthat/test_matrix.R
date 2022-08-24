@@ -5,8 +5,6 @@ corx_ob.kn = corx(mtcars, method = "kendall")
 
 corx_mpg_cyl.p = corx_ob$p[1,2]
 
-
-
 cor_ob = cor(mtcars)
 cor_ob.sp = cor(mtcars, method = "spearman")
 cor_ob.kn = cor(mtcars, method = "kendall")
@@ -36,11 +34,11 @@ test_that("p-values identical (spearman", {
   expect_equal(corx_p, obs_p)
 })
 
-# test_that("p-values identical (kendall)", {
-#   corx_p = corx_ob.kn$p[1,2]
-#   obs_p = suppressWarnings(cor.test(mtcars$mpg, mtcars$cyl, method = "kendall")$p.value)
-#   expect_equal(corx_p, obs_p)
-# })
+test_that("p-values identical (kendall)", {
+  corx_p = corx_ob.kn$p[1,2]
+  obs_p = suppressWarnings(cor.test(mtcars$mpg, mtcars$cyl, method = "kendall")$p.value)
+  expect_equal(corx_p, obs_p)
+})
 
 
 test_that("Weird names are working", {
@@ -51,9 +49,9 @@ test_that("Weird names are working", {
 })
 
 test_that("Rename working", {
-  temp_dat = mtcars
-  names(temp_dat)[1] = "mpee gee"
-  temp_corx = corx(temp_dat, c(mpg = "mpee gee"))
+  temp_dat <- mtcars
+  names(temp_dat)[1] <- "mpee gee"
+  temp_corx <- corx(temp_dat, c(mpg = "mpee gee"))
   expect_equal(temp_corx$apa, corx(mtcars, mpg)$apa)
 })
 
@@ -390,7 +388,7 @@ test_that(' assymetry not allowed in plot_mds',{
 
 test_that("adjust works (non partial)", {
   cr1 <- corx(mtcars)
-  cr2 <- corx(mtcars, adjust_p = "holm")
+  cr2 <- corx(mtcars, p_adjust = "holm")
 
   testthat::expect_true(!identical(cr1$p, cr2$p))
 
@@ -398,8 +396,64 @@ test_that("adjust works (non partial)", {
 
 test_that("adjust works (partial)", {
   cr1 <- corx(mtcars, z = wt)
-  cr2 <- corx(mtcars, z = wt, adjust_p = "holm")
+  cr2 <- corx(mtcars, z = wt, p_adjust = "holm")
 
   testthat::expect_true(!identical(cr1$p, cr2$p))
 
+})
+
+test_that("adjust_p_agree_psych.symm",  {
+
+p1 <- psych::corr.test(mtcars, adjust = "none")
+p2 <- psych::corr.test(mtcars, adjust = "holm")
+
+adj <- adjust_pmat(p1$p, "holm")
+
+testthat::expect_equal(p2$p.adj, adj[upper.tri(adj)])
+
+})
+
+test_that("adjust_p_agree_psych.notsymm",  {
+
+p1 <- psych::corr.test(mtcars[1:4], mtcars[6:9], adjust = "none")
+p2 <- psych::corr.test(mtcars[1:4], mtcars[6:9], adjust = "holm")
+
+adj <- adjust_pmat(p1$p, "holm")
+
+testthat::expect_equal(p2$p.adj, adj)
+
+})
+
+test_that("p_adjust does something",{
+  c1 <- corx::corx(mtcars[,1:5], method = "spearman")$p
+  c2 <- corx::corx(mtcars[,1:5], method = "spearman", p_adjust = "holm")$p
+  testthat::expect_false(identical(c1,c2))
+})
+
+test_that("p_adjust manual checks OK (symm) [1]",{
+c1 <- corx::corx(mtcars[,1:5], method = "kendall", p_adjust = "none")
+c2 <- corx::corx(mtcars[,1:5], method = "kendall", p_adjust = "bonferroni")
+n_unique.p <- length(c1$p[lower.tri(c1$p)])
+testthat::expect_equal(c2$p[1,3], (c1$p[1,3] * n_unique.p))
+})
+
+test_that("p_adjust manual checks OK (symm) [2]",{
+c1 <- corx::corx(mtcars, p_adjust = "none")
+c2 <- corx::corx(mtcars, p_adjust = "bonferroni")
+n_unique.p <- length(c1$p[lower.tri(c1$p)])
+testthat::expect_equal(c2$p[5,2], (c1$p[5,2] * n_unique.p))
+})
+
+test_that("p_adjust manual checks OK (!symm) [1]",{
+c1 <- corx::corx(mtcars, x = c("mpg", "cyl"), y = c("drat", "wt"), method = "kendall", p_adjust = "none")
+c2 <- corx::corx(mtcars, x = c("mpg", "cyl"), y = c("drat", "wt"), method = "kendall", p_adjust = "bonferroni")
+n_unique.p <- length(c1$p)
+testthat::expect_equal(c2$p[1,2], (c1$p[1,2] * n_unique.p))
+})
+
+test_that("p_adjust manual checks OK (!symm) [2]",{
+c1 <- corx::corx(mtcars, x = c("mpg", "cyl","hp"), y = c("drat", "wt"), method = "kendall", p_adjust = "none")
+c2 <- corx::corx(mtcars, x = c("mpg", "cyl","hp"), y = c("drat", "wt"), method = "kendall", p_adjust = "bonferroni")
+n_unique.p <- length(c1$p)
+testthat::expect_equal(c2$p[3,2], (c1$p[3,2] * n_unique.p))
 })
