@@ -7,16 +7,16 @@
 plot_mds(corx, k = NULL, abs = TRUE, ...)
 }
 \arguments{
-\item{corx}{the corx object, or a matrix of correlation coefficients}
+\item{corx}{corx object}
 
-\item{k}{a numeric, the number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.}
+\item{k}{numeric. The number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.}
 
-\item{abs}{if TRUE (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.}
+\item{abs}{logical.  If TRUE (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.}
 
 \item{...}{additional arguments passed to ggpubr::ggscatter}
 }
 \description{
-plot the Classical multidimensional scaling of a corx object
+Perform multidimensional scaling of a corx object and plot results
 }
 \details{
 plot_mds performs classic multidimensional scaling on a correlation matrix. The correlation matrix is first converted to a distance matrix using psych::cor2dist.

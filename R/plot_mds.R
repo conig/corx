@@ -1,9 +1,9 @@
 #' plot_mds
 #'
-#' plot the Classical multidimensional scaling of a corx object
-#' @param corx the corx object, or a matrix of correlation coefficients
-#' @param k  a numeric, the number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.
-#' @param abs if TRUE (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.
+#' Perform multidimensional scaling of a corx object and plot results
+#' @param corx corx object
+#' @param k  numeric. The number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.
+#' @param abs logical.  If TRUE (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.
 #' @param ... additional arguments passed to ggpubr::ggscatter
 #' @details plot_mds performs classic multidimensional scaling on a correlation matrix. The correlation matrix is first converted to a distance matrix using psych::cor2dist.
 #' This function employs the following formula:

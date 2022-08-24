@@ -9,7 +9,7 @@ to_table(corx, include_p = FALSE)
 \arguments{
 \item{corx}{a corx object}
 
-\item{include_p}{a bool. should p-values be included?}
+\item{include_p}{logical. should p-values be included?}
 }
 \description{
 Tabulate correlation matrices

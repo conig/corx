@@ -2,27 +2,27 @@
 #'
 #' Calculates correlations matrices. Relevant values are stored in a list with methods for easy retrieval and formatting in publication ready tables.
 #'
-#' @param data A data.frame or matrix
+#' @param data data.frame or matrix
 #' @param x a vector of rownames. Defaults to all
 #' @param y a vector of colnames. If not supplied, y is set to x.
 #' @param z a vector of variable names. Control variables to be used in partial correlations - defaults to NULL
-#' @param method a string. One of "pearson", "spearman", or "kendall"
-#' @param round a scalar. Number of digits in printing
+#' @param method character. One of "pearson", "spearman", or "kendall"
+#' @param round numeric. Number of digits in printing
 #' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
-#' @param p_adjust What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"
-#' @param remove_lead a logical. if TRUE (the default), leading zeros are removed in summaries
-#' @param triangle one of "lower", "upper" or NULL (the default)
-#' @param caption table caption. Passed to plots
-#' @param note table note
-#' @param describe a list of functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
-#' @param grey_nonsig a logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
-#' @param call_only For debugging, if TRUE only the call is returned
+#' @param p_adjust character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"
+#' @param remove_lead logical. if TRUE (the default), leading zeros are removed in summaries
+#' @param triangle character. one of "lower", "upper" or NULL (the default)
+#' @param caption character. table caption. Passed to plots
+#' @param note character. Text for a table note
+#' @param describe list of named functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
+#' @param grey_nonsig logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
+#' @param call_only logical. For debugging, if TRUE only the call is returned
 #' @details
 #' Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
 #'
 #' @section Partial correlations:
 #'
-#' Supplying the argument z will call ppcor::pcor.test the correlation pair are supplied to arguments x and y. The vector of z given to corx is passed to to argument z in pcor.test.
+#' Supplying the argument z will call ppcor::pcor.test the correlation pair are supplied to arguments x and y. The vector of z given to corx is passed to argument z in pcor.test.
 #'
 #' @section  Missing data:
 #'
@@ -30,7 +30,7 @@
 #'
 #' @section P-adjust:
 #'
-#' P-values attained can be adjusted for multiple comparisons by using the 'adjust_p' argument. This calls the function stats::p.adjust. When a matrix is symmetrical, p-values are only adjusted for unique comparisons. When a correlation matrix is not symmetrical, all comparisons are assumed to be unique.
+#' P-values attained can be adjusted for multiple comparisons by using the 'p_adjust' argument. This calls the function stats::p.adjust. When a matrix is symmetrical, p-values are only adjusted for unique comparisons. When a correlation matrix is not symmetrical, all comparisons are assumed to be unique.
 
 #' @examples
 #' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),

@@ -2,7 +2,7 @@
 #'
 #' Tabulate correlation matrices
 #' @param corx a corx object
-#' @param include_p a bool. should p-values be included?
+#' @param include_p logical. should p-values be included?
 #' @export
 
 to_table <- function(corx, include_p = FALSE){
