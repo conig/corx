@@ -415,44 +415,6 @@ plot.corx <- function(x, ...){
   do.call(ggcorrplot::ggcorrplot, elip)
 }
 
-check_names <- function (x, vars) {
-  vars <- unique(vars)
-
-  if(!is.matrix(x)){
-    name_data <- names(x)
-  }else{
-    name_data <- colnames(x)
-  }
-
-  error_names <- vars[!vars %in% name_data]
-
-  find_name <- function(n) {
-    prob_name <- name_data[agrep(n, name_data)]
-
-    if (length(prob_name) == 1) {
-      return(glue::glue("'{n}' ['{prob_name}'?]"))
-    } else{
-      return(n)
-    }
-  }
-
-  error_names <- unlist(lapply(error_names, find_name))
-
-  if(length(error_names) > 1){
-    stem <- "names"
-  }else{
-    stem <- "name"
-  }
-
-  mess1 <- glue::glue(
-    "{length(error_names)} {stem} could not be found: {paste(error_names, collapse = ', ')}."
-  )
-
-  if (length(error_names) > 0) {
-    stop(mess1, call. = F)
-  }
-}
-
 #' @export
 summary.corx <- function(object,... , digits, quantile.type){
   name_mat <- colnames(object$apa)
