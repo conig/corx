@@ -29,6 +29,7 @@ Imports:
     ppcor
 RoxygenNote: 7.2.1
 Suggests: 
+    covr,
     papaja,
     psych,
     testthat

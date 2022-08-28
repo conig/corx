@@ -7,8 +7,10 @@
 
 <img src='man/figures/logo.png' align="right" height="139" />
 
-[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/corx)](https://cran.r-project.org/package=corx)
 [![R-CMD-check](https://github.com/conig/corx/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/conig/corx/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/conig/corx/branch/master/graph/badge.svg)](https://app.codecov.io/gh/conig/corx?branch=master)
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/corx)](https://cran.r-project.org/package=corx)
 <!-- badges: end -->
 
 ‘corx’ aims to be a Swiss Army knife for correlation matrices.
