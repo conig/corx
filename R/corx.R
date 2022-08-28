@@ -479,6 +479,8 @@ star_matrix <- function(m, stars) {
 #' rename if needed
 #'
 #' Renames columns
+#' @param data data object
+#' @param x a character vector. If named, columns will be renamed
 
   rename_if_needed <- function(data, x) {
       rename_vars <- x[names(x) != x]

@@ -6,6 +6,11 @@
 \usage{
 rename_if_needed(data, x)
 }
+\arguments{
+\item{data}{data object}
+
+\item{x}{a character vector. If named, columns will be renamed}
+}
 \description{
 Renames columns
 }
