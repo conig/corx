@@ -457,3 +457,7 @@ c2 <- corx::corx(mtcars, x = c("mpg", "cyl","hp"), y = c("drat", "wt"), method =
 n_unique.p <- length(c1$p)
 testthat::expect_equal(c2$p[3,2], (c1$p[3,2] * n_unique.p))
 })
+
+test_that("Misspelling columns results in error",{
+  testthat::expect_error(corx(mtcars, "mpgg"))
+})

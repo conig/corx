@@ -1,3 +1,7 @@
+# corx 1.0.7.1
+* Fixed issue where misspelling columns did not result in error
+* Fixed issue with leading zeros presented in to_table
+
 # corx 1.0.7.0
 
 * Removed magrittr pipe operator

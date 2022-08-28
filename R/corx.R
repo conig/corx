@@ -86,22 +86,11 @@ corx <-
 
     if(methods::is(data, "matrix")) data <- data.frame(data, check.names = FALSE)
 
-    x <- tidyselect::vars_select(colnames(data), {{x}}, .strict = F)
-    y <- tidyselect::vars_select(colnames(data), {{y}}, .strict = F)
-    z <- tidyselect::vars_select(colnames(data), {{z}}, .strict = F)
+    x <- tidyselect::vars_select(colnames(data), {{x}}, .strict = TRUE)
+    y <- tidyselect::vars_select(colnames(data), {{y}}, .strict = TRUE)
+    z <- tidyselect::vars_select(colnames(data), {{z}}, .strict = TRUE)
 
     # allow rename within select
-    rename_if_needed <- function(data, x) {
-      rename_vars <- x[names(x) != x]
-      for (i in seq_along(rename_vars)) {
-        if (names(x)[i] != x[i]) {
-          colnames(data)[colnames(data) == x[i]] <- names(rename_vars[rename_vars == x[i]])
-        }
-      }
-
-      data
-    }
-
     data <- rename_if_needed(data, x)
     data <- rename_if_needed(data, y)
     data <- rename_if_needed(data, z)
@@ -109,36 +98,6 @@ corx <-
     if(length(x) > 0) x <- names(x)
     if(length(y) > 0) y <- names(y)
     if(length(z) > 0) z <- names(z)
-    # --
-
-    x <- check_for_vec(x, call$x, parent_env)
-    y <- check_for_vec(y, call$y, parent_env)
-    z <- check_for_vec(z, call$z, parent_env)
-
-    get_input <- function(x){ # grab plain text input
-      x = as.character(x)
-      if(length(x)>1) x <- x[-1]
-      x
-    }
-    x_orig <- get_input(call$x)
-    y_orig <- get_input(call$y)
-    z_orig <- get_input(call$z)
-
-
-
-    to_check <- c()
-
-    if(length(x) == 0 & length(x_orig) > 0){ # did the user try to get a var and failed
-      to_check <- c(to_check, x_orig) # check what the deal is
-    }
-    if(length(y) == 0 & length(y_orig) > 0){
-      to_check <- c(to_check, y_orig)
-    }
-    if(length(z) == 0 & length(z_orig) > 0){
-      to_check <- c(to_check, z_orig)
-    }
-
-    check_names(data, unique(to_check))
 
     if(length(x) == 0){
       x <- names(data)
@@ -156,8 +115,6 @@ corx <-
       x <- x[!x %in% z]
       y <- y[!y %in% z]
     }
-
-
 
     if(length(x) == 0 | length(y) == 0) stop("Can't partial out the entirety of x or y")
 
@@ -557,22 +514,17 @@ star_matrix <- function(m, stars) {
   s_matrix
 }
 
-#' check_for_vec
+#' rename if needed
 #'
-#' convert vectors of names to character vectors
-#' @param names names to check
-#' @param sym names from call
-#' @param env environment to search
+#' Renames columns
 
- check_for_vec <- function(names, sym, env){
-
-      if(length(names) == 0 & !is.null(sym)){
-
-        if(as.character(sym) %in% ls(envir = env)){
-          names <- get(as.character(sym))
+  rename_if_needed <- function(data, x) {
+      rename_vars <- x[names(x) != x]
+      for (i in seq_along(rename_vars)) {
+        if (names(x)[i] != x[i]) {
+          colnames(data)[colnames(data) == x[i]] <- names(rename_vars[rename_vars == x[i]])
         }
-
       }
 
-     names
-}
+      data
+    }
