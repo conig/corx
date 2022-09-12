@@ -2,7 +2,7 @@ Package: corx
 Type: Package
 Title: Create and Format Correlation Matrices
 Version: 1.0.7.1
-Date: 2022-08-28
+Date: 2022-09-12
 Authors@R: 
     person(given = "James",
            family = "Conigrave",
