@@ -16,10 +16,8 @@ apa_table.corx <- function(corx, ...){
 }
 
 .onLoad <- function(...) {
-
   s3_register("papaja::apa_table", "corx")
   invisible()
-
 }
 
 s3_register <- function (generic, class, method = NULL)

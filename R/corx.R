@@ -385,11 +385,6 @@ digits <- function(x, n = 2) {
   x
 }
 
-# set classes
-
-#' S3 class corx
-#' @exportClass corx
-
 #' plot.corx
 #' @param x a corx object
 #' @param ... other arguments to ggcorrplot::ggcorrplot
