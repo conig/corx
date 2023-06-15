@@ -20,15 +20,15 @@
 #' @details
 #' Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
 #'
-#' @section Partial correlations:
+#' ## Partial correlations:
 #'
 #' Supplying the argument z will call ppcor::pcor.test the correlation pair are supplied to arguments x and y. The vector of z given to corx is passed to argument z in pcor.test.
 #'
-#' @section  Missing data:
+#' ##  Missing data:
 #'
 #' Observations containing missing data required to complete a correlation or partial correlation are automatically removed.
 #'
-#' @section P-adjust:
+#' ## P-adjust:
 #'
 #' P-values attained can be adjusted for multiple comparisons by using the 'p_adjust' argument. This calls the function stats::p.adjust. When a matrix is symmetrical, p-values are only adjusted for unique comparisons. When a correlation matrix is not symmetrical, all comparisons are assumed to be unique.
 
@@ -45,15 +45,13 @@
 #'          note = "Using shortcuts to select describe functions", triangle = "lower")
 #' cor_2
 #' @return A list of class 'corx' which includes:
-#' \itemize{
-#'  \item{"call"}{ The call which if evaluated reproduces the object}
-#'  \item{"apa"}{ An 'APA' formatted correlation matrix with significance stars}
-#'  \item{"r"}{ Raw correlation coefficients}
-#'  \item{"p"}{ p-values}
-#'  \item{"n"}{ Pairwise observations}
-#'  \item{"caption"}{ Object caption}
-#'  \item{"note"}{ Object note}
-#' }
+#'  * "call" The call which if evaluated reproduces the object
+#'  * "apa" An 'APA' formatted correlation matrix with significance stars
+#'  * "r" Raw correlation coefficients
+#'  * "p" p-values
+#'  * "n" Pairwise observations
+#'  * "caption" Object caption
+#'  * "note" Object note
 #' @export
 
 corx <-
