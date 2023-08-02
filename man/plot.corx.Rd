@@ -2,7 +2,7 @@
 % Please edit documentation in R/corx.R
 \name{plot.corx}
 \alias{plot.corx}
-\title{S3 class corx}
+\title{plot.corx}
 \usage{
 \method{plot}{corx}(x, ...)
 }
@@ -12,5 +12,5 @@
 \item{...}{other arguments to ggcorrplot::ggcorrplot}
 }
 \description{
-S3 class corx
+plot.corx
 }

@@ -9,7 +9,7 @@
 #' This function employs the following formula:
 #' \deqn{d = \sqrt(2*(1-r))}
 #' These distances are then passed to stats::cmdscale where k = 2. To compute \eqn{latex}{R^2}, distances are predict from the cmdscale output and correlated with input distances. This correlation is squared.
-#'  If the value of \eqn{R^2} is less than 70%, a warning will inform users that two-dimensions may not be sufficient to represent item relationships.
+#'  If the value of \eqn{R^2} is less than 70\%, a warning will inform users that two-dimensions may not be sufficient to represent item relationships.
 #'  The position of variables is then plotted with ggplot2. Clusters of items are identified using stats::kmeans. The number of clusters is determined using principal component analysis unless specified.
 #'
 #' @references
@@ -52,8 +52,6 @@ plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
 
   dist = data.frame(cmd$points)
   colnames(dist) = c("x", "y")
-
-  #total_var =  sum(cmd$eig[1:2])/sum(cmd$eig) * 100
 
  if(r2 < 70) warning("Two dimensions explains only ", round(r2,1),"% of variance. MDS might not be appropriate.")
 

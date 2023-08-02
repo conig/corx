@@ -1,8 +1,8 @@
 Package: corx
 Type: Package
 Title: Create and Format Correlation Matrices
-Version: 1.0.7.1
-Date: 2022-09-14
+Version: 1.0.7.2
+Date: 2023-06-15
 Authors@R: 
     person(given = "James",
            family = "Conigrave",
@@ -27,7 +27,7 @@ Imports:
     stats,
     methods,
     ppcor
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Suggests: 
     covr,
     papaja,
