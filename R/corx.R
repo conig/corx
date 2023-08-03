@@ -433,11 +433,19 @@ as.data.frame.corx <- function(x,...){
 #' @param stop should the variable stop, or create a warning?
 
 check_classes <- function(data, ok_classes, stop_message, stop = TRUE) {
+
+  v_is <- function(x, classes)
+    any(sapply(classes, function(y) {
+      x <- labelled::remove_labels(x)
+      methods::is(x, y)
+    }))
+
   classes <- lapply(data, class)
-  class_ok <- sapply(classes, function(x) any(ok_classes %in% x))
+
+  class_ok <- sapply(data, function(x) v_is(x, ok_classes))
   bad_cols <- names(data)[!class_ok]
   bad_index <- which(names(data) %in% bad_cols)
-  bad_classes <- lapply(classes[!class_ok], function(x) paste(abbreviate(x,3), collapse = ","))
+  bad_classes <- sapply(classes[!class_ok], function(x) paste(abbreviate(x,3), collapse = ","))
   script <- paste(glue::glue("[{bad_index}] '{bad_cols}' <{bad_classes}>"), collapse = ", ")
 
   if (!all(class_ok)) {
@@ -448,6 +456,8 @@ check_classes <- function(data, ok_classes, stop_message, stop = TRUE) {
     }
   }
 }
+
+
 
 #' star_matrix
 #'

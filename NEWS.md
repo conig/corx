@@ -1,3 +1,11 @@
+# corx 1.0.7.3
+
+* Corx now can identify haven labelled variables as numeric
+
+# corx 1.0.7.2
+
+* Fixed issue with incorrect class declaration
+
 # corx 1.0.7.1
 
 * Fixed issue where misspelling columns did not result in error
