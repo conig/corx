@@ -17,7 +17,7 @@
 #' @param caption character. table caption. Passed to plots
 #' @param note character. Text for a table note
 #' @param describe list of named functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
-#' @param grey_nonsig logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
+#' @param grey_nonsig logical. Should non-significant values be grey in output? This argument does nothing if describe, or show_ci is used.
 #' @param call_only logical. For debugging, if TRUE only the call is returned
 #' @details
 #' Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
@@ -75,6 +75,8 @@ corx <-
            grey_nonsig = TRUE,
            call_only = FALSE) {
 
+    # Disable grey nonsig if show_ci selected
+    if(show_ci) grey_nonsig <- FALSE
 
     call <- match.call()
     env <- environment()
