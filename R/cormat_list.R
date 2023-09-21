@@ -6,7 +6,7 @@
 #' @param method string, passed to cor.test
 #' @param p_adjust string, passed to p.adjust
 
-cormat_list <- function(data, x, y, z, method, p_adjust) {
+cormat_list <- function(data, x, y, z, method, p_adjust, conf_level = conf_level, round) {
   cors <- list()
 
   cormat <- matrix(nrow = length(x), ncol = length(y))
@@ -16,6 +16,7 @@ cormat_list <- function(data, x, y, z, method, p_adjust) {
   cors$r <- cormat
   cors$n <- cormat
   cors$p <- cormat
+  cors$ci <- cormat
 
   for (r in x) {
     for (c in y) {
@@ -25,12 +26,15 @@ cormat_list <- function(data, x, y, z, method, p_adjust) {
           y = c,
           z = z,
           method = method,
-          data = data
+          data = data,
+          conf_level = conf_level,
+          round = round
         )
 
       cors$r[r, c] <- cor_ob$r
       cors$n[r, c] <- cor_ob$n
       cors$p[r, c] <- cor_ob$p
+      cors$ci[r, c] <- cor_ob$ci
 
     }
   }
@@ -43,19 +47,21 @@ cormat_list <- function(data, x, y, z, method, p_adjust) {
 
 }
 
-flex_cor <- function(x, y, z = NULL, method, data) {
+flex_cor <- function(x, y, z = NULL, method, conf_level, round, data) {
   if (is.null(z)) {
     cor_ob <-
       stats::cor.test(
         x = data[, x],
         y = data[, y],
         method = method,
-        exact = FALSE
+        exact = FALSE,
+        conf.level = conf_level
       )
     return(list(
       r = cor_ob$estimate,
       n = as.numeric(psych::pairwiseCount(data[, x], data[, y])),
-      p = cor_ob$p.value
+      p = cor_ob$p.value,
+      ci = paste_ci(NA_if_NULL(cor_ob$conf.int, 2), digits = round)
     ))
   }
 
@@ -72,11 +78,23 @@ flex_cor <- function(x, y, z = NULL, method, data) {
 
     list(r = cor_ob.partial$estimate,
          n = cor_ob.partial$n,
-         p = cor_ob.partial$p.value)
+         p = cor_ob.partial$p.value,
+         ci = paste_ci(c(NA, NA), digits = round))
   } else{
     list(r = 1,
          n = nrow(partial_data),
-         p = 1)
+         p = 1,
+         ci = paste_ci(c(NA, NA), digits = round))
   }
 
+}
+
+NA_if_NULL <- function(x, len){
+  if(is.null(x)) return(rep(NA, len))
+  x
+}
+
+paste_ci <- function(x, digits) {
+  rounded <- sapply(x, function(i) digits(i, digits))
+  as.character(glue::glue("[{rounded[1]}, {rounded[2]}]"))
 }

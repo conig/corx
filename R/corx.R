@@ -7,10 +7,12 @@
 #' @param y a vector of colnames. If not supplied, y is set to x.
 #' @param z a vector of variable names. Control variables to be used in partial correlations - defaults to NULL
 #' @param method character. One of "pearson", "spearman", or "kendall"
-#' @param round numeric. Number of digits in printing
 #' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
 #' @param p_adjust character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"
+#' @param round numeric. Number of digits in printing
 #' @param remove_lead logical. if TRUE (the default), leading zeros are removed in summaries
+#' @param conf_level numeric. If 95% CI are desired, include 0.95, only available for pearson correlations without z.
+#' @param show_ci bool. Should confidence intervals be displayed?
 #' @param triangle character. one of "lower", "upper" or NULL (the default)
 #' @param caption character. table caption. Passed to plots
 #' @param note character. Text for a table note
@@ -63,6 +65,8 @@ corx <-
            stars = c(0.05,0.01,0.001),
            p_adjust = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
            round = 2,
+           conf_level = 0.95,
+           show_ci = FALSE,
            remove_lead = TRUE,
            triangle = NULL,
            caption = NULL,
@@ -129,15 +133,20 @@ corx <-
       y = y,
       z = z,
       method = method,
-      p_adjust = p_adjust
+      p_adjust = p_adjust,
+      conf_level = conf_level,
+      round = round
     )
 
-    pres_matrix <- apa_matrix(cors$r, #get apa matrix
-                             cors$p,
-                             stars,
-                             round,
-                             remove_lead,
-                             triangle)
+    pres_matrix <- apa_matrix(
+      r_matrix = cors$r, #get apa matrix
+      p_matrix = cors$p,
+      stars = stars,
+      round = round,
+      remove_lead = remove_lead,
+      triangle = triangle,
+      ci_matrix = cors$ci,
+      show_ci = show_ci)
 
     # describe function ----------------------------------------------------
 
@@ -228,6 +237,7 @@ corx <-
       r = cors$r,
       p = cors$p,
       n = cors$n,
+      ci = cors$ci,
       caption = caption,
       note = note
     )
@@ -272,15 +282,21 @@ partial_n_matrix <- function(data, x, y, z){
 #' @param round How many digits to round to?
 #' @param remove_lead a logical. Should leading zeros be removed?
 #' @param triangle can select lower upper or NULL
+#' @param show_ci bool. If TRUE, confidence interval will be displayed for non-partial pearson correlations.
 
 apa_matrix <- function(r_matrix,
                       p_matrix,
                       stars,
                       round,
                       remove_lead,
-                      triangle) {
+                      triangle,
+                      ci_matrix,
+                      show_ci = FALSE) {
   f_matrix <- r_matrix
   f_matrix[] <- digits(f_matrix , round)
+  if(show_ci)
+    f_matrix[] <- paste(f_matrix, ci_matrix)
+
   row_names <- matrix(rownames(r_matrix), nrow(r_matrix), ncol = ncol(r_matrix))
   col_names <- matrix(colnames(r_matrix), nrow = nrow(r_matrix), ncol = ncol(r_matrix), byrow = T)
 
