@@ -9,15 +9,12 @@
 #' @param method character. One of "pearson", "spearman", or "kendall"
 #' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
 #' @param p_adjust character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"
-#' @param round numeric. Number of digits in printing
 #' @param remove_lead logical. if TRUE (the default), leading zeros are removed in summaries
-#' @param conf_level numeric. If 95% CI are desired, include 0.95, only available for pearson correlations without z.
-#' @param show_ci bool. Should confidence intervals be displayed?
 #' @param triangle character. one of "lower", "upper" or NULL (the default)
 #' @param caption character. table caption. Passed to plots
 #' @param note character. Text for a table note
 #' @param describe list of named functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
-#' @param grey_nonsig logical. Should non-significant values be grey in output? This argument does nothing if describe, or show_ci is used.
+#' @param grey_nonsig logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
 #' @param call_only logical. For debugging, if TRUE only the call is returned
 #' @details
 #' Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
@@ -74,9 +71,6 @@ corx <-
       "BY",
       "fdr"
     ),
-    round = 2,
-    conf_level = 0.95,
-    show_ci = FALSE,
     remove_lead = TRUE,
     triangle = NULL,
     caption = NULL,
@@ -85,11 +79,6 @@ corx <-
     grey_nonsig = TRUE,
     call_only = FALSE
   ) {
-    # Disable grey nonsig if show_ci selected
-    if (show_ci) {
-      grey_nonsig <- FALSE
-    }
-
     call <- match.call()
     env <- environment()
 
@@ -172,9 +161,7 @@ corx <-
       stars = stars,
       round = round,
       remove_lead = remove_lead,
-      triangle = triangle,
-      ci_matrix = cors$ci,
-      show_ci = show_ci
+      triangle = triangle
     )
 
     # describe function ----------------------------------------------------
@@ -297,7 +284,6 @@ corx <-
       r = cors$r,
       p = cors$p,
       n = cors$n,
-      ci = cors$ci,
       caption = caption,
       note = note
     )
@@ -349,15 +335,10 @@ apa_matrix <- function(
   stars,
   round,
   remove_lead,
-  triangle,
-  ci_matrix,
-  show_ci = FALSE
+  triangle
 ) {
   f_matrix <- r_matrix
   f_matrix[] <- digits(f_matrix, round)
-  if (show_ci) {
-    f_matrix[] <- paste(f_matrix, ci_matrix)
-  }
 
   row_names <- matrix(rownames(r_matrix), nrow(r_matrix), ncol = ncol(r_matrix))
   col_names <- matrix(
