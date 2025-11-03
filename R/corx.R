@@ -7,6 +7,7 @@
 #' @param y a vector of colnames. If not supplied, y is set to x.
 #' @param z a vector of variable names. Control variables to be used in partial correlations - defaults to NULL
 #' @param method character. One of "pearson", "spearman", or "kendall"
+#' @param round numeric. How many digits should correlation coefficients be rounded to in printing?'
 #' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
 #' @param p_adjust character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"
 #' @param remove_lead logical. if TRUE (the default), leading zeros are removed in summaries
@@ -71,6 +72,7 @@ corx <-
       "BY",
       "fdr"
     ),
+    round = 2,
     remove_lead = TRUE,
     triangle = NULL,
     caption = NULL,
