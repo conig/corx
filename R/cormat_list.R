@@ -12,9 +12,7 @@ cormat_list <- function(
   y,
   z,
   method,
-  p_adjust,
-  conf_level = conf_level,
-  round
+  p_adjust
 ) {
   cors <- list()
 
@@ -34,15 +32,12 @@ cormat_list <- function(
           y = c,
           z = z,
           method = method,
-          data = data,
-          conf_level = conf_level,
-          round = round
+          data = data
         )
 
       cors$r[r, c] <- cor_ob$r
       cors$n[r, c] <- cor_ob$n
       cors$p[r, c] <- cor_ob$p
-      cors$ci[r, c] <- cor_ob$ci
     }
   }
 
@@ -60,8 +55,7 @@ flex_cor <- function(x, y, z = NULL, method, data) {
         x = data[, x],
         y = data[, y],
         method = method,
-        exact = FALSE,
-        conf.level = conf_level
+        exact = FALSE
       )
     return(list(
       r = cor_ob$estimate,
@@ -84,8 +78,7 @@ flex_cor <- function(x, y, z = NULL, method, data) {
     list(
       r = cor_ob.partial$estimate,
       n = cor_ob.partial$n,
-      p = cor_ob.partial$p.value,
-      ci = paste_ci(c(NA, NA), digits = round)
+      p = cor_ob.partial$p.value
     )
   } else {
     list(
