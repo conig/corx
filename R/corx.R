@@ -164,8 +164,6 @@ corx <-
       z = z,
       method = method,
       p_adjust = p_adjust,
-      conf_level = conf_level,
-      round = round
     )
 
     pres_matrix <- apa_matrix(
