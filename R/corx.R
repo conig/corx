@@ -329,7 +329,6 @@ partial_n_matrix <- function(data, x, y, z) {
 #' @param round How many digits to round to?
 #' @param remove_lead a logical. Should leading zeros be removed?
 #' @param triangle can select lower upper or NULL
-#' @param show_ci bool. If TRUE, confidence interval will be displayed for non-partial pearson correlations.
 
 apa_matrix <- function(
   r_matrix,
