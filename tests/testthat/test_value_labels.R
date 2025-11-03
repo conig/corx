@@ -4,8 +4,7 @@ testthat::test_that("value_labels works correctly", {
       Sepal.Length = c(mediumlengh = 5.1, lowerlength = 4.6)
     )
   testthat::expect_no_error(
-    iris_new |>
-      dplyr::select(where(is.numeric)) |>
+    iris_new[, 1:4] |>
       corx()
   )
 })
