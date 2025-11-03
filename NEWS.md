@@ -1,21 +1,21 @@
 # corx 1.0.7.3
 
-* Corx now can identify haven labelled variables as numeric
+- Corx now can identify haven labelled variables as numeric
 
 # corx 1.0.7.2
 
-* Fixed issue with incorrect class declaration
+- Fixed issue with incorrect class declaration
 
 # corx 1.0.7.1
 
-* Fixed issue where misspelling columns did not result in error
-* Removed leading zeros for p-values in to_table
-* P-values are now rounded consistently to three decimal places
+- Fixed issue where misspelling columns did not result in error
+- Removed leading zeros for p-values in to_table
+- P-values are now rounded consistently to three decimal places
 
 # corx 1.0.7.0
 
-* Removed magrittr pipe operator
-* Added corx method for papaja::apa_table
-* Now use cor.test for non-partial correlations
-* Added ability to adjust p-values using stats::p.adjust
-* Added new function "to_table" which provides additional options for corx tabulation (i.e., inclusion of p-values)
+- Removed magrittr pipe operator
+- Added corx method for papaja::apa_table
+- Now use cor.test for non-partial correlations
+- Added ability to adjust p-values using stats::p.adjust
+- Added new function "to_table" which provides additional options for corx tabulation (i.e., inclusion of p-values)
