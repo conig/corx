@@ -18,6 +18,8 @@ apa_matrix(r_matrix, p_matrix, stars, round, remove_lead, triangle)
 \item{remove_lead}{a logical. Should leading zeros be removed?}
 
 \item{triangle}{can select lower upper or NULL}
+
+\item{show_ci}{bool. If TRUE, confidence interval will be displayed for non-partial pearson correlations.}
 }
 \description{
 Creates an apa matrix

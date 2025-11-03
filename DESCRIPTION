@@ -29,7 +29,7 @@ Imports:
     methods,
     ppcor,
     labelled
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
 Suggests: 
     covr,
     papaja,
