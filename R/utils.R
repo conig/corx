@@ -1,4 +1,4 @@
-# replacement for tisyselect::vars_select
+# replacement for tidyselect::vars_select
 eval_select_names <- function(
   vars,
   expr,
