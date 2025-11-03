@@ -194,17 +194,28 @@ corx <-
       n = function(x) digits(length(stats::na.omit(x)), 0)
     )
 
-    tryCatch(
-      {
-        # allow lists to be sent to tidyselect
-        describe_name <- eval_select_names(
-          names(all_desc),
-          {{ describe }},
-          strict = FALSE
+    describe_name <- character()
+    describe_expr <- call$describe
+    run_select <- !is.null(describe_expr) &&
+      !identical(describe_expr, quote(T)) &&
+      !identical(describe_expr, quote(TRUE)) &&
+      !identical(describe_expr, quote(F)) &&
+      !identical(describe_expr, quote(FALSE))
+
+    if (run_select) {
+      describe_name <-
+        tryCatch(
+          {
+            # allow lists to be sent to tidyselect
+            eval_select_names(
+              names(all_desc),
+              {{ describe }},
+              strict = FALSE
+            )
+          },
+          error = function(e) character()
         )
-      },
-      error = function(e) assign("describe_name", c(), envir = env)
-    ) # assign empty vec if error
+    }
 
     if (length(describe_name) > 0) {
       # if vars were found
