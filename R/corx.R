@@ -409,7 +409,7 @@ print.corx <- function(x, ...) {
   }
 
   text <- gsub("\\bNA\\b", crayon::red("NA"), text) # make NAs red
-  text <- gsub("\\*", crayon::yellow("*"), text) # make stars yelloe
+  text <- gsub("\\*", crayon::yellow("*"), text) # make stars yellow
   text <- gsub("\\ - ", crayon::silver(" - "), text) # make dashes silver
 
   text <- text[-1] # remove header
@@ -514,8 +514,8 @@ as.data.frame.corx <- function(x, ...) {
 
 check_classes <- function(data, ok_classes, stop_message, stop = TRUE) {
   v_is <- function(x, classes) {
+    x <- labelled::remove_labels(x)
     any(sapply(classes, function(y) {
-      x <- labelled::remove_labels(x)
       methods::is(x, y)
     }))
   }
