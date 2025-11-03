@@ -106,9 +106,9 @@ corx <-
       data <- data.frame(data, check.names = FALSE)
     }
 
-    x <- tidyselect::vars_select(colnames(data), {{ x }}, .strict = TRUE)
-    y <- tidyselect::vars_select(colnames(data), {{ y }}, .strict = TRUE)
-    z <- tidyselect::vars_select(colnames(data), {{ z }}, .strict = TRUE)
+    x <- eval_select_names(colnames(data), {{ x }}, strict = TRUE)
+    y <- eval_select_names(colnames(data), {{ y }}, strict = TRUE)
+    z <- eval_select_names(colnames(data), {{ z }}, strict = TRUE)
 
     # allow rename within select
     data <- rename_if_needed(data, x)
@@ -197,10 +197,10 @@ corx <-
     tryCatch(
       {
         # allow lists to be sent to tidyselect
-        describe_name <- tidyselect::vars_select(
+        describe_name <- eval_select_names(
           names(all_desc),
           {{ describe }},
-          .strict = F
+          strict = FALSE
         )
       },
       error = function(e) assign("describe_name", c(), envir = env)
@@ -211,10 +211,10 @@ corx <-
 
       if (length(describe_name) != (length(call$describe) - 1)) {
         # check if all vars were found
-        describe_name <- tidyselect::vars_select(
+        describe_name <- eval_select_names(
           names(all_desc),
           {{ describe }},
-          .strict = T
+          strict = TRUE
         )
       }
 
