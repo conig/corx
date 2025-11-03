@@ -37,7 +37,7 @@ corx(
 
 \item{p_adjust}{character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"}
 
-\item{round}{numeric. Number of digits in printing}
+\item{round}{numeric. How many digits should correlation coefficients be rounded to in printing?}
 
 \item{remove_lead}{logical. if TRUE (the default), leading zeros are removed in summaries}
 

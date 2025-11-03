@@ -6,7 +6,14 @@
 #' @param method string, passed to cor.test
 #' @param p_adjust string, passed to p.adjust
 
-cormat_list <- function(data, x, y, z, method, p_adjust) {
+cormat_list <- function(
+  data,
+  x,
+  y,
+  z,
+  method,
+  p_adjust
+) {
   cors <- list()
 
   cormat <- matrix(nrow = length(x), ncol = length(y))
@@ -31,7 +38,6 @@ cormat_list <- function(data, x, y, z, method, p_adjust) {
       cors$r[r, c] <- cor_ob$r
       cors$n[r, c] <- cor_ob$n
       cors$p[r, c] <- cor_ob$p
-
     }
   }
 
@@ -40,7 +46,6 @@ cormat_list <- function(data, x, y, z, method, p_adjust) {
   }
 
   cors
-
 }
 
 flex_cor <- function(x, y, z = NULL, method, data) {
@@ -70,13 +75,16 @@ flex_cor <- function(x, y, z = NULL, method, data) {
         method = method
       )
 
-    list(r = cor_ob.partial$estimate,
-         n = cor_ob.partial$n,
-         p = cor_ob.partial$p.value)
-  } else{
-    list(r = 1,
-         n = nrow(partial_data),
-         p = 1)
+    list(
+      r = cor_ob.partial$estimate,
+      n = cor_ob.partial$n,
+      p = cor_ob.partial$p.value
+    )
+  } else {
+    list(
+      r = 1,
+      n = nrow(partial_data),
+      p = 1
+    )
   }
-
 }
