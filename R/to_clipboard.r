@@ -1,6 +1,8 @@
 #' Copy a formatted correlation table to the clipboard
 #'
 #' Copy a table for pasting into a spreadsheet or another application.
+#' This function requires an interactive R session and an available system
+#' clipboard. In scripts, use [to_table()] to get the formatted table instead.
 #'
 #' @param x A [corx()] object, matrix, or data frame. For a `corx` object, only
 #'   the formatted table (`x$apa`) is copied, without the caption or note.
