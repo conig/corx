@@ -2,15 +2,38 @@
 % Please edit documentation in R/to_table.R
 \name{to_table}
 \alias{to_table}
-\title{to_table}
+\title{Extract a formatted correlation table}
 \usage{
 to_table(corx, include_p = FALSE)
 }
 \arguments{
-\item{corx}{a corx object}
+\item{corx}{A \code{\link[=corx]{corx()}} object.}
 
-\item{include_p}{logical. should p-values be included?}
+\item{include_p}{Logical. If \code{FALSE} (the default), return the formatted
+table as stored in the object. If \code{TRUE}, add rows for the stored
+p-values, which are adjusted if requested in \code{\link[=corx]{corx()}}.}
+}
+\value{
+If \code{include_p = FALSE}, the stored formatted table: usually a
+character matrix (see \code{triangle} in \code{\link[=corx]{corx()}}). Otherwise, a data frame with
+alternating coefficient and p-value rows.
 }
 \description{
-Tabulate correlation matrices
+Extract the formatted table from a \code{\link[=corx]{corx()}} result, optionally adding
+p-values on a separate row beneath each row of coefficients.
+}
+\details{
+For Pearson correlations, leave \code{method} at its default in
+\code{\link[=corx]{corx()}} when using \code{include_p = TRUE}. Explicitly setting
+\code{method = "pearson"} currently causes an error in that output mode.
+Use the full table rather than triangular formatting when adding
+p-values to a two-variable table.
+}
+\examples{
+fit <- corx(mtcars[, 1:4])
+to_table(fit)
+to_table(fit, include_p = TRUE)
+}
+\seealso{
+\link{corx-methods}, \code{\link[=to_clipboard]{to_clipboard()}}.
 }

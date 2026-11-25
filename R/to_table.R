@@ -1,8 +1,26 @@
-#' to_table
+#' Extract a formatted correlation table
 #'
-#' Tabulate correlation matrices
-#' @param corx a corx object
-#' @param include_p logical. should p-values be included?
+#' Extract the formatted table from a [corx()] result, optionally adding
+#' p-values on a separate row beneath each row of coefficients.
+#'
+#' @param corx A [corx()] object.
+#' @param include_p Logical. If `FALSE` (the default), return the formatted
+#'   table as stored in the object. If `TRUE`, add rows for the stored
+#'   p-values, which are adjusted if requested in [corx()].
+#' @details For Pearson correlations, leave `method` at its default in
+#'   [corx()] when using `include_p = TRUE`. Explicitly setting
+#'   `method = "pearson"` currently causes an error in that output mode.
+#'   Use the full table rather than triangular formatting when adding
+#'   p-values to a two-variable table.
+#' @returns If `include_p = FALSE`, the stored formatted table: usually a
+#'   character matrix (see `triangle` in [corx()]). Otherwise, a data frame with
+#'   alternating coefficient and p-value rows.
+#' @seealso [corx-methods], [to_clipboard()].
+#' @examples
+#' fit <- corx(mtcars[, 1:4])
+#' to_table(fit)
+#' to_table(fit, include_p = TRUE)
+#' @md
 #' @export
 
 to_table <- function(corx, include_p = FALSE){

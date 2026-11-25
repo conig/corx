@@ -2,15 +2,26 @@
 % Please edit documentation in R/methods.R
 \name{apa_table.corx}
 \alias{apa_table.corx}
-\title{apa_table.corx}
+\title{Format a correlation table with papaja}
 \usage{
 apa_table.corx(corx, ...)
 }
 \arguments{
-\item{corx}{corx object}
+\item{corx}{A \code{\link[=corx]{corx()}} object.}
 
-\item{...}{Other arguments to papaja::apa_table}
+\item{...}{Additional arguments passed to \code{papaja::apa_table()}. Specify
+\code{caption} or \code{note} here to override the values stored in the object.
+The method supplies the table itself.}
+}
+\value{
+The result of \code{papaja::apa_table()}, in the format selected by
+that function.
 }
 \description{
-method for papaja::apa_table for corx objects
+Method for \code{papaja::apa_table()} that uses the formatted table from a
+\code{\link[=corx]{corx()}} object. Pass the object as the first positional argument, for
+example \code{papaja::apa_table(fit)}.
+}
+\seealso{
+\code{\link[=to_table]{to_table()}}.
 }

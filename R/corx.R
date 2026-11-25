@@ -1,64 +1,97 @@
-#' corx
+#' Compute and format a correlation matrix
 #'
-#' Calculates correlations matrices. Relevant values are stored in a list with methods for easy retrieval and formatting in publication ready tables.
+#' Compute ordinary or partial correlations and format them for an APA-style
+#' table. Unrounded coefficients, p-values, and observation counts are also
+#' available separately.
 #'
-#' @param data data.frame or matrix
-#' @param x a vector of rownames. Defaults to all
-#' @param y a vector of colnames. If not supplied, y is set to x.
-#' @param z a vector of variable names. Control variables to be used in partial correlations - defaults to NULL
-#' @param method character. One of "pearson", "spearman", or "kendall"
-#' @param round numeric. How many digits should correlation coefficients be rounded to in printing?
-#' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
-#' @param p_adjust character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"
-#' @param remove_lead logical. if TRUE (the default), leading zeros are removed in summaries
-#' @param triangle character. one of "lower", "upper" or NULL (the default)
-#' @param caption character. table caption. Passed to plots
-#' @param note character. Text for a table note
-#' @param describe list of named functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
-#' @param grey_nonsig logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
-#' @param call_only logical. For debugging, if TRUE only the call is returned
+#' @param data A data frame or matrix with at least three rows. Selected columns
+#'   must be numeric or integer. Numeric columns with value labels are accepted;
+#'   character and factor columns are not.
+#' @param x Column selection for the rows of the result. The default, `NULL`,
+#'   selects all columns. Use bare names, quoted names, or tidyselect helpers.
+#' @param y Column selection for the columns of the result, using the same syntax
+#'   as `x`. The default, `NULL`, uses the selection in `x`.
+#' @param z Column selection for control variables, using the same syntax as
+#'   `x`. The default, `NULL`, computes ordinary correlations. Selected controls
+#'   are removed from both axes of the result.
+#' @param method Correlation method: `"pearson"` (the default), `"spearman"`,
+#'   or `"kendall"`.
+#' @param stars Numeric p-value thresholds, listed from largest to smallest.
+#'   Each threshold a p-value falls strictly below adds one star. Use `NULL`
+#'   or `numeric(0)` to omit stars.
+#' @param p_adjust Multiple-testing adjustment passed to `stats::p.adjust()`:
+#'   `"none"` (the default), `"holm"`, `"hochberg"`, `"hommel"`,
+#'   `"bonferroni"`, `"BH"`, `"BY"`, or `"fdr"`.
+#' @param round Number of decimal places in the formatted table. The default
+#'   is 2. This does not round the stored coefficients or p-values.
+#' @param remove_lead Logical. If `TRUE` (the default), omit leading zeros from
+#'   formatted coefficients (for example, `.42` instead of `0.42`).
+#' @param triangle Which part of a square matrix with the same variables in the
+#'   same order on both axes to show in the formatted table: `"lower"`,
+#'   `"upper"`, or `NULL` (the default) for the full table. The stored numeric
+#'   matrices are not cropped. With two variables and no descriptive columns,
+#'   triangular formatting drops the matrix dimensions.
+#' @param caption Optional character string printed above the table and used as
+#'   the default plot title.
+#' @param note Optional character string printed below the table. If `NULL`,
+#'   a note is generated from the significance thresholds in `stars`.
+#' @param describe Descriptive statistics to append for each row variable.
+#'   Use `FALSE` (the default) for none, `TRUE` for the mean and standard
+#'   deviation, or a named list of functions that each accept a column and
+#'   return one value. You can also select the built-in summaries
+#'   `mean`, `sd`, `var`, `median`, `iqr`, `skewness`, `kurtosis`, and `n`
+#'   (the number of nonmissing values), for example `c(M = mean, n)`.
+#'   The built-in summaries remove missing values from each variable
+#'   independently; custom functions handle missing values themselves.
+#' @param grey_nonsig Logical. If `TRUE` (the default), print coefficients
+#'   without significance stars in grey when stars are enabled and
+#'   `describe = FALSE`. This affects console output only.
+#' @param call_only Logical. If `TRUE`, return the matched call and its
+#'   environments for debugging, without computing correlations. The default
+#'   is `FALSE`.
+#'
 #' @details
-#' Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
+#' Ordinary correlations use `stats::cor.test()`; rank-based p-values use
+#' its asymptotic calculation. Partial correlations use `ppcor::pcor.test()`.
 #'
-#' ## Partial correlations:
+#' **Missing data.** Each pair uses only the rows observed for both variables
+#' and all controls. The `n` matrix records this count, even when it is zero.
+#' Ordinary correlations based on fewer than two observations have missing
+#' coefficients and p-values. With exactly two observations, ordinary Pearson
+#' and Spearman correlations have a coefficient but no p-value. Partial tests
+#' require at least three observations beyond the number of controls (two for
+#' Kendall); otherwise both the coefficient and p-value are missing.
 #'
-#' Supplying the argument z will call ppcor::pcor.test the correlation pair are supplied to arguments x and y. The vector of z given to corx is passed to argument z in pcor.test.
+#' **Multiple comparisons.** The adjustment is applied to distinct unordered
+#' variable pairs in the matrix. Self-correlations are excluded and their
+#' p-values are left unchanged. If a pair appears in both orientations, both
+#' cells receive the same adjusted p-value. The display selected by `triangle`
+#' does not change the set of comparisons.
 #'
-#' ##  Missing data:
+#' @returns A list of class `corx` with the following components:
+#'   * `call`: The matched function call.
+#'   * `apa`: The formatted character matrix (or vector if triangular
+#'     formatting drops the dimensions).
+#'   * `r`: The unrounded matrix of correlation coefficients.
+#'   * `p`: The matrix of p-values, adjusted if requested.
+#'   * `n`: The matrix of observation counts.
+#'   * `caption`, `note`: The text displayed with the table.
 #'
-#' Each pair uses the rows observed for both variables and all controls. The n matrix
-#' records this count, even when it is zero. With fewer than two observations,
-#' the coefficient and p-value are NA. With exactly two, ordinary Pearson and
-#' Spearman coefficients are returned without a p-value. Partial tests require
-#' at least three observations beyond the number of controls (two for Kendall);
-#' otherwise both results are NA.
-#'
-#' ## P-adjust:
-#'
-#' The p_adjust argument calls stats::p.adjust once on the distinct unordered variable pairs
-#' shown in the matrix. Self-correlations are excluded and their p-values are left
-#' unchanged. If a pair appears in both orientations, both receive the same adjusted p-value.
-
+#'   With `call_only = TRUE`, the result is an unclassed list containing the
+#'   matched `call`, the function's evaluation environment (`env`), and the
+#'   calling environment (`parent_env`).
+#' @seealso [corx-methods], [print.corx()], [plot.corx()], [plot_mds()], [to_table()],
+#'   [to_clipboard()].
 #' @examples
-#' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
-#'            z = wt, round = 2, stars = c(0.05),
-#'            caption = "Controlling for weight" ,
-#'            describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
-#' cor_mat
-#' coef(cor_mat)
-#' cor_mat$p
-#' plot(cor_mat)
-#' cor_2 <- corx(iris[,-5], describe = c(median, IQR = iqr, kurt = kurtosis),
-#'          note = "Using shortcuts to select describe functions", triangle = "lower")
-#' cor_2
-#' @return A list of class 'corx' which includes:
-#'  * "call" The call which if evaluated reproduces the object
-#'  * "apa" An 'APA' formatted correlation matrix with significance stars
-#'  * "r" Raw correlation coefficients
-#'  * "p" p-values
-#'  * "n" Pairwise observations
-#'  * "caption" Object caption
-#'  * "note" Object note
+#' fit <- corx(mtcars, x = c(mpg, cyl, disp), y = c(drat, qsec),
+#'             z = wt, caption = "Controlling for weight",
+#'             describe = list(M = function(x) mean(x, na.rm = TRUE)))
+#' fit
+#' coef(fit)
+#' fit$p
+#'
+#' corx(iris[, 1:4], describe = c(median, IQR = iqr, n), triangle = "lower")
+#' @md
 #' @export
 
 corx <-
@@ -385,9 +418,15 @@ apa_matrix <- function(
 }
 
 
-#' print.corx
-#' @param x object
-#' @param ... extra arguments
+#' Print a formatted correlation table
+#'
+#' Print the original call, the formatted table, and its caption and note.
+#'
+#' @param x A [corx()] object.
+#' @param ... Unused; included for compatibility with the `print()` generic.
+#' @returns `NULL`, invisibly. The table is written to the console.
+#' @seealso [corx-methods], [to_table()].
+#' @md
 #' @export
 print.corx <- function(x, ...) {
   apa <- x$apa
@@ -441,6 +480,26 @@ print.corx <- function(x, ...) {
   cat(final_text)
 }
 
+#' Extract results from a correlation table
+#'
+#' Use `coef()` to extract unrounded coefficients, or use `summary()` and
+#' `as.data.frame()` to extract the formatted table.
+#'
+#' @rdname corx-methods
+#' @aliases corx-methods
+#' @param object,x A [corx()] object.
+#' @param ... Unused; included for compatibility with the generics.
+#' @param digits,quantile.type Unused arguments to the `summary()` method.
+#'   To change rounding, set `round` when calling [corx()].
+#' @returns `coef()` returns the numeric coefficient matrix. `summary()` and
+#'   `as.data.frame()` return the formatted table as a data frame, with the
+#'   table's original column names.
+#' @examples
+#' fit <- corx(mtcars[, 1:3])
+#' coef(fit)
+#' summary(fit)
+#' as.data.frame(fit)
+#' @md
 #' @export
 coef.corx <- function(object, ...) object$r # coef returns r matrix
 
@@ -462,9 +521,24 @@ digits <- function(x, n = 2) {
   x
 }
 
-#' plot.corx
-#' @param x a corx object
-#' @param ... other arguments to ggcorrplot::ggcorrplot
+#' Plot a correlation matrix
+#'
+#' Plot the coefficients and p-values stored in a [corx()] object using
+#' `ggcorrplot::ggcorrplot()`.
+#'
+#' @param x A [corx()] object.
+#' @param ... Named arguments passed to `ggcorrplot::ggcorrplot()`. Use `type`
+#'   or `title` to override the defaults. The coefficient and p-value matrices
+#'   are supplied from `x`; do not pass `corr` or `p.mat`.
+#' @details The plot uses the `triangle` setting from the original call, or
+#'   `"full"` if none was supplied. The caption in the original call supplies
+#'   the default title.
+#' @returns A ggplot object.
+#' @seealso [plot_mds()].
+#' @examples
+#' fit <- corx(mtcars[, 1:4])
+#' plot(fit, type = "lower", title = "Motor Trend car data")
+#' @md
 #' @export
 
 plot.corx <- function(x, ...) {
@@ -495,6 +569,7 @@ plot.corx <- function(x, ...) {
   do.call(ggcorrplot::ggcorrplot, elip)
 }
 
+#' @rdname corx-methods
 #' @export
 summary.corx <- function(object, ..., digits, quantile.type) {
   name_mat <- colnames(object$apa)
@@ -503,6 +578,7 @@ summary.corx <- function(object, ..., digits, quantile.type) {
   obj
 }
 
+#' @rdname corx-methods
 #' @export
 as.data.frame.corx <- function(x, ...) {
   name_mat <- colnames(x$apa)

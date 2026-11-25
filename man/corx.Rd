@@ -2,7 +2,7 @@
 % Please edit documentation in R/corx.R
 \name{corx}
 \alias{corx}
-\title{corx}
+\title{Compute and format a correlation matrix}
 \usage{
 corx(
   data,
@@ -23,81 +23,116 @@ corx(
 )
 }
 \arguments{
-\item{data}{data.frame or matrix}
+\item{data}{A data frame or matrix with at least three rows. Selected columns
+must be numeric or integer. Numeric columns with value labels are accepted;
+character and factor columns are not.}
 
-\item{x}{a vector of rownames. Defaults to all}
+\item{x}{Column selection for the rows of the result. The default, \code{NULL},
+selects all columns. Use bare names, quoted names, or tidyselect helpers.}
 
-\item{y}{a vector of colnames. If not supplied, y is set to x.}
+\item{y}{Column selection for the columns of the result, using the same syntax
+as \code{x}. The default, \code{NULL}, uses the selection in \code{x}.}
 
-\item{z}{a vector of variable names. Control variables to be used in partial correlations - defaults to NULL}
+\item{z}{Column selection for control variables, using the same syntax as
+\code{x}. The default, \code{NULL}, computes ordinary correlations. Selected controls
+are removed from both axes of the result.}
 
-\item{method}{character. One of "pearson", "spearman", or "kendall"}
+\item{method}{Correlation method: \code{"pearson"} (the default), \code{"spearman"},
+or \code{"kendall"}.}
 
-\item{stars}{a numeric vector. This argument defines cut-offs for p-value stars.}
+\item{stars}{Numeric p-value thresholds, listed from largest to smallest.
+Each threshold a p-value falls strictly below adds one star. Use \code{NULL}
+or \code{numeric(0)} to omit stars.}
 
-\item{p_adjust}{character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"}
+\item{p_adjust}{Multiple-testing adjustment passed to \code{stats::p.adjust()}:
+\code{"none"} (the default), \code{"holm"}, \code{"hochberg"}, \code{"hommel"},
+\code{"bonferroni"}, \code{"BH"}, \code{"BY"}, or \code{"fdr"}.}
 
-\item{round}{numeric. How many digits should correlation coefficients be rounded to in printing?}
+\item{round}{Number of decimal places in the formatted table. The default
+is 2. This does not round the stored coefficients or p-values.}
 
-\item{remove_lead}{logical. if TRUE (the default), leading zeros are removed in summaries}
+\item{remove_lead}{Logical. If \code{TRUE} (the default), omit leading zeros from
+formatted coefficients (for example, \code{.42} instead of \code{0.42}).}
 
-\item{triangle}{character. one of "lower", "upper" or NULL (the default)}
+\item{triangle}{Which part of a square matrix with the same variables in the
+same order on both axes to show in the formatted table: \code{"lower"},
+\code{"upper"}, or \code{NULL} (the default) for the full table. The stored numeric
+matrices are not cropped. With two variables and no descriptive columns,
+triangular formatting drops the matrix dimensions.}
 
-\item{caption}{character. table caption. Passed to plots}
+\item{caption}{Optional character string printed above the table and used as
+the default plot title.}
 
-\item{note}{character. Text for a table note}
+\item{note}{Optional character string printed below the table. If \code{NULL},
+a note is generated from the significance thresholds in \code{stars}.}
 
-\item{describe}{list of named functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.}
+\item{describe}{Descriptive statistics to append for each row variable.
+Use \code{FALSE} (the default) for none, \code{TRUE} for the mean and standard
+deviation, or a named list of functions that each accept a column and
+return one value. You can also select the built-in summaries
+\code{mean}, \code{sd}, \code{var}, \code{median}, \code{iqr}, \code{skewness}, \code{kurtosis}, and \code{n}
+(the number of nonmissing values), for example \code{c(M = mean, n)}.
+The built-in summaries remove missing values from each variable
+independently; custom functions handle missing values themselves.}
 
-\item{grey_nonsig}{logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE}
+\item{grey_nonsig}{Logical. If \code{TRUE} (the default), print coefficients
+without significance stars in grey when stars are enabled and
+\code{describe = FALSE}. This affects console output only.}
 
-\item{call_only}{logical. For debugging, if TRUE only the call is returned}
+\item{call_only}{Logical. If \code{TRUE}, return the matched call and its
+environments for debugging, without computing correlations. The default
+is \code{FALSE}.}
 }
 \value{
-A list of class 'corx' which includes:
- * "call" The call which if evaluated reproduces the object
- * "apa" An 'APA' formatted correlation matrix with significance stars
- * "r" Raw correlation coefficients
- * "p" p-values
- * "n" Pairwise observations
- * "caption" Object caption
- * "note" Object note
+A list of class \code{corx} with the following components:
+\itemize{
+\item \code{call}: The matched function call.
+\item \code{apa}: The formatted character matrix (or vector if triangular
+formatting drops the dimensions).
+\item \code{r}: The unrounded matrix of correlation coefficients.
+\item \code{p}: The matrix of p-values, adjusted if requested.
+\item \code{n}: The matrix of observation counts.
+\item \code{caption}, \code{note}: The text displayed with the table.
+}
+
+With \code{call_only = TRUE}, the result is an unclassed list containing the
+matched \code{call}, the function's evaluation environment (\code{env}), and the
+calling environment (\code{parent_env}).
 }
 \description{
-Calculates correlations matrices. Relevant values are stored in a list with methods for easy retrieval and formatting in publication ready tables.
+Compute ordinary or partial correlations and format them for an APA-style
+table. Unrounded coefficients, p-values, and observation counts are also
+available separately.
 }
 \details{
-Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
+Ordinary correlations use \code{stats::cor.test()}; rank-based p-values use
+its asymptotic calculation. Partial correlations use \code{ppcor::pcor.test()}.
 
-## Partial correlations:
+\strong{Missing data.} Each pair uses only the rows observed for both variables
+and all controls. The \code{n} matrix records this count, even when it is zero.
+Ordinary correlations based on fewer than two observations have missing
+coefficients and p-values. With exactly two observations, ordinary Pearson
+and Spearman correlations have a coefficient but no p-value. Partial tests
+require at least three observations beyond the number of controls (two for
+Kendall); otherwise both the coefficient and p-value are missing.
 
-Supplying the argument z will call ppcor::pcor.test the correlation pair are supplied to arguments x and y. The vector of z given to corx is passed to argument z in pcor.test.
-
-##  Missing data:
-
-Each pair uses the rows observed for both variables and all controls. The n matrix
-records this count, even when it is zero. With fewer than two observations,
-the coefficient and p-value are NA. With exactly two, ordinary Pearson and
-Spearman coefficients are returned without a p-value. Partial tests require
-at least three observations beyond the number of controls (two for Kendall);
-otherwise both results are NA.
-
-## P-adjust:
-
-The p_adjust argument calls stats::p.adjust once on the distinct unordered variable pairs
-shown in the matrix. Self-correlations are excluded and their p-values are left
-unchanged. If a pair appears in both orientations, both receive the same adjusted p-value.
+\strong{Multiple comparisons.} The adjustment is applied to distinct unordered
+variable pairs in the matrix. Self-correlations are excluded and their
+p-values are left unchanged. If a pair appears in both orientations, both
+cells receive the same adjusted p-value. The display selected by \code{triangle}
+does not change the set of comparisons.
 }
 \examples{
-cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
-           z = wt, round = 2, stars = c(0.05),
-           caption = "Controlling for weight" ,
-           describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
-cor_mat
-coef(cor_mat)
-cor_mat$p
-plot(cor_mat)
-cor_2 <- corx(iris[,-5], describe = c(median, IQR = iqr, kurt = kurtosis),
-         note = "Using shortcuts to select describe functions", triangle = "lower")
-cor_2
+fit <- corx(mtcars, x = c(mpg, cyl, disp), y = c(drat, qsec),
+            z = wt, caption = "Controlling for weight",
+            describe = list(M = function(x) mean(x, na.rm = TRUE)))
+fit
+coef(fit)
+fit$p
+
+corx(iris[, 1:4], describe = c(median, IQR = iqr, n), triangle = "lower")
+}
+\seealso{
+\link{corx-methods}, \code{\link[=print.corx]{print.corx()}}, \code{\link[=plot.corx]{plot.corx()}}, \code{\link[=plot_mds]{plot_mds()}}, \code{\link[=to_table]{to_table()}},
+\code{\link[=to_clipboard]{to_clipboard()}}.
 }

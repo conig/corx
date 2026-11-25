@@ -1,5 +1,7 @@
 # corx (development version)
 
+- Updated the help for exported functions and methods, including column selection, return values, and examples.
+
 - Pairs with no shared observations now return `NA` for the correlation and p-value and `0` for the sample size, without aborting the rest of the matrix (#13). Symmetric ordinary correlation matrices compute each pair only once.
 
 - Overlapping row and column selections now adjust p-values once per distinct variable pair, excluding self-correlations and giving reversed pairs the same adjusted p-value. Ordinary correlations also avoid recomputing those reversed pairs.

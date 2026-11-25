@@ -2,15 +2,21 @@
 % Please edit documentation in R/corx.R
 \name{print.corx}
 \alias{print.corx}
-\title{print.corx}
+\title{Print a formatted correlation table}
 \usage{
 \method{print}{corx}(x, ...)
 }
 \arguments{
-\item{x}{object}
+\item{x}{A \code{\link[=corx]{corx()}} object.}
 
-\item{...}{extra arguments}
+\item{...}{Unused; included for compatibility with the \code{print()} generic.}
+}
+\value{
+\code{NULL}, invisibly. The table is written to the console.
 }
 \description{
-print.corx
+Print the original call, the formatted table, and its caption and note.
+}
+\seealso{
+\link{corx-methods}, \code{\link[=to_table]{to_table()}}.
 }

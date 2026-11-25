@@ -1,21 +1,39 @@
-#' plot_mds
+#' Plot correlations using multidimensional scaling
 #'
-#' Perform multidimensional scaling of a corx object and plot results
-#' @param corx corx object
-#' @param k  numeric. The number of clusters. If set to "auto" will be equal to the number of principal components that explain more than 5\% of total variance.
-#' @param abs logical.  If TRUE (the default) negative correlations will be turned positive. This means items with high negative correlations will be treated as highly similar.
-#' @param ... additional arguments passed to ggpubr::ggscatter
-#' @details plot_mds performs classic multidimensional scaling on a correlation matrix. The correlation matrix is first converted to a distance matrix using psych::cor2dist.
-#' This function employs the following formula:
-#' \deqn{d = \sqrt(2*(1-r))}
-#' These distances are then passed to stats::cmdscale where k = 2. To compute \eqn{latex}{R^2}, distances are predict from the cmdscale output and correlated with input distances. This correlation is squared.
-#'  If the value of \eqn{R^2} is less than 70\%, a warning will inform users that two-dimensions may not be sufficient to represent item relationships.
-#'  The position of variables is then plotted with ggplot2. Clusters of items are identified using stats::kmeans. The number of clusters is determined using principal component analysis unless specified.
+#' Show variables as points in a two-dimensional map, with similar variables
+#' placed near one another. Optionally group the points with k-means clustering.
 #'
+#' @param corx A [corx()] object with at least three variables, matching row
+#'   and column names in the same order, and no missing coefficients.
+#' @param k Number of clusters, as a positive integer no larger than the number
+#'   of variables. The default, `NULL`, skips clustering. Use `"auto"` to count
+#'   the principal components that each explain more than 5% of the variance
+#'   in a PCA of the correlation matrix used for scaling.
+#' @param abs Logical. If `TRUE` (the default), use absolute correlations so
+#'   that strongly negative and strongly positive correlations both imply
+#'   similarity. If `FALSE`, retain the signs.
+#' @param ... Additional arguments passed to `ggpubr::ggscatter()`. Do not
+#'   supply arguments already set by this function, such as `x`, `y`, or
+#'   `label`.
+#' @details This function requires the psych package. Correlations are
+#'   converted to distances with `psych::cor2dist()`:
+#'   \deqn{d = \sqrt{2(1-r)}}{d = sqrt(2 * (1 - r))}
+#'   Here, \eqn{r} is the signed or absolute correlation, as specified by
+#'   `abs`. Classical multidimensional scaling with `stats::cmdscale()`
+#'   embeds the distances in two dimensions. The function warns if the squared
+#'   correlation between the original distances and the distances in the map is
+#'   below 0.70. When clustering is requested, `stats::kmeans()` uses the
+#'   two-dimensional coordinates.
+#' @returns A ggplot object.
+#' @seealso [plot.corx()] for a plot of the correlation matrix itself.
 #' @references
-#' Carlson, D.L., 2017. Quantitative methods in archaeology using R. Cambridge University Press.
-#'
-#' @export plot_mds
+#' Carlson, D. L. (2017). *Quantitative Methods in Archaeology Using R*.
+#' Cambridge University Press.
+#' @examples
+#' fit <- corx(mtcars[, 1:4])
+#' if (requireNamespace("psych", quietly = TRUE)) plot_mds(fit)
+#' @md
+#' @export
 
 plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
   call = match.call()
