@@ -1,4 +1,4 @@
-# corx (development version)
+# corx 1.0.8
 
 - Upper-triangle tables now retain the last variable, and two-variable tables keep their dimensions. P-value rows align with the displayed coefficients, including when the correlation method is set explicitly or supplied through a variable. Triangular output requires matching source variables on both axes.
 
