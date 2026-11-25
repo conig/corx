@@ -36,7 +36,6 @@
 #' @export
 
 plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
-  call = match.call()
   if(methods::is(corx, "corx")){
     corx <- stats::coef(corx)
   }else{
@@ -55,18 +54,14 @@ plot_mds = function(corx, k = NULL, abs = TRUE, ...) {
 
   # ----
 
+  if (!isSymmetric(corx)) stop("MDS requires a symmetric correlation matrix.", call. = FALSE)
+  if (any(!is.finite(corx))) stop("MDS requires finite correlations for every pair.", call. = FALSE)
   if(abs) corx <- abs(corx)
   distances =  psych::cor2dist(corx)
   cmd = stats::cmdscale(distances, k = 2, eig = TRUE)
 
   new_dists = dist(cmd$points, diag = TRUE, upper = TRUE)
   r2 = (stats::cor(new_dists, stats::as.dist(distances)) ^2) *100
-
-  df1 = 1
-  df2 = NROW(new_dists) - 2
-
-  f_value = r2/ ((1 - r2)/df2)
-  p_val = stats::pf(f_value, 1, df2, lower.tail = FALSE)
 
   dist = data.frame(cmd$points)
   colnames(dist) = c("x", "y")

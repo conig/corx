@@ -61,8 +61,7 @@ formatted coefficients (for example, \code{.42} instead of \code{0.42}).}
 \item{triangle}{Which part of a square matrix with the same variables in the
 same order on both axes to show in the formatted table: \code{"lower"},
 \code{"upper"}, or \code{NULL} (the default) for the full table. The stored numeric
-matrices are not cropped. With two variables and no descriptive columns,
-triangular formatting drops the matrix dimensions.}
+matrices are not cropped.}
 
 \item{caption}{Optional character string printed above the table and used as
 the default plot title.}
@@ -91,8 +90,7 @@ is \code{FALSE}.}
 A list of class \code{corx} with the following components:
 \itemize{
 \item \code{call}: The matched function call.
-\item \code{apa}: The formatted character matrix (or vector if triangular
-formatting drops the dimensions).
+\item \code{apa}: The formatted character matrix.
 \item \code{r}: The unrounded matrix of correlation coefficients.
 \item \code{p}: The matrix of p-values, adjusted if requested.
 \item \code{n}: The matrix of observation counts.

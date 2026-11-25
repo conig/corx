@@ -4,10 +4,10 @@
 \alias{apa_table.corx}
 \title{Format a correlation table with papaja}
 \usage{
-apa_table.corx(corx, ...)
+apa_table.corx(x, ...)
 }
 \arguments{
-\item{corx}{A \code{\link[=corx]{corx()}} object.}
+\item{x}{A \code{\link[=corx]{corx()}} object.}
 
 \item{...}{Additional arguments passed to \code{papaja::apa_table()}. Specify
 \code{caption} or \code{note} here to override the values stored in the object.
@@ -19,8 +19,7 @@ that function.
 }
 \description{
 Method for \code{papaja::apa_table()} that uses the formatted table from a
-\code{\link[=corx]{corx()}} object. Pass the object as the first positional argument, for
-example \code{papaja::apa_table(fit)}.
+\code{\link[=corx]{corx()}} object.
 }
 \seealso{
 \code{\link[=to_table]{to_table()}}.

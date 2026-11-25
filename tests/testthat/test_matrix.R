@@ -348,7 +348,7 @@ test_that("triangle upper works",{
 
   cr = corx(mtcars,  grey_nonsig = F, describe = c(test = median),
             triangle = "upper", round = 8, remove_lead = F, stars = 0,
-            method = "spearman")$apa[3,7]
+            method = "spearman")$apa[3, "7"]
 
   y = suppressWarnings(unname(digits(cor.test(mtcars$disp, mtcars$qsec, method = "spearman")$estimate, 8)))
   testthat::expect_equal(cr, y)

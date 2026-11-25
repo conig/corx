@@ -14,20 +14,13 @@ table as stored in the object. If \code{TRUE}, add rows for the stored
 p-values, which are adjusted if requested in \code{\link[=corx]{corx()}}.}
 }
 \value{
-If \code{include_p = FALSE}, the stored formatted table: usually a
-character matrix (see \code{triangle} in \code{\link[=corx]{corx()}}). Otherwise, a data frame with
-alternating coefficient and p-value rows.
+If \code{include_p = FALSE}, the formatted character matrix. Otherwise,
+a data frame with alternating coefficient and p-value rows. Descriptive
+statistics have no corresponding p-value; those cells are missing.
 }
 \description{
 Extract the formatted table from a \code{\link[=corx]{corx()}} result, optionally adding
 p-values on a separate row beneath each row of coefficients.
-}
-\details{
-For Pearson correlations, leave \code{method} at its default in
-\code{\link[=corx]{corx()}} when using \code{include_p = TRUE}. Explicitly setting
-\code{method = "pearson"} currently causes an error in that output mode.
-Use the full table rather than triangular formatting when adding
-p-values to a two-variable table.
 }
 \examples{
 fit <- corx(mtcars[, 1:4])

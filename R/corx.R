@@ -33,8 +33,7 @@
 #' @param triangle Which part of a square matrix with the same variables in the
 #'   same order on both axes to show in the formatted table: `"lower"`,
 #'   `"upper"`, or `NULL` (the default) for the full table. The stored numeric
-#'   matrices are not cropped. With two variables and no descriptive columns,
-#'   triangular formatting drops the matrix dimensions.
+#'   matrices are not cropped.
 #' @param caption Optional character string printed above the table and used as
 #'   the default plot title.
 #' @param note Optional character string printed below the table. If `NULL`,
@@ -75,8 +74,7 @@
 #'
 #' @returns A list of class `corx` with the following components:
 #'   * `call`: The matched function call.
-#'   * `apa`: The formatted character matrix (or vector if triangular
-#'     formatting drops the dimensions).
+#'   * `apa`: The formatted character matrix.
 #'   * `r`: The unrounded matrix of correlation coefficients.
 #'   * `p`: The matrix of p-values, adjusted if requested.
 #'   * `n`: The matrix of observation counts.
@@ -135,7 +133,7 @@ corx <-
     }
 
     if (nrow(data) < 3) {
-      stop("Can't calculate p-values with fewer than four rows of data.")
+      stop("At least three rows of data are required.")
     }
 
     if (methods::is(data, "matrix")) {
@@ -165,7 +163,13 @@ corx <-
       "All classes must be numeric."
     )
 
-    method <- method[1] # take the first method in case more than one supplied
+    if (!is.null(triangle)) {
+      triangle <- match.arg(triangle, c("lower", "upper"))
+      if (!identical(unname(x), unname(y))) {
+        stop("Triangular tables require the same variables in the same order on both axes.")
+      }
+    }
+    method <- match.arg(method[1L], c("pearson", "spearman", "kendall"))
     p_adjust <- p_adjust[1]
 
     cors <- cormat_list(
@@ -268,14 +272,14 @@ corx <-
           x
         }
 
-        pres_matrix[[names(describe)[i]]] <-
+        pres_matrix[[ncol(pres_matrix) + 1L]] <-
           unlist(lapply(seq_along(x), function(var) {
             val <- describe[[i]](data[[x[[var]]]])
             safe_round(val, round)
           }))
       }
       pres_matrix <- as.matrix(pres_matrix)
-      colnames(pres_matrix)[seq_along(orig_names)] <- orig_names
+      colnames(pres_matrix) <- c(orig_names, names(describe))
     }
 
     if (!is.null(triangle)) {
@@ -284,7 +288,10 @@ corx <-
       nums <- seq_along(rownames(pres_matrix))
       rownames(pres_matrix) <- paste0(nums, ". ", rownames(pres_matrix))
       colnames(pres_matrix)[1:length(nums)] <- nums
-      pres_matrix <- pres_matrix[, -length(nums)]
+      if (length(nums) > 1L) {
+        omit <- if (triangle == "lower") length(nums) else 1L
+        pres_matrix <- pres_matrix[, -omit, drop = FALSE]
+      }
     }
 
     # add in note --------------------------------------------
@@ -308,6 +315,8 @@ corx <-
       note = note
     )
     class(c_matrix) <- "corx"
+    attr(c_matrix, "method") <- method
+    attr(c_matrix, "triangle") <- triangle
     attr(c_matrix, "grey_nonsig") <- grey_nonsig
     attr(c_matrix, "stars") <- stars
     attr(c_matrix, "round") <- round
@@ -512,27 +521,13 @@ digits <- function(x, n = 2) {
 #' @export
 
 plot.corx <- function(x, ...) {
-  call <- match.call()
   elip <- list(...)
-
-  tri <- x$call$triangle
-  if (is.null(tri)) {
-    tri <- "full"
+  if (is.null(elip$title)) elip$title <- if (is.null(x$caption)) "" else x$caption
+  if (is.null(elip$type)) {
+    tri <- attr(x, "triangle", exact = TRUE)
+    if (is.null(tri) && is.character(x$call$triangle)) tri <- x$call$triangle
+    elip$type <- if (is.null(tri)) "full" else tri
   }
-  if (!is.null(call$type)) {
-    tri <- call$type
-  }
-
-  caption <- x$call$caption
-  if (is.null(caption)) {
-    caption <- ""
-  }
-  if (!is.null(call$title)) {
-    caption <- call$title
-  }
-
-  elip[['title']] <- caption # elip is designed
-  elip[['type']] <- tri # To be a call
   elip[['corr']] <- x$r # I'm setting arguments which will be used in do.call
   elip[['p.mat']] <- x$p # We include the p.matrix for signifance rules in ggcorrplot
 

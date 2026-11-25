@@ -28,7 +28,6 @@ cormat_list <- function(
     compute <- matrix(TRUE, length(rows), length(cols))
     compute[pairs$mirror] <- FALSE
   }
-  method <- match.arg(method, c("pearson", "kendall", "spearman"))
 
   for (i in seq_along(rows)) {
     js <- if (reuse) which(compute[i, ]) else seq_along(cols)

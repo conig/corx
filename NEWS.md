@@ -1,5 +1,11 @@
 # corx (development version)
 
+- Upper-triangle tables now retain the last variable, and two-variable tables keep their dimensions. P-value rows align with the displayed coefficients, including when the correlation method is set explicitly or supplied through a variable. Triangular output requires matching source variables on both axes.
+
+- Descriptive statistics no longer overwrite a correlation column with the same name. Plotting uses the stored caption and triangle, and MDS rejects asymmetric matrices even when the axis labels match.
+
+- The papaja table method now accepts the generic's named `x` argument.
+
 - Updated the help for exported functions and methods, including column selection, return values, and examples.
 
 - Ordinary Pearson correlations now compute the two-sided p-value directly, and tables format each distinct rounded value only once.
