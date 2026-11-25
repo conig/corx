@@ -27,12 +27,6 @@ You can install the released version of corx from
 install.packages("corx")
 ```
 
-To try features in development, you can install corx from github
-
-``` r
-remotes::install_github("conig/corx@devel")
-```
-
 ## Example
 
 ## Basic usage

@@ -19,7 +19,8 @@ original content by default, or the formatted text if
 }
 \description{
 Copy a table for pasting into a spreadsheet or another application.
-This function requires an available system clipboard.
+This function requires an interactive R session and an available system
+clipboard. In scripts, use \code{\link[=to_table]{to_table()}} to get the formatted table instead.
 }
 \seealso{
 \code{\link[=to_table]{to_table()}} to extract a table without using the clipboard.

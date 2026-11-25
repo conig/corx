@@ -1,5 +1,7 @@
 # corx 1.0.8
 
+- `to_clipboard()` now requires an interactive R session. Use `to_table()` to extract the formatted table in scripts.
+
 - Upper-triangle tables now retain the last variable, and two-variable tables keep their dimensions. P-value rows align with the displayed coefficients, including when the correlation method is set explicitly or supplied through a variable. Triangular output requires matching source variables on both axes.
 
 - Descriptive statistics no longer overwrite a correlation column with the same name. Plotting uses the stored caption and triangle, and MDS rejects asymmetric matrices even when the axis labels match.
@@ -10,7 +12,7 @@
 
 - Ordinary Pearson correlations now compute the two-sided p-value directly, and tables format each distinct rounded value only once.
 
-- Column selectors now inspect the actual data, so `where(is.numeric)` works on mixed data. Renaming a variable labels the output without changing which correlations are computed or adjusted. Explicit `x` and `y` selections that match nothing now error instead of silently using the defaults.
+- Column selectors now inspect the actual data, so `where(is.numeric)` works on mixed data. Renaming a variable labels the output without changing which correlations are computed or adjusted. Explicit `x` and `y` selections that match nothing now error instead of silently using the defaults. A variable set to `NULL` still requests the default unless a data column has the same name.
 
 - Pairs with no shared observations now return `NA` for the correlation and p-value and `0` for the sample size, without aborting the rest of the matrix (#13). Symmetric ordinary correlation matrices compute each pair only once.
 

@@ -8,6 +8,18 @@ test_that("selectors see the columns; omitted axes still use their defaults", {
   expect_error(corx(d, Sepal.Width, tidyselect::any_of("absent")), "at least one")
 })
 
+test_that("a caller's NULL selector uses the axis default", {
+  # Optional selectors passed through wrappers should behave like omitted ones.
+  cols <- NULL
+  d <- mtcars[c("mpg", "wt", "cyl")]
+  expect_equal(corx(d, x = cols)$r, corx(d)$r)
+  expect_equal(corx(d, x = c(Weight = wt, mpg), y = cols)$r,
+               corx(d, x = c(Weight = wt, mpg))$r)
+
+  d$cols <- d$cyl
+  expect_equal(corx(d, x = cols)$r, cor(d["cols"]))
+})
+
 test_that("aliases label axes without changing correlations or the test family", {
   # Two labels for mpg and a wt label that collides with a source name.
   fit <- corx(mtcars, c(mpg = mpg, Miles = mpg, Weight = wt),

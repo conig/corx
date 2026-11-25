@@ -1,7 +1,6 @@
 #' Copy a formatted correlation table to the clipboard
 #'
 #' Copy a table for pasting into a spreadsheet or another application.
-#' This function requires an available system clipboard.
 #'
 #' @param x A [corx()] object, matrix, or data frame. For a `corx` object, only
 #'   the formatted table (`x$apa`) is copied, without the caption or note.
@@ -14,11 +13,14 @@
 #' @export
 
 to_clipboard <- function(x, ...) {
-
-  if("corx" %in% class(x)){
-  clipr::write_clip(x$apa, ...)
-  }else{
-    clipr::write_clip(x, ...)
+  if (!interactive()) {
+    stop(
+      "to_clipboard() only works in interactive R sessions. Use to_table() in scripts.",
+      call. = FALSE
+    )
   }
-
+  if (inherits(x, "corx")) {
+    x <- x$apa
+  }
+  clipr::write_clip(x, ...)
 }
