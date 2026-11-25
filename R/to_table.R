@@ -136,11 +136,3 @@ round_p <- function(p, n = 3, stars = c(), leading.zero = FALSE, apa_threshold =
   })
   unlist(out)
 }
-
-digits <- function(x, n = 2) {
-  x = round(x, n)
-  x[] = sapply(x, function(i) {
-         ifelse(!is.na(i), trimws(format(round(as.numeric(as.character(i)), n), nsmall = n)),NA)
-      })
-  return(x)
-}

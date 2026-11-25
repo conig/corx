@@ -23,3 +23,13 @@ test_that("small overlaps respect method and control-variable requirements", {
   expect_equal(as.numeric(partial$n), 1)
   expect_true(is.na(partial$r) && is.na(partial$p))
 })
+
+test_that("Pearson tails use the complete pairs for each comparison", {
+  d <- data.frame(x = 1:100, strong = -(1:100) + sin(1:100),
+                  weak = cos(1:100), perfect = 1:100)
+  d$strong[1:20] <- NA
+  fit <- corx(d, x, c(strong, weak, perfect))
+  ref <- vapply(d[-1], function(y) cor.test(d$x, y)$p.value, numeric(1))
+  # Compare on the log scale so tiny nonzero p-values cannot pass as zero.
+  expect_equal(log(fit$p[1, ]), log(ref))
+})

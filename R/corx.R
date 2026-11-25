@@ -55,8 +55,9 @@
 #'   is `FALSE`.
 #'
 #' @details
-#' Ordinary correlations use `stats::cor.test()`; rank-based p-values use
-#' its asymptotic calculation. Partial correlations use `ppcor::pcor.test()`.
+#' Ordinary Pearson correlations use the two-sided t test with `n - 2` degrees
+#' of freedom. Ordinary rank correlations use the asymptotic p-values from
+#' `stats::cor.test()`. Partial correlations use `ppcor::pcor.test()`.
 #'
 #' **Missing data.** Each pair uses only the rows observed for both variables
 #' and all controls. The `n` matrix records this count, even when it is zero.
@@ -480,13 +481,13 @@ coef.corx <- function(object, ...) object$r # coef returns r matrix
 
 digits <- function(x, n = 2) {
   x <- round(x, n)
-  x[] <- sapply(x, function(i) {
-    ifelse(
-      !is.na(i),
-      trimws(format(round(as.numeric(as.character(i)), n), nsmall = n)),
-      NA
-    )
+  # Many coefficients have the same printed value (at most 201 at two decimals).
+  values <- unique(as.vector(x))
+  labels <- sapply(values, function(i) {
+    if (is.na(i)) return(NA)
+    format(round(as.numeric(as.character(i)), n), nsmall = n, trim = TRUE)
   })
+  x[] <- labels[match(x, values)]
   x
 }
 

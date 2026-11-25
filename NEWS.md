@@ -2,6 +2,8 @@
 
 - Updated the help for exported functions and methods, including column selection, return values, and examples.
 
+- Ordinary Pearson correlations now compute the two-sided p-value directly, and tables format each distinct rounded value only once.
+
 - Column selectors now inspect the actual data, so `where(is.numeric)` works on mixed data. Renaming a variable labels the output without changing which correlations are computed or adjusted. Explicit `x` and `y` selections that match nothing now error instead of silently using the defaults.
 
 - Pairs with no shared observations now return `NA` for the correlation and p-value and `0` for the sample size, without aborting the rest of the matrix (#13). Symmetric ordinary correlation matrices compute each pair only once.

@@ -67,10 +67,25 @@ flex_cor <- function(x, y, z = NULL, method, data) {
   if (is.null(z)) {
     a <- data[[x]]
     b <- data[[y]]
-    n <- sum(stats::complete.cases(a, b))
+    ok <- stats::complete.cases(a, b)
+    n <- sum(ok)
     if (n < 2L) return(list(r = NA_real_, n = n, p = NA_real_))
-    if (n == 2L && method != "kendall") {
-      # The coefficient exists, but the t test has zero degrees of freedom.
+    if (method == "pearson") {
+      if (n != length(a)) {
+        a <- a[ok]
+        b <- b[ok]
+      }
+      r <- stats::cor(a, b)
+      # Same two-sided t test as cor.test(), without building an htest per pair.
+      df <- n - 2L
+      p <- NA_real_
+      if (df > 0L) {
+        t <- sqrt(df) * r / sqrt(1 - r^2)
+        p <- 2 * stats::pt(-abs(t), df)
+      }
+      return(list(r = r, n = n, p = p))
+    }
+    if (n == 2L && method == "spearman") {
       r <- stats::cor(a, b, use = "complete.obs", method = method)
       return(list(r = r, n = n, p = NA_real_))
     }

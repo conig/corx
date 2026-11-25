@@ -109,8 +109,9 @@ table. Unrounded coefficients, p-values, and observation counts are also
 available separately.
 }
 \details{
-Ordinary correlations use \code{stats::cor.test()}; rank-based p-values use
-its asymptotic calculation. Partial correlations use \code{ppcor::pcor.test()}.
+Ordinary Pearson correlations use the two-sided t test with \code{n - 2} degrees
+of freedom. Ordinary rank correlations use the asymptotic p-values from
+\code{stats::cor.test()}. Partial correlations use \code{ppcor::pcor.test()}.
 
 \strong{Missing data.} Each pair uses only the rows observed for both variables
 and all controls. The \code{n} matrix records this count, even when it is zero.
