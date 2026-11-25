@@ -1,5 +1,5 @@
 # Only variables on both axes can form self-comparisons or reversed pairs.
-# Align that square block by name, keeping its positions in the original matrix.
+# Align that square block by variable identity, keeping its original cell positions.
 shared_pair_cells <- function(x, y) {
   shared <- intersect(x, y)
   rows <- match(shared, x)

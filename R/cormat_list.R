@@ -1,8 +1,8 @@
 #' cormat_list
 #' @param data data.frame
-#' @param x character vector, row names
-#' @param y character vector, column names
-#' @param z character vector, partial variable names
+#' @param x named column positions for the row variables
+#' @param y named column positions for the column variables
+#' @param z column positions of the control variables, or NULL
 #' @param method string, passed to cor.test
 #' @param p_adjust string, passed to p.adjust
 
@@ -14,22 +14,26 @@ cormat_list <- function(
   method,
   p_adjust
 ) {
-  template <- matrix(NA_real_, length(x), length(y), dimnames = list(x, y))
+  # Compute and adjust once per source pair, even if it has multiple labels.
+  rows <- x[!duplicated(x)]
+  cols <- y[!duplicated(y)]
+  template <- matrix(NA_real_, length(rows), length(cols),
+                     dimnames = list(names(rows), names(cols)))
   cors <- list(r = template, n = template, p = template)
   if (is.null(z) || p_adjust != "none") {
-    pairs <- shared_pair_cells(x, y)
+    pairs <- shared_pair_cells(rows, cols)
   }
   reuse <- is.null(z) && length(pairs$mirror) > 0L
   if (reuse) {
-    compute <- matrix(TRUE, length(x), length(y))
+    compute <- matrix(TRUE, length(rows), length(cols))
     compute[pairs$mirror] <- FALSE
   }
   method <- match.arg(method, c("pearson", "kendall", "spearman"))
 
-  for (i in seq_along(x)) {
-    cols <- if (reuse) which(compute[i, ]) else seq_along(y)
-    for (j in cols) {
-      pair <- flex_cor(x[i], y[j], z, method, data)
+  for (i in seq_along(rows)) {
+    js <- if (reuse) which(compute[i, ]) else seq_along(cols)
+    for (j in js) {
+      pair <- flex_cor(rows[[i]], cols[[j]], z, method, data)
       cors$r[i, j] <- pair$r
       cors$n[i, j] <- pair$n
       cors$p[i, j] <- pair$p
@@ -47,6 +51,15 @@ cormat_list <- function(
     cors$p <- adjust_pmat(cors$p, p_adjust, pairs)
   }
 
+  if (length(rows) != length(x) || length(cols) != length(y)) {
+    i <- match(x, rows)
+    j <- match(y, cols)
+    cors <- lapply(cors, function(m) {
+      m <- m[i, j, drop = FALSE]
+      dimnames(m) <- list(names(x), names(y))
+      m
+    })
+  }
   cors
 }
 
@@ -66,7 +79,7 @@ flex_cor <- function(x, y, z = NULL, method, data) {
     return(list(r = test$estimate, n = n, p = test$p.value))
   }
 
-  partial_data <- stats::na.omit(data[, unique(c(x, y, z)), drop = FALSE])
+  partial_data <- stats::na.omit(data[, c(x, y, z), drop = FALSE])
   n <- nrow(partial_data)
   # ppcor's t test needs positive residual df; its Kendall test needs two
   # observations after subtracting the number of controls.
@@ -76,9 +89,9 @@ flex_cor <- function(x, y, z = NULL, method, data) {
   if (x != y) {
     cor_ob.partial <-
       ppcor::pcor.test(
-        x = partial_data[[x]],
-        y = partial_data[[y]],
-        z = partial_data[, z, drop = FALSE],
+        x = partial_data[[1L]],
+        y = partial_data[[2L]],
+        z = partial_data[, -(1:2), drop = FALSE],
         method = method
       )
 

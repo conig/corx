@@ -8,9 +8,13 @@
 #'   must be numeric or integer. Numeric columns with value labels are accepted;
 #'   character and factor columns are not.
 #' @param x Column selection for the rows of the result. The default, `NULL`,
-#'   selects all columns. Use bare names, quoted names, or tidyselect helpers.
+#'   selects all columns. Use bare names, quoted names, or tidyselect helpers
+#'   such as `where(is.numeric)`. For a character vector stored in `cols`, use
+#'   `tidyselect::all_of(cols)`. An explicit selection must match a column.
+#'   Use `c(Label = column)` to label a variable without renaming the input.
 #' @param y Column selection for the columns of the result, using the same syntax
-#'   as `x`. The default, `NULL`, uses the selection in `x`.
+#'   as `x`. The default, `NULL`, uses the selection in `x`. An explicit
+#'   selection must match a column. Labels on the two axes may differ.
 #' @param z Column selection for control variables, using the same syntax as
 #'   `x`. The default, `NULL`, computes ordinary correlations. Selected controls
 #'   are removed from both axes of the result.
@@ -137,50 +141,25 @@ corx <-
       data <- data.frame(data, check.names = FALSE)
     }
 
-    x <- eval_select_names(colnames(data), {{ x }}, strict = TRUE)
-    y <- eval_select_names(colnames(data), {{ y }}, strict = TRUE)
-    z <- eval_select_names(colnames(data), {{ z }}, strict = TRUE)
-
-    # allow rename within select
-    data <- rename_if_needed(data, x)
-    data <- rename_if_needed(data, y)
-    data <- rename_if_needed(data, z)
-
-    if (length(x) > 0) {
-      x <- names(x)
-    }
-    if (length(y) > 0) {
-      y <- names(y)
-    }
-    if (length(z) > 0) {
-      z <- names(z)
-    }
-
-    if (length(x) == 0) {
-      x <- names(data)
-    }
-
-    if (length(y) == 0) {
-      y <- x
-    }
-
-    if (length(z) == 0) {
+    # Locations identify the source columns; their names label the output axes.
+    x <- select_columns(data, rlang::enquo(x), stats::setNames(seq_along(data), names(data)))
+    y <- select_columns(data, rlang::enquo(y), x)
+    z <- select_columns(data, rlang::enquo(z), NULL, allow_empty = TRUE)
+    if (length(z)) {
+      z <- unique(z)
+      x <- x[!x %in% z]
+      y <- y[!y %in% z]
+    } else {
       z <- NULL
     }
 
-    if (length(z) > 0) {
-      # remove partialled out variable from x and y
-      x <- x[!x %in% z]
-      y <- y[!y %in% z]
-    }
-
-    if (length(x) == 0 | length(y) == 0) {
+    if (!length(x) || !length(y)) {
       stop("Can't partial out the entirety of x or y")
     }
 
     # check classes are appropriate
     check_classes(
-      data[, unique(c(x, y, z))],
+      data[, unique(c(x, y, z)), drop = FALSE],
       c("numeric", "integer"),
       "All classes must be numeric."
     )
@@ -200,6 +179,7 @@ corx <-
     pres_matrix <- apa_matrix(
       r_matrix = cors$r, #get apa matrix
       p_matrix = cors$p,
+      self = outer(unname(x), unname(y), "=="),
       stars = stars,
       round = round,
       remove_lead = remove_lead,
@@ -275,9 +255,6 @@ corx <-
         )
       }
 
-      data <- data.frame(data)
-      x <- make.names(x)
-
       orig_names <- colnames(pres_matrix)
       pres_matrix <- data.frame(pres_matrix)
 
@@ -292,7 +269,7 @@ corx <-
 
         pres_matrix[[names(describe)[i]]] <-
           unlist(lapply(seq_along(x), function(var) {
-            val <- describe[[i]](data[, x[[var]]])
+            val <- describe[[i]](data[[x[[var]]]])
             safe_round(val, round)
           }))
       }
@@ -369,6 +346,7 @@ partial_n_matrix <- function(data, x, y, z) {
 #' @param round How many digits to round to?
 #' @param remove_lead a logical. Should leading zeros be removed?
 #' @param triangle can select lower upper or NULL
+#' @param self logical matrix identifying comparisons of a variable with itself
 
 apa_matrix <- function(
   r_matrix,
@@ -376,22 +354,13 @@ apa_matrix <- function(
   stars,
   round,
   remove_lead,
-  triangle
+  triangle,
+  self
 ) {
   f_matrix <- r_matrix
   f_matrix[] <- digits(f_matrix, round)
 
-  row_names <- matrix(rownames(r_matrix), nrow(r_matrix), ncol = ncol(r_matrix))
-  col_names <- matrix(
-    colnames(r_matrix),
-    nrow = nrow(r_matrix),
-    ncol = ncol(r_matrix),
-    byrow = T
-  )
-
-  f_matrix[row_names == col_names] <- " - "
-
-  #diag(f_matrix)
+  f_matrix[self] <- " - "
 
   if (!is.null(triangle)) {
     if (triangle == "lower") {
@@ -405,7 +374,7 @@ apa_matrix <- function(
   }
 
   s_matrix <- star_matrix(p_matrix, stars = stars)
-  s_matrix[row_names == col_names] <- ""
+  s_matrix[self] <- ""
 
   f_matrix[] <- paste0(f_matrix, s_matrix)
 
@@ -597,31 +566,28 @@ as.data.frame.corx <- function(x, ...) {
 
 check_classes <- function(data, ok_classes, stop_message, stop = TRUE) {
   v_is <- function(x, classes) {
+    if (!is.object(x) && inherits(x, classes)) return(TRUE)
     x <- labelled::remove_labels(x)
-    any(sapply(classes, function(y) {
-      methods::is(x, y)
-    }))
+    any(vapply(classes, function(y) methods::is(x, y), logical(1)))
   }
 
-  classes <- lapply(data, class)
+  class_ok <- vapply(data, v_is, logical(1), classes = ok_classes)
+  if (all(class_ok)) return(invisible(NULL))
 
-  class_ok <- sapply(data, function(x) v_is(x, ok_classes))
   bad_cols <- names(data)[!class_ok]
-  bad_index <- which(names(data) %in% bad_cols)
-  bad_classes <- sapply(classes[!class_ok], function(x) {
-    paste(abbreviate(x, 3), collapse = ",")
-  })
+  bad_index <- which(!class_ok)
+  bad_classes <- vapply(data[!class_ok], function(x) {
+    paste(abbreviate(class(x), 3), collapse = ",")
+  }, character(1))
   script <- paste(
     glue::glue("[{bad_index}] '{bad_cols}' <{bad_classes}>"),
     collapse = ", "
   )
 
-  if (!all(class_ok)) {
-    if (stop) {
-      stop(stop_message, " ", script, ".", call. = F)
-    } else {
-      warning(stop_message, " ", script, ".", call. = F)
-    }
+  if (stop) {
+    stop(stop_message, " ", script, ".", call. = FALSE)
+  } else {
+    warning(stop_message, " ", script, ".", call. = FALSE)
   }
 }
 
@@ -646,23 +612,4 @@ star_matrix <- function(m, stars) {
     get_stars(p, stars = stars)
   })
   s_matrix
-}
-
-#' rename if needed
-#'
-#' Renames columns
-#' @param data data object
-#' @param x a character vector. If named, columns will be renamed
-
-rename_if_needed <- function(data, x) {
-  rename_vars <- x[names(x) != x]
-  for (i in seq_along(rename_vars)) {
-    if (names(x)[i] != x[i]) {
-      colnames(data)[colnames(data) == x[i]] <- names(rename_vars[
-        rename_vars == x[i]
-      ])
-    }
-  }
-
-  data
 }

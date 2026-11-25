@@ -20,7 +20,7 @@ Imports:
     ggcorrplot,
     glue,
     clipr,
-    tidyselect,
+    tidyselect (>= 1.2.0),
     rlang,
     moments,
     ggpubr,

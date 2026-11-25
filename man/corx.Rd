@@ -28,10 +28,14 @@ must be numeric or integer. Numeric columns with value labels are accepted;
 character and factor columns are not.}
 
 \item{x}{Column selection for the rows of the result. The default, \code{NULL},
-selects all columns. Use bare names, quoted names, or tidyselect helpers.}
+selects all columns. Use bare names, quoted names, or tidyselect helpers
+such as \code{where(is.numeric)}. For a character vector stored in \code{cols}, use
+\code{tidyselect::all_of(cols)}. An explicit selection must match a column.
+Use \code{c(Label = column)} to label a variable without renaming the input.}
 
 \item{y}{Column selection for the columns of the result, using the same syntax
-as \code{x}. The default, \code{NULL}, uses the selection in \code{x}.}
+as \code{x}. The default, \code{NULL}, uses the selection in \code{x}. An explicit
+selection must match a column. Labels on the two axes may differ.}
 
 \item{z}{Column selection for control variables, using the same syntax as
 \code{x}. The default, \code{NULL}, computes ordinary correlations. Selected controls
