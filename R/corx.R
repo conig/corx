@@ -26,7 +26,12 @@
 #'
 #' ##  Missing data:
 #'
-#' Observations containing missing data required to complete a correlation or partial correlation are automatically removed.
+#' Each pair uses the rows observed for both variables and all controls. The n matrix
+#' records this count, even when it is zero. With fewer than two observations,
+#' the coefficient and p-value are NA. With exactly two, ordinary Pearson and
+#' Spearman coefficients are returned without a p-value. Partial tests require
+#' at least three observations beyond the number of controls (two for Kendall);
+#' otherwise both results are NA.
 #'
 #' ## P-adjust:
 #'

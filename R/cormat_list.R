@@ -14,31 +14,27 @@ cormat_list <- function(
   method,
   p_adjust
 ) {
-  cors <- list()
+  template <- matrix(NA_real_, length(x), length(y), dimnames = list(x, y))
+  cors <- list(r = template, n = template, p = template)
+  symmetric <- is.null(z) && identical(x, y)
+  method <- match.arg(method, c("pearson", "kendall", "spearman"))
 
-  cormat <- matrix(nrow = length(x), ncol = length(y))
-  rownames(cormat) <- x
-  colnames(cormat) <- y
-
-  cors$r <- cormat
-  cors$n <- cormat
-  cors$p <- cormat
-
-  for (r in x) {
-    for (c in y) {
-      cor_ob <-
-        flex_cor(
-          x = r,
-          y = c,
-          z = z,
-          method = method,
-          data = data
-        )
-
-      cors$r[r, c] <- cor_ob$r
-      cors$n[r, c] <- cor_ob$n
-      cors$p[r, c] <- cor_ob$p
+  for (i in seq_along(x)) {
+    cols <- if (symmetric) i:length(y) else seq_along(y)
+    for (j in cols) {
+      pair <- flex_cor(x[i], y[j], z, method, data)
+      cors$r[i, j] <- pair$r
+      cors$n[i, j] <- pair$n
+      cors$p[i, j] <- pair$p
     }
+  }
+
+  if (symmetric) {
+    lower <- lower.tri(template)
+    cors <- lapply(cors, function(m) {
+      m[lower] <- t(m)[lower]
+      m
+    })
   }
 
   if (p_adjust != "none") {
@@ -50,28 +46,33 @@ cormat_list <- function(
 
 flex_cor <- function(x, y, z = NULL, method, data) {
   if (is.null(z)) {
-    cor_ob <-
-      stats::cor.test(
-        x = data[, x],
-        y = data[, y],
-        method = method,
-        exact = FALSE
-      )
-    return(list(
-      r = cor_ob$estimate,
-      n = as.numeric(psych::pairwiseCount(data[, x], data[, y])),
-      p = cor_ob$p.value
-    ))
+    a <- data[[x]]
+    b <- data[[y]]
+    n <- sum(stats::complete.cases(a, b))
+    if (n < 2L) return(list(r = NA_real_, n = n, p = NA_real_))
+    if (n == 2L && method != "kendall") {
+      # The coefficient exists, but the t test has zero degrees of freedom.
+      r <- stats::cor(a, b, use = "complete.obs", method = method)
+      return(list(r = r, n = n, p = NA_real_))
+    }
+
+    test <- stats::cor.test(a, b, method = method, exact = FALSE)
+    return(list(r = test$estimate, n = n, p = test$p.value))
   }
 
-  partial_data <- stats::na.omit(data[, c(x, y, z)])
+  partial_data <- stats::na.omit(data[, unique(c(x, y, z)), drop = FALSE])
+  n <- nrow(partial_data)
+  # ppcor's t test needs positive residual df; its Kendall test needs two
+  # observations after subtracting the number of controls.
+  min_n <- length(z) + if (method == "kendall") 2L else 3L
+  if (n < min_n) return(list(r = NA_real_, n = n, p = NA_real_))
 
   if (x != y) {
     cor_ob.partial <-
       ppcor::pcor.test(
-        x = partial_data[, x],
-        y = partial_data[, y],
-        z = partial_data[, z],
+        x = partial_data[[x]],
+        y = partial_data[[y]],
+        z = partial_data[, z, drop = FALSE],
         method = method
       )
 

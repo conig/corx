@@ -1,3 +1,7 @@
+# corx (development version)
+
+- Pairs with no shared observations now return `NA` for the correlation and p-value and `0` for the sample size, without aborting the rest of the matrix (#13). Symmetric ordinary correlation matrices compute each pair only once.
+
 # corx 1.0.7.3
 
 - Corx now can identify haven labelled variables as numeric
