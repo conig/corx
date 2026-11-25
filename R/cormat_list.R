@@ -16,11 +16,18 @@ cormat_list <- function(
 ) {
   template <- matrix(NA_real_, length(x), length(y), dimnames = list(x, y))
   cors <- list(r = template, n = template, p = template)
-  symmetric <- is.null(z) && identical(x, y)
+  if (is.null(z) || p_adjust != "none") {
+    pairs <- shared_pair_cells(x, y)
+  }
+  reuse <- is.null(z) && length(pairs$mirror) > 0L
+  if (reuse) {
+    compute <- matrix(TRUE, length(x), length(y))
+    compute[pairs$mirror] <- FALSE
+  }
   method <- match.arg(method, c("pearson", "kendall", "spearman"))
 
   for (i in seq_along(x)) {
-    cols <- if (symmetric) i:length(y) else seq_along(y)
+    cols <- if (reuse) which(compute[i, ]) else seq_along(y)
     for (j in cols) {
       pair <- flex_cor(x[i], y[j], z, method, data)
       cors$r[i, j] <- pair$r
@@ -29,16 +36,15 @@ cormat_list <- function(
     }
   }
 
-  if (symmetric) {
-    lower <- lower.tri(template)
+  if (reuse) {
     cors <- lapply(cors, function(m) {
-      m[lower] <- t(m)[lower]
+      m[pairs$mirror] <- m[pairs$first]
       m
     })
   }
 
   if (p_adjust != "none") {
-    cors$p <- adjust_pmat(cors$p, p_adjust)
+    cors$p <- adjust_pmat(cors$p, p_adjust, pairs)
   }
 
   cors

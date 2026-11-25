@@ -1,21 +1,26 @@
-#' adjust_p
-#' @param pmat matrix of p-values to adjust
-#' @param p_adjust character describing adjustment to make. See stats::p.adjust
-
-adjust_pmat <- function(pmat, p_adjust){
-  if(isSymmetric(pmat)){
-    ps <- pmat[upper.tri(pmat, diag = FALSE)]
-    ps_adj <- stats::p.adjust(ps, method = p_adjust)
-
-    pmat[upper.tri(pmat, diag = FALSE)] <- ps_adj
-
-    pmat[lower.tri(pmat)] <-
-      t(pmat)[lower.tri(pmat, diag = FALSE)]
-     if(!isSymmetric(pmat)) stop("p-matrix no longer symmetric due to error with p.adjust")
-  }else{
-    if(any(rownames(pmat) %in% colnames(pmat))) warning("At least one row variable was also specified as a column variable in a non-symmetrical matrix and p_adjust != 'none'. P-values have been adjusted assuming that ALL pairs (n = ", length(pmat),") in the matrix are unique and valid.")
-        pmat[] <- stats::p.adjust(pmat, method = p_adjust)
-      }
-pmat
+# Only variables on both axes can form self-comparisons or reversed pairs.
+# Align that square block by name, keeping its positions in the original matrix.
+shared_pair_cells <- function(x, y) {
+  shared <- intersect(x, y)
+  rows <- match(shared, x)
+  offsets <- (match(shared, y) - 1) * length(x)
+  block <- outer(rows, offsets, "+")  # R matrices are stored column by column
+  upper <- upper.tri(block)
+  list(self = diag(block), first = block[upper], mirror = t(block)[upper])
 }
 
+#' adjust_p
+#' @param pmat named matrix of p-values to adjust
+#' @param p_adjust character describing adjustment to make. See stats::p.adjust
+#' @param pairs positions of self-comparisons and reversed pairs in pmat
+adjust_pmat <- function(pmat, p_adjust,
+                        pairs = shared_pair_cells(rownames(pmat), colnames(pmat))) {
+  omit <- c(pairs$self, pairs$mirror)
+  if (!length(omit)) {
+    pmat[] <- stats::p.adjust(pmat, method = p_adjust)
+  } else {
+    pmat[-omit] <- stats::p.adjust(pmat[-omit], method = p_adjust)
+    pmat[pairs$mirror] <- pmat[pairs$first]
+  }
+  pmat
+}

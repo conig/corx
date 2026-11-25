@@ -35,7 +35,9 @@
 #'
 #' ## P-adjust:
 #'
-#' P-values attained can be adjusted for multiple comparisons by using the 'p_adjust' argument. This calls the function stats::p.adjust. When a matrix is symmetrical, p-values are only adjusted for unique comparisons. When a correlation matrix is not symmetrical, all comparisons are assumed to be unique.
+#' The p_adjust argument calls stats::p.adjust once on the distinct unordered variable pairs
+#' shown in the matrix. Self-correlations are excluded and their p-values are left
+#' unchanged. If a pair appears in both orientations, both receive the same adjusted p-value.
 
 #' @examples
 #' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
