@@ -2,15 +2,33 @@
 % Please edit documentation in R/corx.R
 \name{plot.corx}
 \alias{plot.corx}
-\title{plot.corx}
+\title{Plot a correlation matrix}
 \usage{
 \method{plot}{corx}(x, ...)
 }
 \arguments{
-\item{x}{a corx object}
+\item{x}{A \code{\link[=corx]{corx()}} object.}
 
-\item{...}{other arguments to ggcorrplot::ggcorrplot}
+\item{...}{Named arguments passed to \code{ggcorrplot::ggcorrplot()}. Use \code{type}
+or \code{title} to override the defaults. The coefficient and p-value matrices
+are supplied from \code{x}; do not pass \code{corr} or \code{p.mat}.}
+}
+\value{
+A ggplot object.
 }
 \description{
-plot.corx
+Plot the coefficients and p-values stored in a \code{\link[=corx]{corx()}} object using
+\code{ggcorrplot::ggcorrplot()}.
+}
+\details{
+The plot uses the \code{triangle} setting from the original call, or
+\code{"full"} if none was supplied. The caption in the original call supplies
+the default title.
+}
+\examples{
+fit <- corx(mtcars[, 1:4])
+plot(fit, type = "lower", title = "Motor Trend car data")
+}
+\seealso{
+\code{\link[=plot_mds]{plot_mds()}}.
 }

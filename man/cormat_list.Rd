@@ -9,11 +9,11 @@ cormat_list(data, x, y, z, method, p_adjust)
 \arguments{
 \item{data}{data.frame}
 
-\item{x}{character vector, row names}
+\item{x}{named column positions for the row variables}
 
-\item{y}{character vector, column names}
+\item{y}{named column positions for the column variables}
 
-\item{z}{character vector, partial variable names}
+\item{z}{column positions of the control variables, or NULL}
 
 \item{method}{string, passed to cor.test}
 

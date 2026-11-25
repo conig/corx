@@ -4,12 +4,18 @@
 \alias{adjust_pmat}
 \title{adjust_p}
 \usage{
-adjust_pmat(pmat, p_adjust)
+adjust_pmat(
+  pmat,
+  p_adjust,
+  pairs = shared_pair_cells(rownames(pmat), colnames(pmat))
+)
 }
 \arguments{
-\item{pmat}{matrix of p-values to adjust}
+\item{pmat}{named matrix of p-values to adjust}
 
 \item{p_adjust}{character describing adjustment to make. See stats::p.adjust}
+
+\item{pairs}{positions of self-comparisons and reversed pairs in pmat}
 }
 \description{
 adjust_p

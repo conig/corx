@@ -2,15 +2,31 @@
 % Please edit documentation in R/to_table.R
 \name{to_table}
 \alias{to_table}
-\title{to_table}
+\title{Extract a formatted correlation table}
 \usage{
 to_table(corx, include_p = FALSE)
 }
 \arguments{
-\item{corx}{a corx object}
+\item{corx}{A \code{\link[=corx]{corx()}} object.}
 
-\item{include_p}{logical. should p-values be included?}
+\item{include_p}{Logical. If \code{FALSE} (the default), return the formatted
+table as stored in the object. If \code{TRUE}, add rows for the stored
+p-values, which are adjusted if requested in \code{\link[=corx]{corx()}}.}
+}
+\value{
+If \code{include_p = FALSE}, the formatted character matrix. Otherwise,
+a data frame with alternating coefficient and p-value rows. Descriptive
+statistics have no corresponding p-value; those cells are missing.
 }
 \description{
-Tabulate correlation matrices
+Extract the formatted table from a \code{\link[=corx]{corx()}} result, optionally adding
+p-values on a separate row beneath each row of coefficients.
+}
+\examples{
+fit <- corx(mtcars[, 1:4])
+to_table(fit)
+to_table(fit, include_p = TRUE)
+}
+\seealso{
+\link{corx-methods}, \code{\link[=to_clipboard]{to_clipboard()}}.
 }

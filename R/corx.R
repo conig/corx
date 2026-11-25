@@ -1,57 +1,100 @@
-#' corx
+#' Compute and format a correlation matrix
 #'
-#' Calculates correlations matrices. Relevant values are stored in a list with methods for easy retrieval and formatting in publication ready tables.
+#' Compute ordinary or partial correlations and format them for an APA-style
+#' table. Unrounded coefficients, p-values, and observation counts are also
+#' available separately.
 #'
-#' @param data data.frame or matrix
-#' @param x a vector of rownames. Defaults to all
-#' @param y a vector of colnames. If not supplied, y is set to x.
-#' @param z a vector of variable names. Control variables to be used in partial correlations - defaults to NULL
-#' @param method character. One of "pearson", "spearman", or "kendall"
-#' @param round numeric. How many digits should correlation coefficients be rounded to in printing?
-#' @param stars a numeric vector. This argument defines cut-offs for p-value stars.
-#' @param p_adjust character. What adjustment for multiple tests should be used? One of "none" (default), "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr"
-#' @param remove_lead logical. if TRUE (the default), leading zeros are removed in summaries
-#' @param triangle character. one of "lower", "upper" or NULL (the default)
-#' @param caption character. table caption. Passed to plots
-#' @param note character. Text for a table note
-#' @param describe list of named functions. If functions are supplied to describe, new columns will be bound to the 'APA matrix' for each function in the list. Describe also accepts a variety of shortcuts. If describe is set to TRUE, mean and standard deviation are returned for all row variables. Describe can accept a character vector to call the following descriptive functions: c('mean','sd','var','median','iqr','skewness','kurtosis'). These shortcuts are powered by 'tidyselect'. Skewness and kurtosis are calculated using the 'moments' package. All functions retrieved with shortcuts remove missing values.
-#' @param grey_nonsig logical. Should non-significant values be grey in output? This argument does nothing if describe is not set to FALSE
-#' @param call_only logical. For debugging, if TRUE only the call is returned
+#' @param data A data frame or matrix with at least three rows. Selected columns
+#'   must be numeric or integer. Numeric columns with value labels are accepted;
+#'   character and factor columns are not.
+#' @param x Column selection for the rows of the result. The default, `NULL`,
+#'   selects all columns. Use bare names, quoted names, or tidyselect helpers
+#'   such as `where(is.numeric)`. For a character vector stored in `cols`, use
+#'   `tidyselect::all_of(cols)`. An explicit selection must match a column.
+#'   Use `c(Label = column)` to label a variable without renaming the input.
+#' @param y Column selection for the columns of the result, using the same syntax
+#'   as `x`. The default, `NULL`, uses the selection in `x`. An explicit
+#'   selection must match a column. Labels on the two axes may differ.
+#' @param z Column selection for control variables, using the same syntax as
+#'   `x`. The default, `NULL`, computes ordinary correlations. Selected controls
+#'   are removed from both axes of the result.
+#' @param method Correlation method: `"pearson"` (the default), `"spearman"`,
+#'   or `"kendall"`.
+#' @param stars Numeric p-value thresholds, listed from largest to smallest.
+#'   Each threshold a p-value falls strictly below adds one star. Use `NULL`
+#'   or `numeric(0)` to omit stars.
+#' @param p_adjust Multiple-testing adjustment passed to `stats::p.adjust()`:
+#'   `"none"` (the default), `"holm"`, `"hochberg"`, `"hommel"`,
+#'   `"bonferroni"`, `"BH"`, `"BY"`, or `"fdr"`.
+#' @param round Number of decimal places in the formatted table. The default
+#'   is 2. This does not round the stored coefficients or p-values.
+#' @param remove_lead Logical. If `TRUE` (the default), omit leading zeros from
+#'   formatted coefficients (for example, `.42` instead of `0.42`).
+#' @param triangle Which part of a square matrix with the same variables in the
+#'   same order on both axes to show in the formatted table: `"lower"`,
+#'   `"upper"`, or `NULL` (the default) for the full table. The stored numeric
+#'   matrices are not cropped.
+#' @param caption Optional character string printed above the table and used as
+#'   the default plot title.
+#' @param note Optional character string printed below the table. If `NULL`,
+#'   a note is generated from the significance thresholds in `stars`.
+#' @param describe Descriptive statistics to append for each row variable.
+#'   Use `FALSE` (the default) for none, `TRUE` for the mean and standard
+#'   deviation, or a named list of functions that each accept a column and
+#'   return one value. You can also select the built-in summaries
+#'   `mean`, `sd`, `var`, `median`, `iqr`, `skewness`, `kurtosis`, and `n`
+#'   (the number of nonmissing values), for example `c(M = mean, n)`.
+#'   The built-in summaries remove missing values from each variable
+#'   independently; custom functions handle missing values themselves.
+#' @param grey_nonsig Logical. If `TRUE` (the default), print coefficients
+#'   without significance stars in grey when stars are enabled and
+#'   `describe = FALSE`. This affects console output only.
+#' @param call_only Logical. If `TRUE`, return the matched call and its
+#'   environments for debugging, without computing correlations. The default
+#'   is `FALSE`.
+#'
 #' @details
-#' Constructs correlation matrices using 'stats::cor.test' unless z is specified. When z is specified ppcor::ppcor.test is used instead. Character and factor variables are not accepted. To prevent errors, users must first convert all variables to numeric.
+#' Ordinary Pearson correlations use the two-sided t test with `n - 2` degrees
+#' of freedom. Ordinary rank correlations use the asymptotic p-values from
+#' `stats::cor.test()`. Partial correlations use `ppcor::pcor.test()`.
 #'
-#' ## Partial correlations:
+#' **Missing data.** Each pair uses only the rows observed for both variables
+#' and all controls. The `n` matrix records this count, even when it is zero.
+#' Ordinary correlations based on fewer than two observations have missing
+#' coefficients and p-values. With exactly two observations, ordinary Pearson
+#' and Spearman correlations have a coefficient but no p-value. Partial tests
+#' require at least three observations beyond the number of controls (two for
+#' Kendall); otherwise both the coefficient and p-value are missing.
 #'
-#' Supplying the argument z will call ppcor::pcor.test the correlation pair are supplied to arguments x and y. The vector of z given to corx is passed to argument z in pcor.test.
+#' **Multiple comparisons.** The adjustment is applied to distinct unordered
+#' variable pairs in the matrix. Self-correlations are excluded and their
+#' p-values are left unchanged. If a pair appears in both orientations, both
+#' cells receive the same adjusted p-value. The display selected by `triangle`
+#' does not change the set of comparisons.
 #'
-#' ##  Missing data:
+#' @returns A list of class `corx` with the following components:
+#'   * `call`: The matched function call.
+#'   * `apa`: The formatted character matrix.
+#'   * `r`: The unrounded matrix of correlation coefficients.
+#'   * `p`: The matrix of p-values, adjusted if requested.
+#'   * `n`: The matrix of observation counts.
+#'   * `caption`, `note`: The text displayed with the table.
 #'
-#' Observations containing missing data required to complete a correlation or partial correlation are automatically removed.
-#'
-#' ## P-adjust:
-#'
-#' P-values attained can be adjusted for multiple comparisons by using the 'p_adjust' argument. This calls the function stats::p.adjust. When a matrix is symmetrical, p-values are only adjusted for unique comparisons. When a correlation matrix is not symmetrical, all comparisons are assumed to be unique.
-
+#'   With `call_only = TRUE`, the result is an unclassed list containing the
+#'   matched `call`, the function's evaluation environment (`env`), and the
+#'   calling environment (`parent_env`).
+#' @seealso [corx-methods], [print.corx()], [plot.corx()], [plot_mds()], [to_table()],
+#'   [to_clipboard()].
 #' @examples
-#' cor_mat <- corx(mtcars, x = c(mpg,cyl,disp), y = c(wt,drat,disp,qsec),
-#'            z = wt, round = 2, stars = c(0.05),
-#'            caption = "Controlling for weight" ,
-#'            describe = list("mean" = function(x) mean(x,na.rm=TRUE)))
-#' cor_mat
-#' coef(cor_mat)
-#' cor_mat$p
-#' plot(cor_mat)
-#' cor_2 <- corx(iris[,-5], describe = c(median, IQR = iqr, kurt = kurtosis),
-#'          note = "Using shortcuts to select describe functions", triangle = "lower")
-#' cor_2
-#' @return A list of class 'corx' which includes:
-#'  * "call" The call which if evaluated reproduces the object
-#'  * "apa" An 'APA' formatted correlation matrix with significance stars
-#'  * "r" Raw correlation coefficients
-#'  * "p" p-values
-#'  * "n" Pairwise observations
-#'  * "caption" Object caption
-#'  * "note" Object note
+#' fit <- corx(mtcars, x = c(mpg, cyl, disp), y = c(drat, qsec),
+#'             z = wt, caption = "Controlling for weight",
+#'             describe = list(M = function(x) mean(x, na.rm = TRUE)))
+#' fit
+#' coef(fit)
+#' fit$p
+#'
+#' corx(iris[, 1:4], describe = c(median, IQR = iqr, n), triangle = "lower")
+#' @md
 #' @export
 
 corx <-
@@ -90,62 +133,43 @@ corx <-
     }
 
     if (nrow(data) < 3) {
-      stop("Can't calculate p-values with fewer than four rows of data.")
+      stop("At least three rows of data are required.")
     }
 
     if (methods::is(data, "matrix")) {
       data <- data.frame(data, check.names = FALSE)
     }
 
-    x <- eval_select_names(colnames(data), {{ x }}, strict = TRUE)
-    y <- eval_select_names(colnames(data), {{ y }}, strict = TRUE)
-    z <- eval_select_names(colnames(data), {{ z }}, strict = TRUE)
-
-    # allow rename within select
-    data <- rename_if_needed(data, x)
-    data <- rename_if_needed(data, y)
-    data <- rename_if_needed(data, z)
-
-    if (length(x) > 0) {
-      x <- names(x)
-    }
-    if (length(y) > 0) {
-      y <- names(y)
-    }
-    if (length(z) > 0) {
-      z <- names(z)
-    }
-
-    if (length(x) == 0) {
-      x <- names(data)
-    }
-
-    if (length(y) == 0) {
-      y <- x
-    }
-
-    if (length(z) == 0) {
+    # Locations identify the source columns; their names label the output axes.
+    x <- select_columns(data, rlang::enquo(x), stats::setNames(seq_along(data), names(data)))
+    y <- select_columns(data, rlang::enquo(y), x)
+    z <- select_columns(data, rlang::enquo(z), NULL, allow_empty = TRUE)
+    if (length(z)) {
+      z <- unique(z)
+      x <- x[!x %in% z]
+      y <- y[!y %in% z]
+    } else {
       z <- NULL
     }
 
-    if (length(z) > 0) {
-      # remove partialled out variable from x and y
-      x <- x[!x %in% z]
-      y <- y[!y %in% z]
-    }
-
-    if (length(x) == 0 | length(y) == 0) {
+    if (!length(x) || !length(y)) {
       stop("Can't partial out the entirety of x or y")
     }
 
     # check classes are appropriate
     check_classes(
-      data[, unique(c(x, y, z))],
+      data[, unique(c(x, y, z)), drop = FALSE],
       c("numeric", "integer"),
       "All classes must be numeric."
     )
 
-    method <- method[1] # take the first method in case more than one supplied
+    if (!is.null(triangle)) {
+      triangle <- match.arg(triangle, c("lower", "upper"))
+      if (!identical(unname(x), unname(y))) {
+        stop("Triangular tables require the same variables in the same order on both axes.")
+      }
+    }
+    method <- match.arg(method[1L], c("pearson", "spearman", "kendall"))
     p_adjust <- p_adjust[1]
 
     cors <- cormat_list(
@@ -160,6 +184,7 @@ corx <-
     pres_matrix <- apa_matrix(
       r_matrix = cors$r, #get apa matrix
       p_matrix = cors$p,
+      self = outer(unname(x), unname(y), "=="),
       stars = stars,
       round = round,
       remove_lead = remove_lead,
@@ -235,9 +260,6 @@ corx <-
         )
       }
 
-      data <- data.frame(data)
-      x <- make.names(x)
-
       orig_names <- colnames(pres_matrix)
       pres_matrix <- data.frame(pres_matrix)
 
@@ -250,14 +272,14 @@ corx <-
           x
         }
 
-        pres_matrix[[names(describe)[i]]] <-
+        pres_matrix[[ncol(pres_matrix) + 1L]] <-
           unlist(lapply(seq_along(x), function(var) {
-            val <- describe[[i]](data[, x[[var]]])
+            val <- describe[[i]](data[[x[[var]]]])
             safe_round(val, round)
           }))
       }
       pres_matrix <- as.matrix(pres_matrix)
-      colnames(pres_matrix)[seq_along(orig_names)] <- orig_names
+      colnames(pres_matrix) <- c(orig_names, names(describe))
     }
 
     if (!is.null(triangle)) {
@@ -266,7 +288,10 @@ corx <-
       nums <- seq_along(rownames(pres_matrix))
       rownames(pres_matrix) <- paste0(nums, ". ", rownames(pres_matrix))
       colnames(pres_matrix)[1:length(nums)] <- nums
-      pres_matrix <- pres_matrix[, -length(nums)]
+      if (length(nums) > 1L) {
+        omit <- if (triangle == "lower") length(nums) else 1L
+        pres_matrix <- pres_matrix[, -omit, drop = FALSE]
+      }
     }
 
     # add in note --------------------------------------------
@@ -290,6 +315,8 @@ corx <-
       note = note
     )
     class(c_matrix) <- "corx"
+    attr(c_matrix, "method") <- method
+    attr(c_matrix, "triangle") <- triangle
     attr(c_matrix, "grey_nonsig") <- grey_nonsig
     attr(c_matrix, "stars") <- stars
     attr(c_matrix, "round") <- round
@@ -329,6 +356,7 @@ partial_n_matrix <- function(data, x, y, z) {
 #' @param round How many digits to round to?
 #' @param remove_lead a logical. Should leading zeros be removed?
 #' @param triangle can select lower upper or NULL
+#' @param self logical matrix identifying comparisons of a variable with itself
 
 apa_matrix <- function(
   r_matrix,
@@ -336,22 +364,13 @@ apa_matrix <- function(
   stars,
   round,
   remove_lead,
-  triangle
+  triangle,
+  self
 ) {
   f_matrix <- r_matrix
   f_matrix[] <- digits(f_matrix, round)
 
-  row_names <- matrix(rownames(r_matrix), nrow(r_matrix), ncol = ncol(r_matrix))
-  col_names <- matrix(
-    colnames(r_matrix),
-    nrow = nrow(r_matrix),
-    ncol = ncol(r_matrix),
-    byrow = T
-  )
-
-  f_matrix[row_names == col_names] <- " - "
-
-  #diag(f_matrix)
+  f_matrix[self] <- " - "
 
   if (!is.null(triangle)) {
     if (triangle == "lower") {
@@ -365,7 +384,7 @@ apa_matrix <- function(
   }
 
   s_matrix <- star_matrix(p_matrix, stars = stars)
-  s_matrix[row_names == col_names] <- ""
+  s_matrix[self] <- ""
 
   f_matrix[] <- paste0(f_matrix, s_matrix)
 
@@ -378,9 +397,15 @@ apa_matrix <- function(
 }
 
 
-#' print.corx
-#' @param x object
-#' @param ... extra arguments
+#' Print a formatted correlation table
+#'
+#' Print the original call, the formatted table, and its caption and note.
+#'
+#' @param x A [corx()] object.
+#' @param ... Unused; included for compatibility with the `print()` generic.
+#' @returns `NULL`, invisibly. The table is written to the console.
+#' @seealso [corx-methods], [to_table()].
+#' @md
 #' @export
 print.corx <- function(x, ...) {
   apa <- x$apa
@@ -434,6 +459,26 @@ print.corx <- function(x, ...) {
   cat(final_text)
 }
 
+#' Extract results from a correlation table
+#'
+#' Use `coef()` to extract unrounded coefficients, or use `summary()` and
+#' `as.data.frame()` to extract the formatted table.
+#'
+#' @rdname corx-methods
+#' @aliases corx-methods
+#' @param object,x A [corx()] object.
+#' @param ... Unused; included for compatibility with the generics.
+#' @param digits,quantile.type Unused arguments to the `summary()` method.
+#'   To change rounding, set `round` when calling [corx()].
+#' @returns `coef()` returns the numeric coefficient matrix. `summary()` and
+#'   `as.data.frame()` return the formatted table as a data frame, with the
+#'   table's original column names.
+#' @examples
+#' fit <- corx(mtcars[, 1:3])
+#' coef(fit)
+#' summary(fit)
+#' as.data.frame(fit)
+#' @md
 #' @export
 coef.corx <- function(object, ...) object$r # coef returns r matrix
 
@@ -445,49 +490,51 @@ coef.corx <- function(object, ...) object$r # coef returns r matrix
 
 digits <- function(x, n = 2) {
   x <- round(x, n)
-  x[] <- sapply(x, function(i) {
-    ifelse(
-      !is.na(i),
-      trimws(format(round(as.numeric(as.character(i)), n), nsmall = n)),
-      NA
-    )
+  # Many coefficients have the same printed value (at most 201 at two decimals).
+  values <- unique(as.vector(x))
+  labels <- sapply(values, function(i) {
+    if (is.na(i)) return(NA)
+    format(round(as.numeric(as.character(i)), n), nsmall = n, trim = TRUE)
   })
+  x[] <- labels[match(x, values)]
   x
 }
 
-#' plot.corx
-#' @param x a corx object
-#' @param ... other arguments to ggcorrplot::ggcorrplot
+#' Plot a correlation matrix
+#'
+#' Plot the coefficients and p-values stored in a [corx()] object using
+#' `ggcorrplot::ggcorrplot()`.
+#'
+#' @param x A [corx()] object.
+#' @param ... Named arguments passed to `ggcorrplot::ggcorrplot()`. Use `type`
+#'   or `title` to override the defaults. The coefficient and p-value matrices
+#'   are supplied from `x`; do not pass `corr` or `p.mat`.
+#' @details The plot uses the `triangle` setting from the original call, or
+#'   `"full"` if none was supplied. The caption in the original call supplies
+#'   the default title.
+#' @returns A ggplot object.
+#' @seealso [plot_mds()].
+#' @examples
+#' fit <- corx(mtcars[, 1:4])
+#' plot(fit, type = "lower", title = "Motor Trend car data")
+#' @md
 #' @export
 
 plot.corx <- function(x, ...) {
-  call <- match.call()
   elip <- list(...)
-
-  tri <- x$call$triangle
-  if (is.null(tri)) {
-    tri <- "full"
+  if (is.null(elip$title)) elip$title <- if (is.null(x$caption)) "" else x$caption
+  if (is.null(elip$type)) {
+    tri <- attr(x, "triangle", exact = TRUE)
+    if (is.null(tri) && is.character(x$call$triangle)) tri <- x$call$triangle
+    elip$type <- if (is.null(tri)) "full" else tri
   }
-  if (!is.null(call$type)) {
-    tri <- call$type
-  }
-
-  caption <- x$call$caption
-  if (is.null(caption)) {
-    caption <- ""
-  }
-  if (!is.null(call$title)) {
-    caption <- call$title
-  }
-
-  elip[['title']] <- caption # elip is designed
-  elip[['type']] <- tri # To be a call
   elip[['corr']] <- x$r # I'm setting arguments which will be used in do.call
   elip[['p.mat']] <- x$p # We include the p.matrix for signifance rules in ggcorrplot
 
   do.call(ggcorrplot::ggcorrplot, elip)
 }
 
+#' @rdname corx-methods
 #' @export
 summary.corx <- function(object, ..., digits, quantile.type) {
   name_mat <- colnames(object$apa)
@@ -496,6 +543,7 @@ summary.corx <- function(object, ..., digits, quantile.type) {
   obj
 }
 
+#' @rdname corx-methods
 #' @export
 as.data.frame.corx <- function(x, ...) {
   name_mat <- colnames(x$apa)
@@ -514,31 +562,28 @@ as.data.frame.corx <- function(x, ...) {
 
 check_classes <- function(data, ok_classes, stop_message, stop = TRUE) {
   v_is <- function(x, classes) {
+    if (!is.object(x) && inherits(x, classes)) return(TRUE)
     x <- labelled::remove_labels(x)
-    any(sapply(classes, function(y) {
-      methods::is(x, y)
-    }))
+    any(vapply(classes, function(y) methods::is(x, y), logical(1)))
   }
 
-  classes <- lapply(data, class)
+  class_ok <- vapply(data, v_is, logical(1), classes = ok_classes)
+  if (all(class_ok)) return(invisible(NULL))
 
-  class_ok <- sapply(data, function(x) v_is(x, ok_classes))
   bad_cols <- names(data)[!class_ok]
-  bad_index <- which(names(data) %in% bad_cols)
-  bad_classes <- sapply(classes[!class_ok], function(x) {
-    paste(abbreviate(x, 3), collapse = ",")
-  })
+  bad_index <- which(!class_ok)
+  bad_classes <- vapply(data[!class_ok], function(x) {
+    paste(abbreviate(class(x), 3), collapse = ",")
+  }, character(1))
   script <- paste(
     glue::glue("[{bad_index}] '{bad_cols}' <{bad_classes}>"),
     collapse = ", "
   )
 
-  if (!all(class_ok)) {
-    if (stop) {
-      stop(stop_message, " ", script, ".", call. = F)
-    } else {
-      warning(stop_message, " ", script, ".", call. = F)
-    }
+  if (stop) {
+    stop(stop_message, " ", script, ".", call. = FALSE)
+  } else {
+    warning(stop_message, " ", script, ".", call. = FALSE)
   }
 }
 
@@ -563,23 +608,4 @@ star_matrix <- function(m, stars) {
     get_stars(p, stars = stars)
   })
   s_matrix
-}
-
-#' rename if needed
-#'
-#' Renames columns
-#' @param data data object
-#' @param x a character vector. If named, columns will be renamed
-
-rename_if_needed <- function(data, x) {
-  rename_vars <- x[names(x) != x]
-  for (i in seq_along(rename_vars)) {
-    if (names(x)[i] != x[i]) {
-      colnames(data)[colnames(data) == x[i]] <- names(rename_vars[
-        rename_vars == x[i]
-      ])
-    }
-  }
-
-  data
 }

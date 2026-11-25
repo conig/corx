@@ -1,63 +1,62 @@
-#' to_table
+#' Extract a formatted correlation table
 #'
-#' Tabulate correlation matrices
-#' @param corx a corx object
-#' @param include_p logical. should p-values be included?
+#' Extract the formatted table from a [corx()] result, optionally adding
+#' p-values on a separate row beneath each row of coefficients.
+#'
+#' @param corx A [corx()] object.
+#' @param include_p Logical. If `FALSE` (the default), return the formatted
+#'   table as stored in the object. If `TRUE`, add rows for the stored
+#'   p-values, which are adjusted if requested in [corx()].
+#' @returns If `include_p = FALSE`, the formatted character matrix. Otherwise,
+#'   a data frame with alternating coefficient and p-value rows. Descriptive
+#'   statistics have no corresponding p-value; those cells are missing.
+#' @seealso [corx-methods], [to_clipboard()].
+#' @examples
+#' fit <- corx(mtcars[, 1:4])
+#' to_table(fit)
+#' to_table(fit, include_p = TRUE)
+#' @md
 #' @export
 
-to_table <- function(corx, include_p = FALSE){
+to_table <- function(corx, include_p = FALSE) {
+  apa <- corx$apa
+  if (!include_p) return(apa)
 
-  if(is.null(corx$call$method)) {
-    method <- "Pearson's r"
-  } else{
-    if (corx$call$method == "spearman") {
-      method <- "Spearman's rho"
-    }
-    if (corx$call$method == "kendall") {
-      method <- "Kendall's tau"
+  # Older saved objects stored options only in the call.
+  method <- attr(corx, "method", exact = TRUE)
+  triangle <- attr(corx, "triangle", exact = TRUE)
+  if (is.null(method)) {
+    method <- corx$call$method
+    triangle <- corx$call$triangle
+    if (!is.null(triangle) && !is.character(triangle)) {
+      stop("Recreate the corx object to recover its triangle setting.")
     }
   }
+  if (is.null(method)) method <- "pearson"
+  label <- switch(as.character(method), pearson = "Pearson's r",
+                  spearman = "Spearman's rho", kendall = "Kendall's tau")
+  if (is.null(label)) stop("Recreate the corx object to recover its correlation method.")
 
-  if(!include_p){
-    return(corx$apa)
+  p <- corx$p
+  if (!is.null(triangle) && ncol(p) > 1L) {
+    # Triangular tables label coefficient columns by their original positions.
+    if (is.null(dim(apa))) apa <- matrix(apa, ncol = 1L, dimnames = list(names(apa), "1"))
+    cols <- as.integer(colnames(apa)[seq_len(ncol(p) - 1L)])
+    p <- p[, cols, drop = FALSE]
   }
+  p[] <- round_p(p, leading.zero = FALSE, simplify = 1, simple_digits = 0)
+  coef_cells <- apa[, seq_len(ncol(p)), drop = FALSE]
+  hidden <- coef_cells %in% c("", " - ")
+  p[hidden] <- coef_cells[hidden]
 
-  p_values <- corx$p
-  p_values[] <- round_p(p_values, leading.zero = FALSE,
-                        simplify = 1, simple_digits = 0)
-
-  if(!is.null(corx$call$triangle)){
-    if(corx$call$triangle == "lower"){
-      p_values[!lower.tri(p_values)] <- ""
-      p_values <- p_values[,-ncol(p_values)]
-    }
-    if(corx$call$triangle == "upper"){
-      p_values[lower.tri(p_values)] <- ""
-      p_values <- p_values[,-ncol(p_values)]
-    }
-
-  }
-
-    out <- lapply(seq_len(nrow(corx$apa)), function(i){
-
-      first_line <- data.frame(row = rownames(corx$apa)[i],
-                          info = method)
-
-      first_line <- cbind(first_line, as.data.frame(t(corx$apa[i,])))
-
-      p_val.i <- p_values[i,]
-      p_val.i[corx$apa[i,] == " - "] <- " - "
-
-      second_line <- data.frame(row = "", info = "p-value")
-
-      second_line <- cbind(second_line, as.data.frame(t(p_val.i)))
-      colnames(second_line) <- colnames(first_line)
-
-      rbind(first_line, second_line)
-    })
-
-
-  out <- do.call(rbind, out)
+  rows <- seq_len(nrow(apa))
+  out <- apa[rep(rows, each = 2L), , drop = FALSE]
+  out[2L * rows, ] <- NA_character_
+  out[2L * rows, seq_len(ncol(p))] <- p
+  out <- data.frame(row = rep(rownames(apa), each = 2L),
+                    info = rep(c(label, "p-value"), length(rows)),
+                    out, row.names = NULL, check.names = FALSE, stringsAsFactors = FALSE)
+  out[[1L]][2L * rows] <- ""
   names(out)[1:2] <- ""
   out
 }
@@ -117,12 +116,4 @@ round_p <- function(p, n = 3, stars = c(), leading.zero = FALSE, apa_threshold =
     }
   })
   unlist(out)
-}
-
-digits <- function(x, n = 2) {
-  x = round(x, n)
-  x[] = sapply(x, function(i) {
-         ifelse(!is.na(i), trimws(format(round(as.numeric(as.character(i)), n), nsmall = n)),NA)
-      })
-  return(x)
 }

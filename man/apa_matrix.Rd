@@ -4,7 +4,7 @@
 \alias{apa_matrix}
 \title{apa matrix}
 \usage{
-apa_matrix(r_matrix, p_matrix, stars, round, remove_lead, triangle)
+apa_matrix(r_matrix, p_matrix, stars, round, remove_lead, triangle, self)
 }
 \arguments{
 \item{r_matrix}{correlation coefficient matrix}
@@ -18,6 +18,8 @@ apa_matrix(r_matrix, p_matrix, stars, round, remove_lead, triangle)
 \item{remove_lead}{a logical. Should leading zeros be removed?}
 
 \item{triangle}{can select lower upper or NULL}
+
+\item{self}{logical matrix identifying comparisons of a variable with itself}
 }
 \description{
 Creates an apa matrix

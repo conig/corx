@@ -2,15 +2,26 @@
 % Please edit documentation in R/to_clipboard.r
 \name{to_clipboard}
 \alias{to_clipboard}
-\title{to_clipboard}
+\title{Copy a formatted correlation table to the clipboard}
 \usage{
 to_clipboard(x, ...)
 }
 \arguments{
-\item{x}{a corx object, matrix, or data.frame}
+\item{x}{A \code{\link[=corx]{corx()}} object, matrix, or data frame. For a \code{corx} object, only
+the formatted table (\code{x$apa}) is copied, without the caption or note.}
 
-\item{...}{additional arguments passed to 'clipr::write_clip'}
+\item{...}{Additional arguments passed to \code{clipr::write_clip()}.}
+}
+\value{
+Invisibly returns the value from \code{clipr::write_clip()} (the
+original content by default, or the formatted text if
+\code{return_new = TRUE}).
 }
 \description{
-Sends a formatted corx table to the clipboard so that it can be pasted into excel.
+Copy a table for pasting into a spreadsheet or another application.
+This function requires an interactive R session and an available system
+clipboard. In scripts, use \code{\link[=to_table]{to_table()}} to get the formatted table instead.
+}
+\seealso{
+\code{\link[=to_table]{to_table()}} to extract a table without using the clipboard.
 }

@@ -1,15 +1,23 @@
-#' apa_table.corx
+#' Format a correlation table with papaja
 #'
-#' method for papaja::apa_table for corx objects
-#' @param corx corx object
-#' @param ... Other arguments to papaja::apa_table
+#' Method for `papaja::apa_table()` that uses the formatted table from a
+#' [corx()] object.
+#'
+#' @param x A [corx()] object.
+#' @param ... Additional arguments passed to `papaja::apa_table()`. Specify
+#'   `caption` or `note` here to override the values stored in the object.
+#'   The method supplies the table itself.
+#' @returns The result of `papaja::apa_table()`, in the format selected by
+#'   that function.
+#' @seealso [to_table()].
+#' @md
 
-apa_table.corx <- function(corx, ...){
+apa_table.corx <- function(x, ...){
 
   args <- list(...)
-  args$x <- corx$apa
-  if(is.null(args$caption)) args$caption <- corx$caption
-  if(is.null(args$note)) args$note <- corx$note
+  args$x <- x$apa
+  if(is.null(args$caption)) args$caption <- x$caption
+  if(is.null(args$note)) args$note <- x$note
 
   do.call(papaja::apa_table, args)
 
