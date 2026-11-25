@@ -325,28 +325,6 @@ corx <-
     c_matrix
   }
 
-#' partial_n_matrix
-#'
-#' Calculate complete observations for a crosstab + a third variable
-#' @param data data.frame or matrix
-#' @param x rownames
-#' @param y colnames
-#' @param z partial variable vector
-
-partial_n_matrix <- function(data, x, y, z) {
-  mx <- matrix(nrow = length(x), ncol = length(y))
-  rownames(mx) <- x
-  colnames(mx) <- y
-
-  for (row in rownames(mx)) {
-    for (col in colnames(mx)) {
-      mx[row, col] <- sum(stats::complete.cases(data[, c(row, col, z)]))
-    }
-  }
-
-  as.matrix(mx)
-}
-
 #' apa matrix
 #'
 #' Creates an apa matrix

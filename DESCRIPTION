@@ -29,9 +29,8 @@ Imports:
     methods,
     ppcor,
     labelled
-RoxygenNote: 7.3.3
 Suggests: 
-    covr,
     papaja,
     psych,
     testthat
+Config/roxygen2/version: 8.1.1
